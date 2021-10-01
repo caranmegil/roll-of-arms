@@ -1,7 +1,7 @@
 <template>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <span id="menu-button" v-if="$store.state.isAuthenticated" class="title-bar-menu material-icons material-icons-outlined">menu</span>
+      <!-- <span id="menu-button" v-if="$store.state.isAuthenticated" class="title-bar-menu material-icons material-icons-outlined">menu</span> -->
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.gif"/></span>
       <span id="account-button" v-if="$store.state.isAuthenticated" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
     </header>

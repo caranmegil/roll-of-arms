@@ -53,8 +53,9 @@ export default {
 <style scoped>
     .login {
         display: grid;
-        grid-template-flow: row;
+        grid-auto-flow: row;
         grid-template-columns: auto;
+        gap: .5em;
     }
 
     .login h1 {
@@ -68,10 +69,13 @@ export default {
     }
 
     .login-form {
+        margin-top: 2em;
         display: grid;
         justify-self: center;
         align-content: center;
         justify-content: center;
+        grid-auto-flow: row;
+        gap: .5em;
     }
 
     .login-form .element {
@@ -79,20 +83,13 @@ export default {
         justify-self: center;
         display: grid;
         grid-auto-flow: column;
-        grid-template-columns: auto;
-        grid-template-rows: 1fr 1fr 1fr;
-        margin-bottom: .5em;
+        grid-template-columns: 1fr 1fr;
     }
 
     .login-form .element > label {
         font-weight: bold;
         justify-self: start;
-        padding: .25em;
-        margin-right: .75em;
-    }
-
-    .login-form .element > input {
-        padding: .25em;
+        align-self: start;
     }
 
     .separator {
@@ -100,12 +97,12 @@ export default {
     }
 
     .bottom-links {
-        border-top: 2px solid black;
+        margin-top: .5em;
         display: grid;
         align-content: center;
         justify-content: center;
         grid-auto-flow: column;
-        gap: 1.25em;
+        gap: .75em;
     }
 
     .error {
