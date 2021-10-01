@@ -1,14 +1,15 @@
 <template>
-  <div class="roll-of-arms-body">
+  <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span>
+      <span id="menu-button" v-if="$store.state.isAuthenticated" class="title-bar-menu material-icons material-icons-outlined">menu</span>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.gif"/></span>
-      <span id="account-button" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
+      <span id="account-button" v-if="$store.state.isAuthenticated" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
     </header>
 
     <main>
       <section id="content">
-        <Login />
+        <Login v-if="!$store.state.isAuthenticated"/>
+        <Main v-if="$store.state.isAuthenticated"/>
       </section>                
     </main>
 
@@ -21,14 +22,26 @@
 </template>
 
 <script>
-import Login from './components/Login.vue'
+import 'es6-promise/auto';
+
+import Main from './components/Main.vue';
+import Login from './components/Login.vue';
 
 export default {
   name: 'App',
+  data() {
+    return {
+      isLoaded: false,
+    }
+  },
   components: {
-    Login
+    Login,
+    Main
+  },
+  mounted() {
+    this.isLoaded = true;
   }
-}
+};
 </script>
 
 <style>
@@ -82,7 +95,6 @@ body {
     grid-column: 1;
     align-self: center;
     justify-self: start;
-    display: none;
 }
 
 .roll-of-arms-body > header > .title-bar-banner {
@@ -97,7 +109,6 @@ body {
     grid-column: 3;
     align-self: center;
     justify-self: end;
-    display: none;
 }
 
 .roll-of-arms-body > main {
