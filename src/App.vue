@@ -1,15 +1,18 @@
 <template>
+  <div v-if="isLoaded" class="profile-menu-container">
+    <ProfileMenu id="profile-menu"/>
+  </div>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <!-- <span id="menu-button" v-if="$store.state.isAuthenticated" class="title-bar-menu material-icons material-icons-outlined">menu</span> -->
+      <!-- <span id="menu-button" v-if="$auth.isAuthenticated.value" class="title-bar-menu material-icons material-icons-outlined">menu</span> -->
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.gif"/></span>
-      <span id="account-button" v-if="$store.state.isAuthenticated" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
+      <span id="account-button" v-if="$auth.isAuthenticated.value" @click="showProfileMenu" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
     </header>
 
     <main>
       <section id="content">
-        <Login v-if="!$store.state.isAuthenticated"/>
-        <Main v-if="$store.state.isAuthenticated"/>
+        <Login v-if="!$auth.isAuthenticated.value"/>
+        <Main v-if="$auth.isAuthenticated.value"/>
       </section>                
     </main>
 
@@ -25,7 +28,8 @@
 import 'es6-promise/auto';
 
 import Main from './components/Main.vue';
-import Login from './components/Login.vue';
+import Login   from './components/Login.vue';
+import ProfileMenu   from './components/ProfileMenu.vue';
 
 export default {
   name: 'App',
@@ -36,7 +40,18 @@ export default {
   },
   components: {
     Login,
-    Main
+    Main,
+    ProfileMenu,
+  },
+  methods: {
+    showProfileMenu: function () {
+      let profileMenu = document.getElementById('profile-menu');
+      if (profileMenu.style.display === 'none' || profileMenu.style.display === '') {
+        profileMenu.style.display = 'block';
+      } else {
+        profileMenu.style.display = 'none';
+      }
+    },
   },
   mounted() {
     this.isLoaded = true;
@@ -65,6 +80,19 @@ body {
     .material-icons { 
         font-size: 32px !important;
     }
+}
+
+.profile-menu-container {
+  position: fixed;
+  z-index: 50;
+  right: 0;
+  top: 50px;
+  width: 10em;
+  height: 100%;
+}
+
+#profile-menu {
+  display: none;
 }
 
 .banner-img {
@@ -109,6 +137,10 @@ body {
     grid-column: 3;
     align-self: center;
     justify-self: end;
+}
+
+.roll-of-arms-body > header >  .title-bar-account:hover {
+  color: red;
 }
 
 .roll-of-arms-body > main {

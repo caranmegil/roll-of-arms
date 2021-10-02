@@ -4,26 +4,13 @@
     <section class="welcome-msg">This is the Roll of Arms for the game <a href="https://www.dragondice.com">Dragon Dice <sup>TM</sup></a> by <a href="https://sfr-inc.com">SFR, Inc.</a>  It is a magnificent system for player management with many more features to come!</section>
     <div v-if="hasError" class="error">Please make sure your email and password are correct!</div>
     <div class="login-form">
-        <div class="element">
-            <label for="email">Email</label>
-            <input id="email" type="text"/>
-        </div>
-        <div class="element">
-            <label for="password">Password</label>
-            <input id="password" type="password"/>
-        </div>
         <button v-on:click="signIn">Sign In</button>
-        <div class="bottom-links">
-            <a href="./api/login">Register</a>
-            <a href="./api/forgot-password">Forgot Password</a>
-        </div>
     </div>
   </div>
 </template>
 
 <script>
 import 'es6-promise/auto';
-import { mapActions } from 'vuex';
 
 export default {
   name: 'Login',
@@ -36,21 +23,20 @@ export default {
   },
   methods: {
     signIn: function() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        if (email === 'a' && password === 'a') {
-            this.setAuthenticated(true);
-        } else {
-            this.hasError = true;
-        }
-    },
-    ...mapActions(['setAuthenticated'])
+        this.$auth.loginWithPopup();
+    }
   }
 }
 </script>
 
 <style scoped>
+    button {
+        padding-top: 13px;
+        padding-bottom: 13px;
+        padding-left: 35px;
+        padding-right: 35px;
+    }
+
     .login {
         display: grid;
         grid-auto-flow: row;
