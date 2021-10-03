@@ -49,6 +49,7 @@ const store = createStore({
         signOut(state) {
             state.isProfileMenuOpen = false;
             state.user = null;
+            state.credentials = {}
             localStorage.setItem('credentials', JSON.stringify({}));
         },
     },

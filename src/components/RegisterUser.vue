@@ -49,7 +49,6 @@ export default {
         const password = document.getElementById('password').value;
         const retypePassword = document.getElementById('retype-password').value;
         
-        console.log(password === retypePassword)
         if (password === retypePassword) {
             this.hasPasswordMismatch = false;
 

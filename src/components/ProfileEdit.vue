@@ -24,11 +24,21 @@ export default {
   props: {
   },
   methods: {
-    save: function () {
+    save: async function () {
       const name = document.getElementById('name').value;
       const location = document.getElementById('location').value;
+      let profile = {
+        name,
+        location,
+      };
 
-      saveCollection('profiles', {name, location});
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${location.replaceAll(/\s/g, '%20')}&format=geojson`);
+      const json = await response.json();
+      if (json.features.length > 0) {
+        const coords = json.features[0].geometry.coordinates;
+        profile.geolocation = [coords[1], coords[0]];
+      }
+      saveCollection('profiles', profile);
     },
     back: function () {
       this.$router.go(-1);

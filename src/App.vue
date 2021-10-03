@@ -6,8 +6,11 @@
     <header>
       <!-- <span id="menu-button" v-if="$auth.isAuthenticated.value" class="title-bar-menu material-icons material-icons-outlined">menu</span> -->
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.gif"/></span>
-      <span v-if="$store.state.user != null && $store.state.user.photoURL == null" @click="showProfileMenu" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
-      <span v-if="$store.state.user != null && $store.state.user.photoURL != null" @click="showProfileMenu" class="title-bar-account"><img class="profile-image" :src="$store.state.user.photoURL"/></span>
+      <div v-if="$store.state.user != null" class="title-bar-account">
+        <span v-if="$store.state.user.photoURL == null" @click="editProfile" class="menu-item material-icons material-icons-outlined">account_circle</span>
+        <span v-if="$store.state.user.photoURL != null" @click="editProfile"><img class="profile-image" :src="$store.state.user.photoURL"/></span>
+        <span @click="logoff" class="menu-item material-icons material-icons-outlined">logout</span>
+      </div>
     </header>
 
     <main>
@@ -27,7 +30,7 @@
 <script>
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
-import {signIntoGoogle, getCurrentUser} from '@/firebase';
+import {signIntoGoogle, signOutOfGoogle, getCurrentUser} from '@/firebase';
 
 import ProfileMenu   from './components/ProfileMenu.vue';
 
@@ -41,25 +44,70 @@ export default {
   components: {
     ProfileMenu,
   },
+  // async mounted() {
+  //   if(this.$store.state.credentials.email !== undefined) {
+  //     const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
+
+  //     if (user) {
+  //       this.setUser(getCurrentUser())
+  //     }
+  //   }
+
+  //   if (this.$store.state.user != null) {
+  //     this.$router.push('/');
+  //   } else {
+  //     this.$router.push('/signin');
+  //   }
+
+  //   this.isLoaded = true;
+  // },
   async mounted() {
-    if(this.$store.state.credentials.email !== undefined) {
-      const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
+      if(this.$store.state.credentials.email !== undefined) {
+        const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
 
-      if (user) {
-        this.setUser(getCurrentUser())
+        if (user) {
+          this.setUser(getCurrentUser())
+        }
       }
-    }
 
-    if (this.$store.state.user != null) {
-      this.$router.push('/');
-    } else {
-      this.$router.push('/signin');
-    }
+      if (this.$store.state.user != null) {
+        this.$router.push('/');
+      } else {
+        this.$router.push('/signin');
+      }
 
-    this.isLoaded = true;
+      this.isLoaded = true;
   },
+  // async updated() {
+  //     if(this.$store.state.credentials.email !== undefined) {
+  //         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
+
+  //       if (user) {
+  //         this.setUser(getCurrentUser())
+  //       }
+  //     }
+  //     if (this.$store.state.user != null) {
+  //       this.$router.push('/');
+  //     } else {
+  //       this.$router.push('/signin');
+  //     }
+
+  //     this.isLoaded = true;
+  // },
   methods: {
-    ...mapActions(['setUser', 'setProfileMenuState']),
+    ...mapActions(['setUser', 'setProfileMenuState', 'signOut']),
+    editProfile: function () {
+      this.setProfileMenuState(false);
+      this.$router.push('/profile')
+    },
+    logoff: async function () {
+      const isSignedOut = await signOutOfGoogle();
+
+      if (isSignedOut) {
+        this.signOut();
+        this.$router.push('/signin');
+      }
+    },
     showProfileMenu() {
       this.setProfileMenuState(!this.$store.state.isProfileMenuOpen);
     }
@@ -162,9 +210,12 @@ button {
     grid-column: 3;
     align-self: center;
     justify-self: end;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr;
 }
 
-.roll-of-arms-body > header >  .title-bar-account:hover {
+.menu-item:hover {
   color: red;
 }
 
