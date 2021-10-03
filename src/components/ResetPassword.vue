@@ -1,23 +1,15 @@
 <template>
   <div class="login">
     <h1>Hey, Dragon Dicer!</h1>
-    <section class="welcome-msg">Time to register!</section>
-    <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
-    <div v-if="hasPasswordMismatch" class="error">Please make sure the password fields are the same!</div>
+    <section class="welcome-msg">Forgot your passord?  No problem!</section>
+    <div v-if="hasError" class="error">Please make sure the email is entered!</div>
+    <div v-if="hasSuccess" class="success">Please, check your email for a password reset!</div>
     <div class="login-form">
         <div class="element">
             <label for="email">email</label>
             <input id="email" type="text"/>
         </div>
-        <div class="element">
-            <label for="password">password</label>
-            <input id="password" type="password"/>
-        </div>
-        <div class="element">
-            <label for="retype-password">Re-type password</label>
-            <input id="retype-password" type="password"/>
-        </div>
-        <button @click="register">Register!</button>
+        <button @click="register">Reset Password!</button>
         <div class="separator"></div>
         <a class="element" @click="back">Back</a>
     </div>
@@ -25,7 +17,7 @@
 </template>
 
 <script>
-import {createUserInGoogle} from '@/firebase';
+import {resetPasswordInGoogle} from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
 
@@ -36,34 +28,25 @@ export default {
   data() {
       return {
           hasError: false,
-          hasPasswordMismatch: false,
+          hasSuccess: false,
       }
   },
   methods: {
-    ...mapActions(['setUser', 'setCredentials', 'setUserRegistrationState', 'setPasswordResetState']),
+    ...mapActions(['setPasswordResetState']),
     back: function() {
-        this.setUserRegistrationState(false);
+        this.setPasswordResetState(false);
     },
     register: async function() {
         const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const retypePassword = document.getElementById('retype-password').value;
         
-        console.log(password === retypePassword)
-        if (password === retypePassword) {
-            this.hasPasswordMismatch = false;
+        const wasReset = await resetPasswordInGoogle(email);
 
-            const user = await createUserInGoogle(email, password);
-            if(user != null) {
-                this.setCredentials({email, password,})
-                this.setUser(user);
-                this.setUserRegistrationState(false);
-                this.hasError = false;
-            } else {
-                this.hasError = true;
-            }
+        if(wasReset) {
+            this.hasSuccess = true;
+            this.hasError = false;
         } else {
-            this.hasPasswordMismatch = true;
+            this.hasSuccess = false;
+            this.hasError = true;
         }
     }
   }
@@ -112,6 +95,7 @@ export default {
         align-self: start;
     }
 
+
    .separator {
         border-top: 1px solid #D3D3D3;
     }
@@ -120,5 +104,10 @@ export default {
         align-self: center;
         justify-self: center;
         color: red;
+    }
+
+    .success {
+        align-self: center;
+        justify-self: center;
     }
 </style>

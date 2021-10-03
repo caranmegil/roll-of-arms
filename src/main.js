@@ -13,6 +13,7 @@ const store = createStore({
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             isProfileMenuOpen: false,
             userRegistrationState: false,
+            passwordResetState: false,
         };
     },
     mutations: {
@@ -29,10 +30,14 @@ const store = createStore({
         setUserRegistrationState(state, isOpen) {
             state.userRegistrationState = isOpen;
         },
+        setPasswordResetState(state, passwordResetState) {
+            state.passwordResetState = passwordResetState;
+        },
         signOut(state) {
             state.isProfileMenuOpen = false;
             state.user = null;
             state.userRegistrationState = false;
+            state.passwordResetState = false;
             localStorage.setItem('credentials', JSON.stringify({}));
         },
     },
@@ -48,6 +53,9 @@ const store = createStore({
         },
         setUserRegistrationState({ commit }, isOpen) {
             commit('setUserRegistrationState', isOpen);
+        },
+        setPasswordResetState({ commit }, passwordResetState) {
+            commit('setPasswordResetState', passwordResetState);
         },
         signOut({ commit }) {
             commit('signOut');

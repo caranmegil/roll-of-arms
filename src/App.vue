@@ -12,8 +12,9 @@
 
     <main>
       <section id="content">
-        <div v-if="$store.state.userRegistrationState"><RegisterUser/>></div>
-        <div v-if="!$store.state.userRegistrationState">
+        <div v-if="$store.state.passwordResetState"><ResetPassword/></div>
+        <div v-if="$store.state.userRegistrationState"><RegisterUser/></div>
+        <div v-if="!$store.state.userRegistrationState && !$store.state.passwordResetState">
           <Login v-if="!$store.state.user"/>
           <Main v-if="$store.state.user"/>
         </div>
@@ -37,6 +38,7 @@ import Main from './components/Main.vue';
 import Login   from './components/Login.vue';
 import ProfileMenu   from './components/ProfileMenu.vue';
 import RegisterUser from './components/RegisterUser.vue';
+import ResetPassword from './components/ResetPassword.vue';
 
 export default {
   name: 'App',
@@ -50,6 +52,7 @@ export default {
     Main,
     ProfileMenu,
     RegisterUser,
+    ResetPassword,
   },
   async mounted() {
     if(this.$store.state.credentials.email !== undefined) {
@@ -101,6 +104,13 @@ body {
       width: 32px;
       height: 32px;
     }
+}
+
+button {
+  border-radius: .75em;
+  padding: .5em;
+  color: ivory;
+  background-color: #525252;
 }
 
 .profile-menu-container {

@@ -14,9 +14,8 @@
         </div>
         <button @click="signIn">Sign In</button>
         <div class="separator"></div>
-        <div class="bottomLinks">
-            <button @click="register">Registration</button>
-            <button @click="forgotPassword">Forgot Password</button>
+        <div class="bottom-links">
+            <a @click="register">Registration</a> <a @click="forgotPassword">Forgot Password</a>
         </div>
     </div>
   </div>
@@ -37,7 +36,7 @@ export default {
       }
   },
   methods: {
-    ...mapActions(['setUser', 'setCredentials', 'setUserRegistrationState']),
+    ...mapActions(['setUser', 'setCredentials', 'setUserRegistrationState', 'setPasswordResetState']),
     signIn: async function() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -55,7 +54,7 @@ export default {
         this.setUserRegistrationState(true);
     },
     forgotPassword: function() {
-
+        this.setPasswordResetState(true);
     }
 
   }
@@ -63,13 +62,6 @@ export default {
 </script>
 
 <style scoped>
-    button {
-        padding-top: 13px;
-        padding-bottom: 13px;
-        padding-left: 35px;
-        padding-right: 35px;
-    }
-
     .login {
         display: grid;
         grid-auto-flow: row;
@@ -116,11 +108,14 @@ export default {
     }
 
     .bottom-links {
+        align-items: center;
+        justify-items: center;
+        align-self: center;
+        justify-self: center;
         margin-top: .5em;
         display: grid;
-        align-content: center;
-        justify-content: center;
         grid-auto-flow: column;
+        grid-template-columns: 1fr;
         gap: .75em;
     }
 

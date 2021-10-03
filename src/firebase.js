@@ -1,5 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+    getAuth,
+    signInWithEmailAndPassword,
+    signOut,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+} from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
 // firebase init - add your own config here
@@ -19,7 +25,7 @@ const createUserInGoogle = async (email, password) => {
         const auth = getAuth();
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         return userCredential.user;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 };
@@ -29,7 +35,7 @@ const signIntoGoogle = async (email, password) => {
         const auth = getAuth()
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         return userCredential.user;
-    } catch(e) {
+    } catch (e) {
         return null;
     }
 };
@@ -39,10 +45,20 @@ const signOutOfGoogle = async () => {
         const auth = getAuth()
         await signOut(auth);
         return true;
-    } catch(e) {
+    } catch (e) {
         return false;
     }
 };
+
+const resetPasswordInGoogle = async (email) => {
+    try {
+        const auth = getAuth();
+        await sendPasswordResetEmail(auth, email);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 const getCurrentUser = () => {
     const auth = getAuth();
@@ -54,6 +70,7 @@ export {
   app,
   analytics,
   db,
+  resetPasswordInGoogle,
   createUserInGoogle,
   getCurrentUser,
   signIntoGoogle,
