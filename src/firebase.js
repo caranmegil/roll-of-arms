@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { getDatabase, ref, set, get } from "firebase/database";
 import {
     getAuth,
     signInWithEmailAndPassword,
@@ -17,8 +17,43 @@ const analytics = getAnalytics(app)
 // utils
 const db = getDatabase(app);
 
-// collection references
-const profilesCollection = null;//db.ref('profiles')
+
+// generic collection actions
+const saveCollection = async (collectionName, data) => {
+    const collectionNameUserRef = ref(db, collectionName + '/' + getCurrentUser().uid);
+    const result = await set(collectionNameUserRef, data);
+    return await result.then(() => true ).catch(() => false)
+};
+
+const getCollection = async (collectionName) => {
+    try {
+        const collectionNameUserRef = ref(db, collectionName + '/' + getCurrentUser().uid);
+        const snapshot = await get(collectionNameUserRef)
+
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            return null;
+        }
+    } catch (e) {
+        return null;
+    }
+}
+
+const getEntireCollection = async (collectionName) => {
+    try {
+        const collectionNameUserRef = ref(db, collectionName);
+        const snapshot = await get(collectionNameUserRef)
+
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            return null;
+        }
+    } catch (e) {
+        return null;
+    }
+}
 
 const createUserInGoogle = async (email, password) => {
     try {
@@ -69,11 +104,12 @@ const getCurrentUser = () => {
 export {
   app,
   analytics,
-  db,
+  saveCollection,
+  getCollection,
+  getEntireCollection,
   resetPasswordInGoogle,
   createUserInGoogle,
   getCurrentUser,
   signIntoGoogle,
   signOutOfGoogle,
-  profilesCollection,
 };

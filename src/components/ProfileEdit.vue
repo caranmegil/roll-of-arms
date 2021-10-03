@@ -16,6 +16,7 @@
 </template>
 
 <script>
+import { saveCollection, getCollection } from '@/firebase';
 import 'es6-promise/auto';
 
 export default {
@@ -24,17 +25,55 @@ export default {
   },
   methods: {
     save: function () {
+      const name = document.getElementById('name').value;
+      const location = document.getElementById('location').value;
 
+      saveCollection('profiles', {name, location});
     },
     back: function () {
       this.$router.go(-1);
     }
   },
+  async mounted() {
+    let name = document.getElementById('name');
+    let location = document.getElementById('location');
+    const profileData = await getCollection('profiles');
+    name.value = profileData.name;
+    location.value = profileData.location;
+  }
 }
 </script>
 
 <style scoped>
-    .separator {
-        border-bottom: 1px solid #D3D3D3;
-    }
+  .profiles {
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: auto;
+    align-content: center;
+    justify-content: center;
+    gap: .5em;
+  }
+
+  .profiles h1 {
+    align-self: center;
+    justify-self: center;    
+  }
+
+  .profiles .element {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .profiles .element > label {
+    font-weight: bold;
+    justify-self: start;
+    align-self: start;
+  }
+
+  .separator {
+    border-bottom: 1px solid #D3D3D3;
+  }
 </style>

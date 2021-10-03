@@ -1,6 +1,6 @@
 <template>
   <ul class="menu-container">
-    <li>View Profile</li>
+    <li @click="profileEdit">Profile</li>
     <li class="separator"></li>
     <li @click="logoff">Sign Out</li>
   </ul>
@@ -16,7 +16,11 @@ export default {
   props: {
   },
   methods: {
-    ...mapActions(['signOut']),
+    ...mapActions(['setProfileMenuState', 'signOut']),
+    profileEdit: function () {
+      this.setProfileMenuState(false);
+      this.$router.push('/profile')
+    },
     logoff: async function () {
       const isSignedOut = await signOutOfGoogle();
 
