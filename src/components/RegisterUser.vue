@@ -40,9 +40,9 @@ export default {
       }
   },
   methods: {
-    ...mapActions(['setUser', 'setCredentials', 'setUserRegistrationState', 'setPasswordResetState']),
+    ...mapActions(['setUser', 'setCredentials']),
     back: function() {
-        this.setUserRegistrationState(false);
+        this.$router.go(-1);
     },
     register: async function() {
         const email = document.getElementById('email').value;
@@ -57,7 +57,7 @@ export default {
             if(user != null) {
                 this.setCredentials({email, password,})
                 this.setUser(user);
-                this.setUserRegistrationState(false);
+                this.$router.push('/');
                 this.hasError = false;
             } else {
                 this.hasError = true;

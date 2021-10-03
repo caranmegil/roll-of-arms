@@ -36,7 +36,7 @@ export default {
       }
   },
   methods: {
-    ...mapActions(['setUser', 'setCredentials', 'setUserRegistrationState', 'setPasswordResetState']),
+    ...mapActions(['setUser', 'setCredentials']),
     signIn: async function() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -46,15 +46,16 @@ export default {
             this.setCredentials({email, password,})
             this.setUser(user);
             this.hasError = false;
+            this.$router.push('/');
         } else {
             this.hasError = true;
         }
     },
     register: function() {
-        this.setUserRegistrationState(true);
+        this.$router.push('/register');
     },
     forgotPassword: function() {
-        this.setPasswordResetState(true);
+        this.$router.push('/reset');
     }
 
   }

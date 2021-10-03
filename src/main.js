@@ -1,10 +1,31 @@
 import { createApp } from 'vue'
 import { createStore } from 'vuex';
+import { createRouter, createWebHashHistory } from 'vue-router';
 
 import App from './App.vue'
 
 import authConfig from './auth/auth_config.json';
 import { setupAuth } from './auth';
+
+import Main from './components/Main.vue';
+import Login   from './components/Login.vue';
+import RegisterUser from './components/RegisterUser.vue';
+import ResetPassword from './components/ResetPassword.vue';
+import ProfileEdit from './components/ProfileEdit.vue';
+
+
+const routes = [
+    { path: '/', component: Main },
+    { path: '/signin', component: Login },
+    { path: '/register', component: RegisterUser },
+    { path: '/reset', component: ResetPassword },
+    { path: '/profile', component: ProfileEdit },
+];
+
+const router = createRouter( {
+    history: createWebHashHistory(),
+    routes,
+});
 
 const store = createStore({
     state() {
@@ -12,8 +33,6 @@ const store = createStore({
             user: null,
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             isProfileMenuOpen: false,
-            userRegistrationState: false,
-            passwordResetState: false,
         };
     },
     mutations: {
@@ -27,17 +46,9 @@ const store = createStore({
         setProfileMenuState(state, isOpen) {
             state.isProfileMenuOpen = isOpen;
         },
-        setUserRegistrationState(state, isOpen) {
-            state.userRegistrationState = isOpen;
-        },
-        setPasswordResetState(state, passwordResetState) {
-            state.passwordResetState = passwordResetState;
-        },
         signOut(state) {
             state.isProfileMenuOpen = false;
             state.user = null;
-            state.userRegistrationState = false;
-            state.passwordResetState = false;
             localStorage.setItem('credentials', JSON.stringify({}));
         },
     },
@@ -50,12 +61,6 @@ const store = createStore({
         },
         setProfileMenuState({ commit }, isOpen) {
             commit('setProfileMenuState', isOpen);
-        },
-        setUserRegistrationState({ commit }, isOpen) {
-            commit('setUserRegistrationState', isOpen);
-        },
-        setPasswordResetState({ commit }, passwordResetState) {
-            commit('setPasswordResetState', passwordResetState);
         },
         signOut({ commit }) {
             commit('signOut');
@@ -70,5 +75,6 @@ let app = createApp(App);
 setupAuth( authConfig, callbackRedirect ).then( (auth) => {
     app.use(store);
     app.use(auth);
+    app.use(router);
     app.mount('#app');
 })

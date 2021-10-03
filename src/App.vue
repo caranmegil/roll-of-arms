@@ -12,12 +12,7 @@
 
     <main>
       <section id="content">
-        <div v-if="$store.state.passwordResetState"><ResetPassword/></div>
-        <div v-if="$store.state.userRegistrationState"><RegisterUser/></div>
-        <div v-if="!$store.state.userRegistrationState && !$store.state.passwordResetState">
-          <Login v-if="!$store.state.user"/>
-          <Main v-if="$store.state.user"/>
-        </div>
+        <router-view></router-view>
       </section>                
     </main>
 
@@ -34,11 +29,7 @@ import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {signIntoGoogle, getCurrentUser} from '@/firebase';
 
-import Main from './components/Main.vue';
-import Login   from './components/Login.vue';
 import ProfileMenu   from './components/ProfileMenu.vue';
-import RegisterUser from './components/RegisterUser.vue';
-import ResetPassword from './components/ResetPassword.vue';
 
 export default {
   name: 'App',
@@ -48,11 +39,7 @@ export default {
     }
   },
   components: {
-    Login,
-    Main,
     ProfileMenu,
-    RegisterUser,
-    ResetPassword,
   },
   async mounted() {
     if(this.$store.state.credentials.email !== undefined) {
@@ -62,10 +49,17 @@ export default {
         this.setUser(getCurrentUser())
       }
     }
+
+    if (this.$store.state.user != null) {
+      this.$router.push('/');
+    } else {
+      this.$router.push('/signin');
+    }
+
     this.isLoaded = true;
   },
   methods: {
-    ...mapActions(['setProfileMenuState', 'setUser']),
+    ...mapActions(['setUser', 'setProfileMenuState']),
     showProfileMenu() {
       this.setProfileMenuState(!this.$store.state.isProfileMenuOpen);
     }

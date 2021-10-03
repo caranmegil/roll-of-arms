@@ -18,7 +18,6 @@
 
 <script>
 import {resetPasswordInGoogle} from '@/firebase';
-import {mapActions} from 'vuex';
 import 'es6-promise/auto';
 
 export default {
@@ -32,9 +31,8 @@ export default {
       }
   },
   methods: {
-    ...mapActions(['setPasswordResetState']),
     back: function() {
-        this.setPasswordResetState(false);
+        this.$router.go(-1);
     },
     register: async function() {
         const email = document.getElementById('email').value;

@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database";
 import {
     getAuth,
     signInWithEmailAndPassword,
@@ -8,17 +9,16 @@ import {
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
-// firebase init - add your own config here
 import firebaseConfig from './firebaseConfig.json';
 
 const app = initializeApp(firebaseConfig)
 const analytics = getAnalytics(app)
 
 // utils
-const db = null;//firebase.db;
+const db = getDatabase(app);
 
 // collection references
-const profilesCollection = null;//db.collection('profiles')
+const profilesCollection = null;//db.ref('profiles')
 
 const createUserInGoogle = async (email, password) => {
     try {

@@ -19,9 +19,10 @@ export default {
     ...mapActions(['signOut']),
     logoff: async function () {
       const isSignedOut = await signOutOfGoogle();
-      console.log(isSignedOut)
+
       if (isSignedOut) {
         this.signOut();
+        this.$router.push('/signin');
       }
     }
   },
