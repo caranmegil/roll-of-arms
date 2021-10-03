@@ -11,6 +11,8 @@
     "@auth0/auth0-spa-js": "^1.18.0",
     "core-js": "^3.6.5",
     "es6-promise": "^4.2.8",
+    "firebase": "^9.1.1",
+    "leaflet": "^1.7.1",
     "vue": "^3.0.0",
     "vuex": "^4.0.2"
   },

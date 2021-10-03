@@ -9,11 +9,49 @@ import { setupAuth } from './auth';
 const store = createStore({
     state() {
         return {
+            user: null,
+            credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
+            isProfileMenuOpen: false,
+            userRegistrationState: false,
         };
     },
     mutations: {
+        setUser(state, user) {
+            state.user = user;
+        },
+        setCredentials(state, credentials) {
+            state.credentials = credentials;
+            localStorage.setItem('credentials', JSON.stringify(credentials))
+        },
+        setProfileMenuState(state, isOpen) {
+            state.isProfileMenuOpen = isOpen;
+        },
+        setUserRegistrationState(state, isOpen) {
+            state.userRegistrationState = isOpen;
+        },
+        signOut(state) {
+            state.isProfileMenuOpen = false;
+            state.user = null;
+            state.userRegistrationState = false;
+            localStorage.setItem('credentials', JSON.stringify({}));
+        },
     },
     actions: {
+        setUser({ commit }, user) {
+            commit('setUser', user);
+        },
+        setCredentials({ commit }, credentials) {
+            commit('setCredentials', credentials);
+        },
+        setProfileMenuState({ commit }, isOpen) {
+            commit('setProfileMenuState', isOpen);
+        },
+        setUserRegistrationState({ commit }, isOpen) {
+            commit('setUserRegistrationState', isOpen);
+        },
+        signOut({ commit }) {
+            commit('signOut');
+        },
     },
 });
 

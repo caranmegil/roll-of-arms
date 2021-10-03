@@ -2,20 +2,27 @@
   <ul class="menu-container">
     <li>View Profile</li>
     <li class="separator"></li>
-    <li @click="signOut">Sign Out</li>
+    <li @click="logoff">Sign Out</li>
   </ul>
 </template>
 
 <script>
 import 'es6-promise/auto';
+import {mapActions} from 'vuex';
+import {signOutOfGoogle} from '@/firebase';
 
 export default {
   name: 'ProfileMenu',
   props: {
   },
   methods: {
-    signOut: function () {
-      this.$auth.logout();
+    ...mapActions(['signOut']),
+    logoff: async function () {
+      const isSignedOut = await signOutOfGoogle();
+      console.log(isSignedOut)
+      if (isSignedOut) {
+        this.signOut();
+      }
     }
   },
 }
@@ -34,5 +41,9 @@ export default {
 
   li {
     list-style-type: none;
+  }
+
+  li:hover {
+    background-color: #D3D3D3;
   }
 </style>

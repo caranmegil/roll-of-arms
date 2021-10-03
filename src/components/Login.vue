@@ -4,12 +4,27 @@
     <section class="welcome-msg">This is the Roll of Arms for the game <a href="https://www.dragondice.com">Dragon Dice <sup>TM</sup></a> by <a href="https://sfr-inc.com">SFR, Inc.</a>  It is a magnificent system for player management with many more features to come!</section>
     <div v-if="hasError" class="error">Please make sure your email and password are correct!</div>
     <div class="login-form">
-        <button v-on:click="signIn">Sign In</button>
+        <div class="element">
+            <label for="email">email</label>
+            <input id="email" type="text"/>
+        </div>
+        <div class="element">
+            <label for="password">password</label>
+            <input id="password" type="password"/>
+        </div>
+        <button @click="signIn">Sign In</button>
+        <div class="separator"></div>
+        <div class="bottomLinks">
+            <button @click="register">Registration</button>
+            <button @click="forgotPassword">Forgot Password</button>
+        </div>
     </div>
   </div>
 </template>
 
 <script>
+import {signIntoGoogle} from '@/firebase';
+import {mapActions} from 'vuex';
 import 'es6-promise/auto';
 
 export default {
@@ -22,9 +37,27 @@ export default {
       }
   },
   methods: {
-    signIn: function() {
-        this.$auth.loginWithPopup();
+    ...mapActions(['setUser', 'setCredentials', 'setUserRegistrationState']),
+    signIn: async function() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const user = await signIntoGoogle(email, password);
+
+        if(user != null) {
+            this.setCredentials({email, password,})
+            this.setUser(user);
+            this.hasError = false;
+        } else {
+            this.hasError = true;
+        }
+    },
+    register: function() {
+        this.setUserRegistrationState(true);
+    },
+    forgotPassword: function() {
+
     }
+
   }
 }
 </script>

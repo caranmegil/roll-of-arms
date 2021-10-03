@@ -1,18 +1,22 @@
 <template>
-  <div v-if="isLoaded" class="profile-menu-container">
-    <ProfileMenu id="profile-menu"/>
+  <div v-if="isLoaded && $store.state.isProfileMenuOpen" class="profile-menu-container">
+    <ProfileMenu/>
   </div>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
       <!-- <span id="menu-button" v-if="$auth.isAuthenticated.value" class="title-bar-menu material-icons material-icons-outlined">menu</span> -->
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.gif"/></span>
-      <span id="account-button" v-if="$auth.isAuthenticated.value" @click="showProfileMenu" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
+      <span v-if="$store.state.user != null && $store.state.user.photoURL == null" @click="showProfileMenu" class="title-bar-account material-icons material-icons-outlined">account_circle</span>
+      <span v-if="$store.state.user != null && $store.state.user.photoURL != null" @click="showProfileMenu" class="title-bar-account"><img class="profile-image" :src="$store.state.user.photoURL"/></span>
     </header>
 
     <main>
       <section id="content">
-        <Login v-if="!$auth.isAuthenticated.value"/>
-        <Main v-if="$auth.isAuthenticated.value"/>
+        <div v-if="$store.state.userRegistrationState"><RegisterUser/>></div>
+        <div v-if="!$store.state.userRegistrationState">
+          <Login v-if="!$store.state.user"/>
+          <Main v-if="$store.state.user"/>
+        </div>
       </section>                
     </main>
 
@@ -25,11 +29,14 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import 'es6-promise/auto';
+import {signIntoGoogle, getCurrentUser} from '@/firebase';
 
 import Main from './components/Main.vue';
 import Login   from './components/Login.vue';
 import ProfileMenu   from './components/ProfileMenu.vue';
+import RegisterUser from './components/RegisterUser.vue';
 
 export default {
   name: 'App',
@@ -42,20 +49,24 @@ export default {
     Login,
     Main,
     ProfileMenu,
+    RegisterUser,
+  },
+  async mounted() {
+    if(this.$store.state.credentials.email !== undefined) {
+      const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
+
+      if (user) {
+        this.setUser(getCurrentUser())
+      }
+    }
+    this.isLoaded = true;
   },
   methods: {
-    showProfileMenu: function () {
-      let profileMenu = document.getElementById('profile-menu');
-      if (profileMenu.style.display === 'none' || profileMenu.style.display === '') {
-        profileMenu.style.display = 'block';
-      } else {
-        profileMenu.style.display = 'none';
-      }
-    },
+    ...mapActions(['setProfileMenuState', 'setUser']),
+    showProfileMenu() {
+      this.setProfileMenuState(!this.$store.state.isProfileMenuOpen);
+    }
   },
-  mounted() {
-    this.isLoaded = true;
-  }
 };
 </script>
 
@@ -70,6 +81,11 @@ body {
     .material-icons {
         font-size: 24px !important;
     }
+
+    .profile-image {
+      width: 24px;
+      height: 24px;
+    }
 }
 
 @media screen and (max-width: 768px) {
@@ -79,6 +95,11 @@ body {
 
     .material-icons { 
         font-size: 32px !important;
+    }
+
+    .profile-image {
+      width: 32px;
+      height: 32px;
     }
 }
 
@@ -91,16 +112,16 @@ body {
   height: 100%;
 }
 
-#profile-menu {
-  display: none;
-}
-
 .banner-img {
   width: 75%;
   height: 75%;
 }
 
 .material-icons { font-size: 48px; }
+.profile-image {
+  width: 48px;
+  height: 48px;
+}
 
 .roll-of-arms-body {
     height: 95vh;
