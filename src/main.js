@@ -12,7 +12,7 @@ import Login   from './components/Login.vue';
 import RegisterUser from './components/RegisterUser.vue';
 import ResetPassword from './components/ResetPassword.vue';
 import ProfileEdit from './components/ProfileEdit.vue';
-
+import Verify from './components/Verify.vue';
 
 const routes = [
     { path: '/', component: Main },
@@ -20,6 +20,7 @@ const routes = [
     { path: '/register', component: RegisterUser },
     { path: '/reset', component: ResetPassword },
     { path: '/profile', component: ProfileEdit },
+    { path: '/verify', component: Verify },
 ];
 
 const router = createRouter( {

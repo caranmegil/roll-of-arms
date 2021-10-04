@@ -52,11 +52,8 @@ export default {
         if (password === retypePassword) {
             this.hasPasswordMismatch = false;
 
-            const user = await createUserInGoogle(email, password);
-            if(user != null) {
-                this.setCredentials({email, password,})
-                this.setUser(user);
-                this.$router.push('/');
+            if(await createUserInGoogle(email, password)) {
+                this.$router.push('/signin');
                 this.hasError = false;
             } else {
                 this.hasError = true;

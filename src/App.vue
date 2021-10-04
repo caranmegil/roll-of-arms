@@ -30,7 +30,11 @@
 <script>
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
-import {signIntoGoogle, signOutOfGoogle, getCurrentUser} from '@/firebase';
+import {
+  getCurrentUser,
+  signOutOfGoogle,
+  isVerifyEmailWithLink,
+} from '@/firebase';
 
 import ProfileMenu   from './components/ProfileMenu.vue';
 
@@ -44,56 +48,22 @@ export default {
   components: {
     ProfileMenu,
   },
-  // async mounted() {
-  //   if(this.$store.state.credentials.email !== undefined) {
-  //     const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
-
-  //     if (user) {
-  //       this.setUser(getCurrentUser())
-  //     }
-  //   }
-
-  //   if (this.$store.state.user != null) {
-  //     this.$router.push('/');
-  //   } else {
-  //     this.$router.push('/signin');
-  //   }
-
-  //   this.isLoaded = true;
-  // },
   async mounted() {
-      if(this.$store.state.credentials.email !== undefined) {
-        const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
-
-        if (user) {
-          this.setUser(getCurrentUser())
+    let that = this;
+    if( getCurrentUser() ) {
+      this.$router.push('/');
+    } else {
+      isVerifyEmailWithLink().then(function (isWithLink) {
+        if(isWithLink) {
+          that.$router.push('/verify');
+        } else {
+          that.$router.push('/signin');
         }
-      }
+      });
+    }
 
-      if (this.$store.state.user != null) {
-        this.$router.push('/');
-      } else {
-        this.$router.push('/signin');
-      }
-
-      this.isLoaded = true;
+    this.isLoaded = true;
   },
-  // async updated() {
-  //     if(this.$store.state.credentials.email !== undefined) {
-  //         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
-
-  //       if (user) {
-  //         this.setUser(getCurrentUser())
-  //       }
-  //     }
-  //     if (this.$store.state.user != null) {
-  //       this.$router.push('/');
-  //     } else {
-  //       this.$router.push('/signin');
-  //     }
-
-  //     this.isLoaded = true;
-  // },
   methods: {
     ...mapActions(['setUser', 'setProfileMenuState', 'signOut']),
     editProfile: function () {

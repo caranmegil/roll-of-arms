@@ -6,6 +6,9 @@ import {
     signOut,
     createUserWithEmailAndPassword,
     sendPasswordResetEmail,
+    sendSignInLinkToEmail,
+    isSignInWithEmailLink,
+    signInWithEmailLink,
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -64,8 +67,20 @@ const getEntireCollection = async (collectionName) => {
 
 const createUserInGoogle = async (email, password) => {
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        return userCredential.user;
+        const auth = getAuth();
+        const actionCodeSettings = {
+            // URL you want to redirect back to. The domain (www.example.com) for this
+            // URL must be in the authorized domains list in the Firebase Console.
+            url: 'https://roll-of-arms.web.app',
+            // This must be true.
+            handleCodeInApp: true,
+        };
+
+        console.log(email, password);
+        await createUserWithEmailAndPassword(auth, email, password);
+        sendSignInLinkToEmail(auth, email, actionCodeSettings);
+
+        return true;
     } catch (e) {
         console.error(e);
         return false;
@@ -74,21 +89,33 @@ const createUserInGoogle = async (email, password) => {
 
 const signIntoGoogle = async (email, password) => {
     try {
+        auth = getAuth();
         if (user == null) {
-            auth = getAuth();
             user = auth.currentUser;
             if (user != null) {
-                console.log('flag 0', user);
                 return user;
             }
         }
 
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         user = userCredential.user;
-        console.log('flag user', user);
         return user;
     } catch (e) {
         console.error(e);
+        return null;
+    }
+};
+
+const isVerifyEmailWithLink = async () => {
+    auth = getAuth();
+    return isSignInWithEmailLink(auth, window.location.href);
+};
+
+const verifyEmailwithLink = async (email) => {
+    auth = getAuth();
+    if ( isSignInWithEmailLink(auth, window.location.href) ) {
+        return signInWithEmailLink(auth, email, window.location.href);
+    } else {
         return null;
     }
 };
@@ -131,6 +158,8 @@ export {
   getEntireCollection,
   resetPasswordInGoogle,
   createUserInGoogle,
+  isVerifyEmailWithLink,
+  verifyEmailwithLink,
   signIntoGoogle,
   signOutOfGoogle,
 };

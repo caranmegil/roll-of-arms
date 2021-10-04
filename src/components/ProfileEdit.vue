@@ -1,6 +1,7 @@
 <template>
     <div class="profiles">
         <h1>Change your profile</h1>
+        <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
         <div class="element">
             <label for="name">Name</label>
             <input id="name" type="text"/>
@@ -23,10 +24,17 @@ export default {
   name: 'ProfileEdit',
   props: {
   },
+  data() {
+    return {
+      hasError: false,
+    };
+  },
   methods: {
     save: async function () {
       const name = document.getElementById('name').value;
       const location = document.getElementById('location').value;
+      let that = this;
+
       let profile = {
         name,
         location,
@@ -38,7 +46,12 @@ export default {
         const coords = json.features[0].geometry.coordinates;
         profile.geolocation = [coords[1], coords[0]];
       }
-      saveCollection('profiles', profile);
+      saveCollection('profiles', profile).then(function () {
+        that.hasError = false;
+        that.$router.go(-1);
+      }).catch(function () {
+        that.hasError = true;
+      });
     },
     back: function () {
       this.$router.go(-1);
@@ -47,9 +60,9 @@ export default {
   async mounted() {
     let name = document.getElementById('name');
     let location = document.getElementById('location');
-    const profileData = await getCollection('profiles');
-    name.value = profileData.name;
-    location.value = profileData.location;
+    const profileData = await getCollection('profiles') || {};
+    name.value = profileData.name || '';
+    location.value = profileData.location || '';
   }
 }
 </script>
@@ -85,5 +98,11 @@ export default {
 
   .separator {
     border-bottom: 1px solid #D3D3D3;
+  }
+
+  .error {
+      align-self: center;
+      justify-self: center;
+      color: red;
   }
 </style>

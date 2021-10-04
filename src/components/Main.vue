@@ -30,14 +30,33 @@ export default {
       }).addTo(map);
 
       const profiles = await getEntireCollection('profiles');
+      let profilesArray = {};
+
       for(let key in profiles) {
         const profile = profiles[key];
 
         if (profile != null && profile.geolocation != null) {
-          L.marker(profile.geolocation).addTo(map)
-              .bindPopup(profile.name)
-              .openPopup();
+          const locKey = `${profile.geolocation}`;
+
+          if (profilesArray[locKey] === undefined) {
+            profilesArray[locKey] = [profile]
+          } else {
+            profilesArray[locKey].push(profile);
+          }
         }
+      }
+
+      for(let key in profilesArray) {
+        const profiles = profilesArray[key];
+        const geolocation = profiles[0].geolocation;
+
+        profiles.sort((a,b) => a.name.localeCompare(b.name));
+
+        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? currentValue.name : `${previousValue}, ${currentValue.name}`,  null)
+
+        L.marker(geolocation).addTo(map)
+            .bindPopup(names)
+            .openPopup();
       }
     } else {
       let mapElem = document.getElementById('map');
