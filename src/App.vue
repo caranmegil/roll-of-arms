@@ -7,7 +7,7 @@
       <!-- <span id="menu-button" v-if="$auth.isAuthenticated.value" class="title-bar-menu material-icons material-icons-outlined">menu</span> -->
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
       <div v-if="$store.state.user != null" class="title-bar-account">
-        <img class="profile-image" :src="getGravatarPhoto()"/>
+        <img @click="editProfile" class="profile-image" :src="getGravatarPhoto()"/>
         <span @click="logoff" class="menu-item material-icons material-icons-outlined">logout</span>
       </div>
     </header>
