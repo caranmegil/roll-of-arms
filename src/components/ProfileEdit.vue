@@ -11,13 +11,18 @@
             <input id="location" type="text"/>
         </div>
         <button @click="save">Save!</button>
+        <button @click="changePassword">Reset Password</button>
         <div class="separator"></div>
         <a class="element" @click="back">Back</a>
     </div>
 </template>
 
 <script>
-import { saveCollection, getCollection } from '@/firebase';
+import {
+  saveCollection,
+  getCollection,
+  resetPasswordInGoogle,
+} from '@/firebase';
 import 'es6-promise/auto';
 
 export default {
@@ -30,6 +35,10 @@ export default {
     };
   },
   methods: {
+    changePassword: async function () {
+      await resetPasswordInGoogle(this.$store.state.credentials.email);
+      this.$router.go(-1);
+    },
     save: async function () {
       const name = document.getElementById('name').value;
       const location = document.getElementById('location').value;
