@@ -1,0 +1,12 @@
+{
+	"short_name": "roll-of-arms",
+	"name": "Roll of Arms",
+	"description": "The Roll of Arms application for the game Dragon Dice (TM) by SFR, Inc.",
+	"icons": [{
+		"src": "/favicon.png",
+		"sizes": "512x512",
+		"type": "image/png"
+	}],
+	"start_url": "/",
+	"display": "standalone"
+}

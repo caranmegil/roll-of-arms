@@ -1,4 +1,4 @@
-# roll-of-arms
+# Roll of Arms
 
 ## Project setup
 ```
