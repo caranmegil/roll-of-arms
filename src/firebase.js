@@ -25,6 +25,8 @@ const db = getDatabase(app);
 // generic collection actions
 const saveCollection = async (collectionName, data) => {
     try {
+        auth = getAuth();
+        const user = auth.currentUser;
         const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
         const result = await set(collectionNameUserRef, data);
         return await result.then(() => true ).catch(() => false)
@@ -35,6 +37,8 @@ const saveCollection = async (collectionName, data) => {
 
 const getCollection = async (collectionName) => {
     try {
+        auth = getAuth();
+        const user = auth.currentUser;
         const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
         const snapshot = await get(collectionNameUserRef)
 

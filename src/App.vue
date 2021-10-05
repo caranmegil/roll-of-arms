@@ -31,7 +31,7 @@
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
-  getCurrentUser,
+  signIntoGoogle,
   signOutOfGoogle,
   isVerifyEmailWithLink,
 } from '@/firebase';
@@ -50,7 +50,11 @@ export default {
   },
   async mounted() {
     let that = this;
-    if( getCurrentUser() ) {
+
+    const credentials = this.$store.state.credentials;
+
+    if ( credentials && credentials.email ) {
+      this.setUser(signIntoGoogle(credentials.email, credentials.password))
       this.$router.push('/');
     } else {
       isVerifyEmailWithLink().then(function (isWithLink) {
