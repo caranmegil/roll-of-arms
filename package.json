@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "deploy": "yarn build && yarn copy-icons && firebase deploy",
+    "copy-icons": "cp ../dragon-dice-icons/*.webp dist/img",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@auth0/auth0-spa-js": "^1.18.0",
     "core-js": "^3.6.5",
     "es6-promise": "^4.2.8",
     "firebase": "^9.1.1",

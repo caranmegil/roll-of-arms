@@ -4,9 +4,6 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 
 import App from './App.vue'
 
-import authConfig from './auth/auth_config.json';
-import { setupAuth } from './auth';
-
 import Main from './components/Main.vue';
 import Login   from './components/Login.vue';
 import RegisterUser from './components/RegisterUser.vue';
@@ -74,9 +71,6 @@ function callbackRedirect() {
 }
 
 let app = createApp(App);
-setupAuth( authConfig, callbackRedirect ).then( (auth) => {
-    app.use(store);
-    app.use(auth);
-    app.use(router);
-    app.mount('#app');
-})
+app.use(store);
+app.use(router);
+app.mount('#app');
