@@ -1,13 +1,14 @@
 {
   "rules": {
-    ".read": "auth.uid != null",
     "profiles": {
+      ".read": "auth.uid != null",
     	".write": "auth.uid != null && newData.exists() && newData.child(auth.uid).exists()",
       "$user_id": {
         ".write": "auth.uid != null && $user_id == auth.uid && newData.exists() && newData.child('name').exists()"
       }
     },
     "collections": {
+      ".read": "auth.uid != null",
     	".write": "auth.uid != null && newData.exists() && newData.child(auth.uid).exists()",
       "$user_id": {
         ".write": "auth.uid != null && $user_id == auth.uid && newData.exists() && newData.child('dice').exists()"

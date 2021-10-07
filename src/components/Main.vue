@@ -20,7 +20,7 @@ export default {
     const profile = await getCollection('profiles');
 
     if ( profile != null && profile.geolocation != null ) {
-      let map = L.map('map', { preferCanvas: true }).setView(profile.geolocation, 13);
+      let map = L.map('map', { preferCanvas: true });
 
       L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
           attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -58,6 +58,8 @@ export default {
             .bindPopup(names)
             .openPopup();
       }
+
+      map.setView(profile.geolocation, 13);
     } else {
       let mapElem = document.getElementById('map');
       mapElem.innerText = 'Please enter a valid location in your profile or you may need to get fairly specific (but do not enter your exact address).';

@@ -53,7 +53,7 @@
               <div>Type</div>
           </div>
           <div class="body">
-              <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
+              <div v-for="(die, index) in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
                   <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
                   <div>{{die.rarity}}</div>
                   <div>{{die.type}}</div>
@@ -97,7 +97,6 @@ export default {
               },
             ],
             dice: [],
-            filteredDice: [],
             speciesFilter: 'Amazon',
             editionFilter: null,
             editions: [],
@@ -140,7 +139,19 @@ export default {
 
       this.dice = await getCollection('collections') || [];
       if (this.$store.state.collectionDie != null) {
-        this.dice.push(this.$store.state.collectionDie);
+        const collectionDie = this.$store.state.collectionDie;
+        if (this.dice.filter(die => die.name === collectionDie.name && die.edition === collectionDie.edition).length > 0) {
+          this.dice.forEach(die => {
+            if(die.name === collectionDie.name && die.edition === collectionDie.edition) {
+              if (die.amount === undefined) {
+                die.amount = 0;
+              }
+              die.amount += collectionDie.amount;
+            }
+          });
+        } else {
+          this.dice.push(this.$store.state.collectionDie);
+        }
         saveCollection('collections', this.dice);
         this.setCurrentDie(null);
       }
@@ -155,8 +166,11 @@ export default {
           this.$router.push('/dicebrowser');
         },
         changeAmount(index, evt) {
-          this.filteredDice[index].amount = evt.target.value;
-          saveCollection('collections', this.filteredDice);
+          if (evt.target.value !== '') {
+            this.dice[index].amount = evt.target.value;
+            this.dice = this.dice.filter(die => die.amount > 0);
+            saveCollection('collections', this.dice);
+          }
         },
         setCurrentDie(die) {
           this.setCollectionDie(die);
