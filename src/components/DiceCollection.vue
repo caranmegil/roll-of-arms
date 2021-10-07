@@ -1,7 +1,8 @@
 <template>
-    <v-tour name="diceBrowserTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
-    <div class="dice-browser">
-      <h1>Dice Browser</h1>
+    <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
+    <div class="collections">
+      <h1>Collection Manager</h1>
+      <button @click="browseDice">Locate</button>
       <span id="filters">
         <div class="element">
             <label for="speciesFilter">Species</label>
@@ -52,11 +53,11 @@
               <div>Type</div>
           </div>
           <div class="body">
-              <div v-for="die in filteredDice" :key="die.name + '/' + die.edition" class="row">
+              <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
                   <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
                   <div>{{die.rarity}}</div>
                   <div>{{die.type}}</div>
-                  <div class="add-button"><span @click="() => setCurrentDie(die)" class="material-icons material-icons-outlined">add</span></div>
+                  <div><input type="number" @keyup="(evt) => changeAmount(index, evt)" :value="die.amount"></div>
               </div>
           </div>
       </div>
@@ -66,7 +67,7 @@
 <script>
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
-import { getEntireCollection, getCollection, saveCollection } from '@/firebase';
+import { getCollection, saveCollection } from '@/firebase';
 
 export default {
     name: 'DiceBrowser',
@@ -89,7 +90,7 @@ export default {
                 header: {
                   title: 'The Dice!',
                 },
-                content: 'Scroll through this list and locate the die you want to add to your collection and select the "+" to add.',
+                content: 'Scroll through this list and locate the die you want and modify your collection.  Changing the amount to 0 removes it.',
                 params: {
                   placement: 'left-start',
                 },
@@ -133,23 +134,36 @@ export default {
     },
     async mounted() {
       const profile = await getCollection('profiles');
-      if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
-        this.$tours['diceBrowserTour'].start();
+      if (profile.collectionTour || profile.collectionTour === undefined) {
+        this.$tours['collectionTour'].start();
       }
 
-      this.dice = await getEntireCollection('dice');
+      this.dice = await getCollection('collections') || [];
+      if (this.$store.state.collectionDie != null) {
+        this.dice.push(this.$store.state.collectionDie);
+        saveCollection('collections', this.dice);
+        this.setCurrentDie(null);
+      }
       this.setSpeciesFilter();
+    },
+    unmounted() {
+      this.setCollectionDie(null);
     },
     methods: {
         ...mapActions(['setCollectionDie']),
+        browseDice() {
+          this.$router.push('/dicebrowser');
+        },
+        changeAmount(index, evt) {
+          this.filteredDice[index].amount = evt.target.value;
+          saveCollection('collections', this.filteredDice);
+        },
         setCurrentDie(die) {
-          die.amount = 1;
           this.setCollectionDie(die);
-          this.$router.push('/collection');
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
-          profile.diceBrowserTour = false;
+          profile.collectionTour = false;
           saveCollection('profiles', profile);
         },
         setSpeciesFilter: function() {
@@ -166,7 +180,7 @@ export default {
 </script>
 
 <style scope>
-  .dice-browser {
+  .collections {
     display: grid;
     grid-auto-flow: row;
     grid-template-columns: auto;
@@ -175,12 +189,12 @@ export default {
     gap: .5em;
   }
 
-  .dice-browser h1 {
+  .collections h1 {
     align-self: center;
     justify-self: center;    
   }
 
-  .dice-browser .element {
+  .collections .element {
     align-self: center;
     justify-self: center;
     display: grid;
@@ -188,14 +202,14 @@ export default {
     grid-template-columns: 1fr 1fr;
   }
 
-  .dice-browser .element > label {
+  .collections .element > label {
     font-weight: bold;
     justify-self: end;
     align-self: center;
     padding-right: .5em;
   }
 
-  .dice-browser select {
+  .collections select {
     border-radius: .25em;
   }
 
@@ -221,20 +235,10 @@ export default {
   }
 
   #dice div.row {
+    padding-top: .5em;
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    justify-items: center;
-    align-items: center;
   }
 
-  .add-button {
-    font-size: 24px;
-  }
-
-  .die-id {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    justify-items: center;
-  }
 </style>

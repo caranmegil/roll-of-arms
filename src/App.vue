@@ -86,6 +86,11 @@ export default {
         menuElem.style.display = 'none';
       }
     },
+    editCollection: function () {
+      let menuElem = document.getElementById('menu');
+      menuElem.style.display = 'none';
+      this.$router.push('/collection');
+    },
     openDiceBrowser: function () {
       let menuElem = document.getElementById('menu');
       menuElem.style.display = 'none';

@@ -17,6 +17,7 @@ import ResetPassword from './components/ResetPassword.vue';
 import ProfileEdit from './components/ProfileEdit.vue';
 import Verify from './components/Verify.vue';
 import DiceBrowser from './components/DiceBrowser.vue';
+import DiceCollection from './components/DiceCollection.vue';
 
 const routes = [
     { path: '/', component: Main, meta: { requiresAuth: true } },
@@ -26,6 +27,7 @@ const routes = [
     { path: '/profile', component: ProfileEdit, meta: { requiresAuth: true } },
     { path: '/verify', component: Verify },
     { path: '/dicebrowser', component: DiceBrowser },
+    { path: '/collection', component: DiceCollection },
 ];
 
 const router = createRouter( {
@@ -39,6 +41,7 @@ const store = createStore({
             user: null,
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             isProfileMenuOpen: false,
+            collectionDie: null,
         };
     },
     mutations: {
@@ -51,6 +54,9 @@ const store = createStore({
         },
         setProfileMenuState(state, isOpen) {
             state.isProfileMenuOpen = isOpen;
+        },
+        setCollectionDie(state, collectionDie) {
+            state.collectionDie = collectionDie;
         },
         signOut(state) {
             state.isProfileMenuOpen = false;
@@ -68,6 +74,9 @@ const store = createStore({
         },
         setProfileMenuState({ commit }, isOpen) {
             commit('setProfileMenuState', isOpen);
+        },
+        setCollectionDie({ commit }, collectionDie) {
+            commit('setCollectionDie', collectionDie);
         },
         signOut({ commit }) {
             commit('signOut');
