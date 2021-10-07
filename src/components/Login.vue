@@ -57,7 +57,6 @@ export default {
     forgotPassword: function() {
         this.$router.push('/reset');
     }
-
   }
 }
 </script>

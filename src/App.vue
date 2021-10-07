@@ -1,21 +1,25 @@
 <template>
-  <div v-if="isLoaded && $store.state.isProfileMenuOpen" class="profile-menu-container">
-    <ProfileMenu/>
-  </div>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <!-- <span id="menu-button" v-if="$auth.isAuthenticated.value" class="title-bar-menu material-icons material-icons-outlined">menu</span> -->
+      <span id="menu-button" @click="openMenu" v-if="$store.state.user != null" class="title-bar-menu material-icons material-icons-outlined">menu</span>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
       <div v-if="$store.state.user != null" class="title-bar-account">
         <img @click="editProfile" class="profile-image" :src="getGravatarPhoto()"/>
-        <span @click="logoff" class="menu-item material-icons material-icons-outlined">logout</span>
       </div>
     </header>
+    <div id="menu" class="menu-container">
+      <div @click="openDiceBrowser" class="menu-item"><span class="material-icons material-icons-outlined">square</span> Dice Browser</div>
+      <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> Dice Collection</div>
+      <div class="separator"></div>
+      <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
+    </div>
 
     <main>
       <section id="content">
-        <router-view></router-view>
-      </section>                
+        <router-view v-slot="{ Component }">
+            <component :is="Component" :key="$route.path"/> 
+        </router-view>
+      </section>
     </main>
 
     <div id="footer">
@@ -32,10 +36,8 @@ import 'es6-promise/auto';
 import {
   signIntoGoogle,
   signOutOfGoogle,
-  isVerifyEmailWithLink,
+  // isVerifyEmailWithLink,
 } from '@/firebase';
-
-import ProfileMenu   from './components/ProfileMenu.vue';
 
 export default {
   name: 'App',
@@ -45,32 +47,49 @@ export default {
     }
   },
   components: {
-    ProfileMenu,
   },
-  async mounted() {
-    let that = this;
+  mounted() {
+    this.$router.beforeEach( async (to, from, next) => {
+      const credentials = this.$store.state.credentials;
 
-    const credentials = this.$store.state.credentials;
+      if ( this.$store.state.user == null && credentials && credentials.email ) {
+        let user = await signIntoGoogle(credentials.email, credentials.password);
+        this.setUser(user);
+      }
 
-    if ( credentials && credentials.email ) {
-      let user = await signIntoGoogle(credentials.email, credentials.password)
-      this.setUser(user)
-      this.$router.push('/');
-    } else {
-      isVerifyEmailWithLink().then(function (isWithLink) {
-        if(isWithLink) {
-          that.$router.push('/verify');
+      if (to.meta.requiresAuth) {
+        if(this.$store.state.user != null) {
+          console.log('flag 0');
+          next()
         } else {
-          that.$router.push('/signin');
+          console.log('flag 0');
+          next({path: '/signin'});
         }
-      });
-    }
+      } else {
+        next();
+      }
+    });
 
     this.isLoaded = true;
   },
   methods: {
     ...mapActions(['setUser', 'setProfileMenuState', 'signOut']),
+    openMenu: function() {
+      let menuElem = document.getElementById('menu');
+      if(window.getComputedStyle(menuElem).display === 'none') {
+        menuElem.style.display = 'block';
+      } else {
+        menuElem.style.display = 'none';
+      }
+    },
+    openDiceBrowser: function () {
+      let menuElem = document.getElementById('menu');
+      menuElem.style.display = 'none';
+      this.$router.push('/dicebrowser');
+    },
     editProfile: function () {
+      let menuElem = document.getElementById('menu');
+      menuElem.style.display = 'none';
       this.setProfileMenuState(false);
       this.$router.push('/profile')
     },
@@ -78,6 +97,8 @@ export default {
       const isSignedOut = await signOutOfGoogle();
 
       if (isSignedOut) {
+        let menuElem = document.getElementById('menu');
+        menuElem.style.display = 'none';
         this.signOut();
         this.$router.push('/signin');
       }
@@ -113,6 +134,13 @@ body {
       width: 24px;
       height: 24px;
     }
+
+
+  .image-icon {
+    width: 24px;
+    height: 24px;
+  }
+
 }
 
 @media screen and (max-width: 768px) {
@@ -124,7 +152,12 @@ body {
         font-size: 32px !important;
     }
 
-    .profile-image {
+  .image-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .profile-image {
       width: 32px;
       height: 32px;
     }
@@ -137,13 +170,21 @@ button {
   background-color: #525252;
 }
 
-.profile-menu-container {
+.menu-container {
+  background-color: ivory;
+  border: 3px solid #D3D3D3;
+  display: none;
   position: fixed;
-  z-index: 50;
-  right: 0;
-  top: 50px;
-  width: 10em;
-  height: 100%;
+  z-index: 9999999;
+  left: .75em;
+  top: 5.5em;
+  width: 25%;
+  grid-auto-flow: row;
+}
+
+.image-icon {
+  width: 48px;
+  height: 48px;
 }
 
 .banner-img {
@@ -197,8 +238,16 @@ button {
     grid-template-columns: 1fr 1fr;
 }
 
+.menu-item {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  padding: 2px;
+}
+
 .menu-item:hover {
-  color: red;
+  border-bottom: 2px solid red;
 }
 
 .roll-of-arms-body > main {
@@ -231,6 +280,10 @@ button {
     grid-area: 1 / 1 / 1 / 3;
     align-self: center;
     justify-self: center;
+}
+
+.separator {
+  border-bottom: 1px solid #D3D3D3;
 }
 
 a {

@@ -3,8 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "deploy": "yarn build && yarn copy-icons && firebase deploy",
-    "copy-icons": "cp ../dragon-dice-icons/*.webp dist/img",
+    "deploy": "yarn build && firebase deploy",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
