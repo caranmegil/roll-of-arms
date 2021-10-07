@@ -2,7 +2,7 @@
     <div class="dice-browser">
         <div class="element">
             <label for="speciesFilter">Species</label>
-            <select id="speciesFilter" @change="setSpeciesFilter">
+            <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
                 <option value="Amazon">Amazons</option>
                 <option value="Coral Elf">Coral Elves</option>
                 <option value="Dracolem">Dracolem</option>
@@ -34,17 +34,45 @@
         </div>
         <div class="element">
             <label for="editionFilter">Edition</label>
-            <select id="editionFilter">
+            <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
+                <option v-for="option in editions" v-bind:selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" v-bind:key="option" v-bind:value="option">{{option}}</option>
             </select>
+        </div>
+
+        <div class="separator"></div>
+
+        <div id="dice">
+            <div class="header">
+                <div>ID</div>
+                <div>Name</div>
+                <div>Rarity</div>
+                <div>Type</div>
+            </div>
+            <div class="body">
+                <div v-for="die in filteredDice" v-bind:key="die.name + '/' + die.edition" class="row">
+                    <div><img :src="'../images/dice/' + die.id"/></div>
+                    <div>{{die.name}}</div>
+                    <div>{{die.rarity}}</div>
+                    <div>{{die.type}}</div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
+
+import { getEntireCollection } from '@/firebase';
+
 export default {
     name: 'DiceBrowser',
     data() {
         return {
+            dice: [],
+            filteredDice: [],
+            speciesFilter: 'Amazon',
+            editionFilter: null,
+            editions: [],
             menu: {
                 'Amazon': ['-', 'Reprint', 'Alt-Ink'],
                 'Coral Elf': ['-'],
@@ -76,14 +104,19 @@ export default {
             },
         };
     },
-    mounted() {
-        console.log('test')
+    async created() {
+        this.dice = await getEntireCollection('dice');
+        this.setSpeciesFilter();
     },
     methods: {
         setSpeciesFilter: function() {
-            console.log('flag 0')
-            const speciesFilter = document.getElementById('speciesFilter').value;
-            console.log(speciesFilter);
+            this.editions = this.menu[this.speciesFilter];
+            this.editionFilter = this.editions[0];
+            this.setEditionFilter();
+        },
+        setEditionFilter: function() {
+            let that = this;
+            this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
         },
     },
 };
@@ -121,4 +154,33 @@ export default {
   .dice-browser select {
     border-radius: .25em;
   }
+
+  .separator {
+    border-bottom: 1px solid #D3D3D3;
+  }
+
+  #dice {
+    height: 60vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  #dice div.header {
+    margin-bottom: .75em;
+    border-bottom: 1px solid black;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    font-weight: bold;
+    align-items: center;
+    justify-items: center;
+  }
+
+  #dice div.row {
+    padding-top: .5em;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+
 </style>
