@@ -59,11 +59,9 @@ export default {
 
       if (to.meta.requiresAuth) {
         if(this.$store.state.user != null) {
-          console.log('flag 0');
-          next()
+          next();
         } else {
-          console.log('flag 0');
-          next({path: '/signin'});
+          next({ path: '/signin'});
         }
       } else {
         next();
