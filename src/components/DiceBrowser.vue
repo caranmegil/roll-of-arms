@@ -1,5 +1,7 @@
 <template>
+    <v-tour name="diceBrowserTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="dice-browser">
+      <span id="filters">
         <div class="element">
             <label for="speciesFilter">Species</label>
             <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
@@ -38,36 +40,60 @@
                 <option v-for="option in editions" v-bind:selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" v-bind:key="option" v-bind:value="option">{{option}}</option>
             </select>
         </div>
+      </span>
 
-        <div class="separator"></div>
+      <div class="separator"></div>
 
-        <div id="dice">
-            <div class="header">
-                <div>ID</div>
-                <div>Name</div>
-                <div>Rarity</div>
-                <div>Type</div>
-            </div>
-            <div class="body">
-                <div v-for="die in filteredDice" v-bind:key="die.name + '/' + die.edition" class="row">
-                    <div><img :src="'../images/dice/' + die.id"/></div>
-                    <div>{{die.name}}</div>
-                    <div>{{die.rarity}}</div>
-                    <div>{{die.type}}</div>
-                </div>
-            </div>
-        </div>
+      <div id="dice">
+          <div class="header">
+              <div>ID</div>
+              <div>Name</div>
+              <div>Rarity</div>
+              <div>Type</div>
+          </div>
+          <div class="body">
+              <div v-for="die in filteredDice" v-bind:key="die.name + '/' + die.edition" class="row">
+                  <div><img :src="'../images/dice/' + die.id"/></div>
+                  <div>{{die.name}}</div>
+                  <div>{{die.rarity}}</div>
+                  <div>{{die.type}}</div>
+              </div>
+          </div>
+      </div>
     </div>
 </template>
 
 <script>
 
-import { getEntireCollection } from '@/firebase';
+import { getEntireCollection, getCollection, saveCollection } from '@/firebase';
 
 export default {
     name: 'DiceBrowser',
     data() {
         return {
+            tourCallbacks: {
+              onSkip: this.noMoreTours,
+              onFinish: this.noMoreTours,
+            },
+            steps: [
+              {
+                target: '#filters',
+                header: {
+                  title: 'Filters!',
+                },
+                content: 'Set your species and edition filters here.',
+              },
+              {
+                target: '.body',
+                header: {
+                  title: 'The Dice!',
+                },
+                content: 'Scroll through this list and locate the die you want to add to your collection and select it.',
+                params: {
+                  placement: 'left-start',
+                },
+              },
+            ],
             dice: [],
             filteredDice: [],
             speciesFilter: 'Amazon',
@@ -104,11 +130,22 @@ export default {
             },
         };
     },
+    async mounted() {
+      const profile = await getCollection('profiles');
+      if (profile.diceBrowserTour) {
+        this.$tours['diceBrowserTour'].start();
+      }
+    },
     async created() {
         this.dice = await getEntireCollection('dice');
         this.setSpeciesFilter();
     },
     methods: {
+        async noMoreTours() {
+          let profile = await getCollection('profiles');
+          profile.diceBrowserTour = false;
+          saveCollection('profiles', profile);
+        },
         setSpeciesFilter: function() {
             this.editions = this.menu[this.speciesFilter];
             this.editionFilter = this.editions[0];
@@ -147,8 +184,9 @@ export default {
 
   .dice-browser .element > label {
     font-weight: bold;
-    justify-self: start;
-    align-self: start;
+    justify-self: end;
+    align-self: center;
+    padding-right: .5em;
   }
 
   .dice-browser select {

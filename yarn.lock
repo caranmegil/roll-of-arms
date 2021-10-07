@@ -5692,6 +5692,11 @@ jszip@^3.6.0:
     readable-stream "~2.3.6"
     set-immediate-shim "~1.0.1"
 
+jump.js@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/jump.js/-/jump.js-1.0.2.tgz#e0641b47f40a38f2139c25fda0500bf28e43015a"
+  integrity sha1-4GQbR/QKOPITnCX9oFAL8o5DAVo=
+
 killable@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/killable/-/killable-1.0.1.tgz#4c8ce441187a061c7474fb87ca08e2a638194892"
@@ -6853,6 +6858,11 @@ pnp-webpack-plugin@^1.6.4:
   integrity sha512-2Rb3vm+EXble/sMXNSu6eoBx8e79gKqhNq9F5ZWW6ERNCTE/Q0wQNne5541tE5vKjfM8hpNCYL+LGc1YTfI0dg==
   dependencies:
     ts-pnp "^1.1.6"
+
+popperjs-core-ionic-scroll-fix@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/popperjs-core-ionic-scroll-fix/-/popperjs-core-ionic-scroll-fix-2.4.1.tgz#65414834a3463bc7253ce04e1f045eb7dbc2d7de"
+  integrity sha512-sNBR49KMoS1WdB5Rf+ZTFomeN/tZrojmZcZqVWBz9KvgX46YtuTCRweNGgSIHt+xDJDdqkpjpCew1gSPT8mNMQ==
 
 portfinder@^1.0.26:
   version "1.0.28"
@@ -8844,6 +8854,15 @@ uuid@^3.3.2, uuid@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
+
+v3-tour@^3.0.16:
+  version "3.0.16"
+  resolved "https://registry.yarnpkg.com/v3-tour/-/v3-tour-3.0.16.tgz#c1b7d91eede56f419eddbb94ed7f2ef2097d19d2"
+  integrity sha512-ik50E/nUxequJEuOd+HIGYwiY3E4R9nyrYE6ND/2in2QJ8ycmQlgLMsXadLtYY/TQuQRkerHeWiV3C1XiDaRLg==
+  dependencies:
+    hash-sum "^2.0.0"
+    jump.js "^1.0.2"
+    popperjs-core-ionic-scroll-fix "^2.4.1"
 
 v8-compile-cache@^2.0.3:
   version "2.3.0"

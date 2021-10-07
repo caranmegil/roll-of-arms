@@ -13,6 +13,7 @@
     "es6-promise": "^4.2.8",
     "firebase": "^9.1.1",
     "leaflet": "^1.7.1",
+    "v3-tour": "^3.0.16",
     "vue": "^3.0.0",
     "vue-router": "4",
     "vuex": "^4.0.2"

@@ -8,6 +8,7 @@
       </div>
     </header>
     <div id="menu" class="menu-container">
+      <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">home</span> Home</div>
       <div @click="openDiceBrowser" class="menu-item"><span class="material-icons material-icons-outlined">square</span> Dice Browser</div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> Dice Collection</div>
       <div class="separator"></div>
@@ -72,6 +73,11 @@ export default {
   },
   methods: {
     ...mapActions(['setUser', 'setProfileMenuState', 'signOut']),
+    goHome: function() {
+      let menuElem = document.getElementById('menu');
+      menuElem.style.display = 'none';
+      this.$router.push('/');
+    },
     openMenu: function() {
       let menuElem = document.getElementById('menu');
       if(window.getComputedStyle(menuElem).display === 'none') {

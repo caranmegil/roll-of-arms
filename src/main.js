@@ -1,9 +1,12 @@
 import { createApp } from 'vue'
 import { createStore } from 'vuex';
-import { createRouter,
+import {
+    createRouter,
     createWebHistory,
-    //  createWebHashHistory,
-     } from 'vue-router';
+} from 'vue-router';
+import VueTour from 'v3-tour';
+
+import 'v3-tour/dist/vue-tour.css';
 
 import App from './App.vue'
 
@@ -72,7 +75,8 @@ const store = createStore({
     },
 });
 
-let app = createApp(App);
-app.use(store);
-app.use(router);
-app.mount('#app');
+createApp(App)
+    .use(store)
+    .use(router)
+    .use(VueTour)
+    .mount('#app');
