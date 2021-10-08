@@ -15,7 +15,8 @@ import Login   from './components/Login.vue';
 import RegisterUser from './components/RegisterUser.vue';
 import ResetPassword from './components/ResetPassword.vue';
 import ProfileEdit from './components/ProfileEdit.vue';
-import Verify from './components/Verify.vue';
+import ProfileView from './components/ProfileView.vue';
+import Auth from './components/Auth.vue';
 import DiceBrowser from './components/DiceBrowser.vue';
 import DiceCollection from './components/DiceCollection.vue';
 
@@ -25,7 +26,8 @@ const routes = [
     { path: '/register', component: RegisterUser },
     { path: '/reset', component: ResetPassword },
     { path: '/profile', component: ProfileEdit, meta: { requiresAuth: true } },
-    { path: '/verify', component: Verify },
+    { path: '/profile/:id', component: ProfileView },
+    { path: '/auth', component: Auth },
     { path: '/dicebrowser', component: DiceBrowser },
     { path: '/collection', component: DiceCollection },
 ];
@@ -34,6 +36,20 @@ const router = createRouter( {
     history: createWebHistory(process.env.BASE_URL),
     routes,
 });
+
+router.beforeEach( (to, from, next) => {
+
+    if (to.meta && to.meta.requiresAuth) {
+        if(store.state.user != null) {
+            next();
+        } else {
+            next({ path: '/signin'});
+        }
+    } else {
+        next();
+    }
+});
+
 
 const store = createStore({
     state() {

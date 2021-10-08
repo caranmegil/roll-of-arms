@@ -53,6 +53,22 @@ const getCollection = async (collectionName) => {
     }
 }
 
+const getCollectionByField = async (collectionName, fieldName) => {
+    try {
+        const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
+        const snapshot = await get(collectionNameUserRef)
+
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            return null;
+        }
+    } catch (e) {
+        console.error(e);
+        return null;
+    }
+}
+
 const getEntireCollection = async (collectionName) => {
     try {
         const collectionNameUserRef = ref(db, collectionName);
@@ -158,6 +174,7 @@ export {
   getCurrentUser,
   saveCollection,
   getCollection,
+  getCollectionByField,
   getEntireCollection,
   resetPasswordInGoogle,
   createUserInGoogle,

@@ -53,7 +53,7 @@
               <div>Type</div>
           </div>
           <div class="body">
-              <div v-for="(die, index) in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
+              <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
                   <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
                   <div>{{die.rarity}}</div>
                   <div>{{die.type}}</div>
@@ -97,6 +97,7 @@ export default {
               },
             ],
             dice: [],
+            filteredDice: [],
             speciesFilter: 'Amazon',
             editionFilter: null,
             editions: [],

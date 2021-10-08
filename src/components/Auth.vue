@@ -1,5 +1,5 @@
 <template>
-  <div class="verify">
+  <div v-if="$route.query.mode === 'signIn'" class="verify">
     <h1>Time to verify!</h1>
     <div v-if="hasError" class="error">Please make sure your email is correct!</div>
     <div class="verify-form">
@@ -20,7 +20,7 @@ import {mapActions} from 'vuex';
 import 'es6-promise/auto';
 
 export default {
-    name: 'Verify',
+    name: 'Auth',
     data() {
         return {
             hasError: false,
@@ -32,7 +32,8 @@ export default {
             const email = document.getElementById('email').value;
             let that = this;
 
-            verifyEmailwithLink(email).then(function() {
+            const actionCode = this.$route.query.oobCode;
+            verifyEmailwithLink(email, actionCode).then(function() {
                 that.hasError = false;
                 that.$router.push('/signin');
             }).catch( function (e) {

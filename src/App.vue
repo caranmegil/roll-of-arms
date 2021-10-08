@@ -37,7 +37,6 @@ import 'es6-promise/auto';
 import {
   signIntoGoogle,
   signOutOfGoogle,
-  // isVerifyEmailWithLink,
 } from '@/firebase';
 
 export default {
@@ -49,25 +48,13 @@ export default {
   },
   components: {
   },
-  mounted() {
-    this.$router.beforeEach( async (to, from, next) => {
-      const credentials = this.$store.state.credentials;
+  async mounted() {
+    const credentials = this.$store.state.credentials;
 
-      if ( this.$store.state.user == null && credentials && credentials.email ) {
-        let user = await signIntoGoogle(credentials.email, credentials.password);
-        this.setUser(user);
-      }
-
-      if (to.meta.requiresAuth) {
-        if(this.$store.state.user != null) {
-          next();
-        } else {
-          next({ path: '/signin'});
-        }
-      } else {
-        next();
-      }
-    });
+    if ( this.$store.state.user == null && credentials && credentials.email ) {
+      let user = await signIntoGoogle(credentials.email, credentials.password);
+      this.setUser(user);
+    }
 
     this.isLoaded = true;
   },
