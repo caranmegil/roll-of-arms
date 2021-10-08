@@ -33,7 +33,8 @@ export default {
       let profilesArray = {};
 
       for(let key in profiles) {
-        const profile = profiles[key];
+        let profile = profiles[key];
+        profile.uid = key;
 
         if (profile != null && profile.geolocation != null) {
           const locKey = `${profile.geolocation}`;
@@ -52,7 +53,7 @@ export default {
 
         profiles.sort((a,b) => a.name.localeCompare(b.name));
 
-        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? currentValue.name : `${previousValue}, ${currentValue.name}`,  null)
+        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? currentValue.name : `${previousValue}, <a href="./profile/${currentValue.uid}/"/>${currentValue.name}</a>`,  null)
 
         L.marker(geolocation).addTo(map)
             .bindPopup(names)
