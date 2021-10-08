@@ -23,6 +23,17 @@ const db = getDatabase(app);
 
 
 // generic collection actions
+const saveCollectionByField = async (collectionName, fieldName, data) => {
+    try {
+        auth = getAuth();
+        const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
+        const result = await set(collectionNameUserRef, data);
+        return await result.then(() => true ).catch(() => false)
+    } catch (e) {
+        return false;
+    }
+};
+
 const saveCollection = async (collectionName, data) => {
     try {
         auth = getAuth();
@@ -173,6 +184,7 @@ export {
   analytics,
   getCurrentUser,
   saveCollection,
+  saveCollectionByField,
   getCollection,
   getCollectionByField,
   getEntireCollection,

@@ -1,11 +1,15 @@
 <template>
   <div v-if="$route.query.mode === 'signIn'" class="verify">
     <h1>Time to verify!</h1>
-    <div v-if="hasError" class="error">Please make sure your email is correct!</div>
+    <div v-if="hasError" class="error">Please make sure your email and username are correct!</div>
     <div class="verify-form">
         <div class="element">
+            <label for="username">username</label>
+            <input id="username" v-model="username" type="text"/>
+        </div>
+        <div class="element">
             <label for="email">email</label>
-            <input id="email" type="text"/>
+            <input id="email" v-model="email" type="text"/>
         </div>
         <button @click="verify">Verify</button>
     </div>
@@ -14,7 +18,10 @@
 
 <script>
 import {
-  verifyEmailwithLink,
+    getEntireCollection,
+    getCurrentUser,
+    saveCollectionByField,
+    verifyEmailwithLink,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -23,23 +30,31 @@ export default {
     name: 'Auth',
     data() {
         return {
+            username: null,
+            email: null,
             hasError: false,
         }
     },
     methods: {
         ...mapActions(['setUser']),
-        verify: function() {
-            const email = document.getElementById('email').value;
+        verify: async function() {
             let that = this;
-
             const actionCode = this.$route.query.oobCode;
-            verifyEmailwithLink(email, actionCode).then(function() {
-                that.hasError = false;
-                that.$router.push('/signin');
-            }).catch( function (e) {
+            const usernames = await getEntireCollection('usernames');
+            if (!usernames[that.username]) {
+                verifyEmailwithLink(that.email, actionCode).then(function() {
+                    const user = getCurrentUser();
+                    that.setUser(user);
+                    saveCollectionByField('usernames', that.username, user.uid);
+                    that.hasError = false;
+                    that.$router.push('/');
+                }).catch( function (e) {
+                    that.hasError = true;
+                    console.error('There was an exception while verifying email!', e);
+                });
+            } else {
                 that.hasError = true;
-                console.error('There was an exception while verifying email!', e);
-            });
+            }
         },
     },
 }

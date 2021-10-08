@@ -168,9 +168,17 @@ export default {
         },
         changeAmount(index, evt) {
           const amount = parseInt(evt.target.value);
-          if (!isNaN(amount) && this.dice[index]) {
-            this.dice[index].amount = amount;
-            this.dice = this.dice.filter(die => die.amount > 0);
+
+          if (!isNaN(amount) && this.filteredDice[index]) {
+            let newDie = this.filteredDice[index];
+            newDie.amount = amount;
+            this.dice = this.dice.map(die => {
+              if (die.species === newDie.species && die.edition === newDie.edition) {
+                return newDie;
+              }
+
+              return die;
+            }).filter(die => die.amount > 0);
             saveCollection('collections', this.dice);
             this.setSpeciesFilter();
           }

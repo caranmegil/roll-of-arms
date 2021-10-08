@@ -9,14 +9,22 @@
 import L from 'leaflet';
 import { getCollection, getEntireCollection } from '@/firebase';
 import 'es6-promise/auto';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'Main',
   props: {
   },
   methods: {
+    ...mapActions(['setCredentials'])
   },
   async mounted() {
+    // Find if there is this weird state happening
+    // If so, kill the credentials and go to sign-in page.
+    if (this.$store.state.user == null) {
+      this.setCredentials({});
+      this.$router.push('/signin');
+    }
     const profile = await getCollection('profiles');
 
     if ( profile != null && profile.geolocation != null ) {
@@ -30,6 +38,7 @@ export default {
       }).addTo(map);
 
       const profiles = await getEntireCollection('profiles');
+      const usernames = await getEntireCollection('usernames');
       let profilesArray = {};
 
       for(let key in profiles) {
@@ -37,6 +46,12 @@ export default {
         profile.uid = key;
 
         if (profile != null && profile.geolocation != null) {
+          for (let userNameKey in usernames) {
+            if (usernames[userNameKey] === key) {
+              profile.username = userNameKey;
+              break;
+            }
+          }
           const locKey = `${profile.geolocation}`;
 
           if (profilesArray[locKey] === undefined) {
@@ -53,7 +68,7 @@ export default {
 
         profiles.sort((a,b) => a.name.localeCompare(b.name));
 
-        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.uid}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.uid}/" target="_blank"/>${currentValue.name}</a>`,  null)
+        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`,  null)
 
         L.marker(geolocation).addTo(map)
             .bindPopup(names)

@@ -66,6 +66,7 @@
 <script>
 import {
   getCollectionByField,
+  getEntireCollection,
 } from '@/firebase';
 import 'es6-promise/auto';
 
@@ -128,8 +129,10 @@ export default {
     }
   },
   async mounted() {
-    this.profile = await getCollectionByField('profiles', this.$route.params.id) || {};
-    this.dice = await getCollectionByField('collections', this.$route.params.id) || [];
+    const usernames = await getEntireCollection('usernames');
+    const uid = usernames[this.$route.params.id];
+    this.profile = await getCollectionByField('profiles', uid) || {};
+    this.dice = await getCollectionByField('collections', uid) || [];
     this.setSpeciesFilter();
   },
 }
