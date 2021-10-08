@@ -53,7 +53,7 @@ export default {
 
         profiles.sort((a,b) => a.name.localeCompare(b.name));
 
-        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? currentValue.name : `${previousValue}, <a href="./profile/${currentValue.uid}/"/>${currentValue.name}</a>`,  null)
+        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.uid}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.uid}/" target="_blank"/>${currentValue.name}</a>`,  null)
 
         L.marker(geolocation).addTo(map)
             .bindPopup(names)
