@@ -8,6 +8,8 @@ import VueTour from 'v3-tour';
 
 import 'v3-tour/dist/vue-tour.css';
 
+import { signIntoGoogle } from '@/firebase';
+
 import App from './App.vue'
 
 import Main from './components/Main.vue';
@@ -37,10 +39,12 @@ const router = createRouter( {
     routes,
 });
 
-router.beforeEach( (to, from, next) => {
+router.beforeEach( async (to, from, next) => {
 
-    if (to.meta && to.meta.requiresAuth) {
-        if(store.state.user != null) {
+    if (to.meta && to.meta.requiresAuth && store.state.credentials.email !== undefined) {
+        const user = await signIntoGoogle(store.state.credentials.email, store.state.credentials.password);
+        store._actions.setUser[0](user);
+        if(user != null) {
             next();
         } else {
             next({ path: '/signin'});
