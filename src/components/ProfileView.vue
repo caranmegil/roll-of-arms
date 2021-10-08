@@ -1,7 +1,7 @@
 <template>
     <div class="collections">
       <h1>Profile for {{(profile != null) ? profile.name : ''}}</h1>
-      <h1>Collection Manager</h1>
+      <h1>Their Collection</h1>
       <span id="filters">
         <div class="element">
             <label for="speciesFilter">Species</label>

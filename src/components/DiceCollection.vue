@@ -167,10 +167,12 @@ export default {
           this.$router.push('/dicebrowser');
         },
         changeAmount(index, evt) {
-          if (evt.target.value !== '') {
-            this.dice[index].amount = evt.target.value;
+          const amount = parseInt(evt.target.value);
+          if (!isNaN(amount) && this.dice[index]) {
+            this.dice[index].amount = amount;
             this.dice = this.dice.filter(die => die.amount > 0);
             saveCollection('collections', this.dice);
+            this.setSpeciesFilter();
           }
         },
         setCurrentDie(die) {
