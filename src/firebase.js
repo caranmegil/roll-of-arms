@@ -9,6 +9,7 @@ import {
     sendSignInLinkToEmail,
     isSignInWithEmailLink,
     signInWithEmailLink,
+    confirmPasswordReset,
 } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 
@@ -117,6 +118,17 @@ const createUserInGoogle = async (email, password) => {
     }
 };
 
+const confirmPassword = async (authCode, password) => {
+    try {
+        const auth = getAuth();
+        await confirmPasswordReset(auth, authCode, password);
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+};
+
 const signIntoGoogle = async (email, password) => {
     try {
         auth = getAuth();
@@ -182,6 +194,7 @@ const getCurrentUser = () => {
 export {
   app,
   analytics,
+  confirmPassword,
   getCurrentUser,
   saveCollection,
   saveCollectionByField,

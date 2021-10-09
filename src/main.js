@@ -60,7 +60,6 @@ const store = createStore({
         return {
             user: null,
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
-            isProfileMenuOpen: false,
             collectionDie: null,
         };
     },
@@ -71,9 +70,6 @@ const store = createStore({
         setCredentials(state, credentials) {
             state.credentials = credentials;
             localStorage.setItem('credentials', JSON.stringify(credentials))
-        },
-        setProfileMenuState(state, isOpen) {
-            state.isProfileMenuOpen = isOpen;
         },
         setCollectionDie(state, collectionDie) {
             state.collectionDie = collectionDie;
@@ -91,9 +87,6 @@ const store = createStore({
         },
         setCredentials({ commit }, credentials) {
             commit('setCredentials', credentials);
-        },
-        setProfileMenuState({ commit }, isOpen) {
-            commit('setProfileMenuState', isOpen);
         },
         setCollectionDie({ commit }, collectionDie) {
             commit('setCollectionDie', collectionDie);

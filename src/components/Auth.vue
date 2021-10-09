@@ -14,10 +14,26 @@
         <button @click="verify">Verify</button>
     </div>
   </div>
+  <div v-if="$route.query.mode === 'resetPassword'" class="verify">
+    <h1>Time to verify!</h1>
+    <div v-if="hasPasswordMismatch" class="error">Please make sure your passwords match!</div>
+    <div class="verify-form">
+        <div class="element">
+            <label for="password">password</label>
+            <input id="password" v-model="password" type="password"/>
+        </div>
+        <div class="element">
+            <label for="retype-password">Re-type password</label>
+            <input id="retype-password" v-model="password2" type="password"/>
+        </div>
+        <button @click="resetPassword">Reset</button>
+    </div>
+  </div>
 </template>
 
 <script>
 import {
+    confirmPassword,
     getEntireCollection,
     getCurrentUser,
     saveCollectionByField,
@@ -30,13 +46,30 @@ export default {
     name: 'Auth',
     data() {
         return {
+            password: null,
+            password2: null,
             username: null,
             email: null,
             hasError: false,
+            hasPasswordMismatch: false,
         }
     },
     methods: {
         ...mapActions(['setUser']),
+        resetPassword: async function() {
+            if (this.password === this.password2) {
+                this.hasPasswordMismatch = false;
+
+                if(await confirmPassword(this.$route.query.oobCode, this.password)) {
+                    this.$router.push('/signin');
+                    this.hasError = false;
+                } else {
+                    this.hasError = true;
+                }
+            } else {
+                this.hasPasswordMismatch = true;
+            }
+        },
         verify: async function() {
             let that = this;
             const actionCode = this.$route.query.oobCode;
