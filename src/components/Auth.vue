@@ -74,7 +74,7 @@ export default {
             let that = this;
             const actionCode = this.$route.query.oobCode;
             const usernames = await getEntireCollection('usernames');
-            if (!usernames[that.username]) {
+            if ( (that.username !== '' || that.username != null) && !usernames[that.username]) {
                 verifyEmailwithLink(that.email, actionCode).then(function() {
                     const user = getCurrentUser();
                     that.setUser(user);

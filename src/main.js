@@ -61,6 +61,7 @@ const store = createStore({
             user: null,
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             collectionDie: null,
+            filters: {species: 'Amazon', edition: '-'}
         };
     },
     mutations: {
@@ -74,10 +75,14 @@ const store = createStore({
         setCollectionDie(state, collectionDie) {
             state.collectionDie = collectionDie;
         },
+        setFilters(state, filters) {
+            state.filters = filters;
+        },
         signOut(state) {
             state.isProfileMenuOpen = false;
             state.user = null;
             state.credentials = {}
+            state.filters = {species: 'Amazon', edition: '-'}
             localStorage.setItem('credentials', JSON.stringify({}));
         },
     },
@@ -90,6 +95,9 @@ const store = createStore({
         },
         setCollectionDie({ commit }, collectionDie) {
             commit('setCollectionDie', collectionDie);
+        },
+        setFilters({ commit }, filters) {
+            commit('setFilters', filters);
         },
         signOut({ commit }) {
             commit('signOut');

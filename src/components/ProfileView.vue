@@ -2,58 +2,19 @@
     <div class="collections">
       <h1>Profile for {{(profile != null) ? profile.name : ''}}</h1>
       <h1>Their Collection</h1>
-      <span id="filters">
-        <div class="element">
-            <label for="speciesFilter">Species</label>
-            <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
-                <option value="Amazon">Amazons</option>
-                <option value="Coral Elf">Coral Elves</option>
-                <option value="Dracolem">Dracolem</option>
-                <option value="Dragon">Dragons</option>
-                <option value="Dragonkin">Dragonkin</option>
-                <option value="Dwarf">Dwarves</option>
-                <option value="Eldarim">Eldarim</option>
-                <option value="Eldarim, Black">Eldarim, Black</option>
-                <option value="Eldarim, Blue">Eldarim, Blue</option>
-                <option value="Eldarim, Green">Eldarim, Green</option>
-                <option value="Eldarim, Gold">Eldarim, Gold</option>
-                <option value="Eldarim, Red<">Eldarim, Red</option>
-                <option value="Frostwings">Frostwings</option>
-                <option value="Ferals">Ferals</option>
-                <option value="Firewalkers">Firewalkers</option>
-                <option value="Goblins">Goblins</option>
-                <option value="Item">Item</option>
-                <option value="Lava Elves">Lava Elves</option>
-                <option value="Medallion">Medallion</option>
-                <option value="Minor Terrain">Minor Terrain</option>
-                <option value="Relic">Relic</option>
-                <option value="Royalty">Royalty</option>
-                <option value="Scalders">Scalders</option>
-                <option value="Swamp Stalkers">Swamp Stalkers</option>
-                <option value="Terrain">Terrain</option>
-                <option value="Treefolk">Treefolk</option>
-                <option value="Undead">Undead</option>
-            </select>
-        </div>
-        <div class="element">
-            <label for="editionFilter">Edition</label>
-            <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
-                <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
-            </select>
-        </div>
-      </span>
-
-      <div class="separator"></div>
 
       <div id="dice">
           <div class="header">
               <div>ID</div>
+              <div>Edition</div>
               <div>Rarity</div>
               <div>Type</div>
+              <div></div>
           </div>
           <div class="body">
-              <div v-for="die in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
+              <div v-for="die in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
                   <div class="die-id"><img :src="'../../images/dice/' + die.id"/><div>{{die.name}}</div></div>
+                  <div>{{die.edition}}</div>
                   <div>{{die.rarity}}</div>
                   <div>{{die.type}}</div>
                   <div>{{die.amount}}</div>
@@ -78,40 +39,6 @@ export default {
     return {
       profile: null,
       dice: [],
-      filteredDice: [],
-      speciesFilter: 'Amazon',
-      editionFilter: null,
-      editions: [],
-      menu: {
-        'Amazon': ['-', 'Reprint', 'Alt-Ink'],
-        'Coral Elf': ['-'],
-        'Dwarf': ['-'],
-        'Frostwings': ['-', 'Reprint', 'Alt-Ink', 'Promos'],
-        'Ferals': ['-', 'Alt-Ink'],
-        'Firewalkers': ['-'],
-        'Goblins': ['-'],
-        'Lava Elves': ['-'],
-        'Scalders': ['-', 'Reprint', 'Promos'],
-        'Swamp Stalkers': ['-', 'Dark', 'Alt-Ink', 'Purple-Ink'],
-        'Treefolk': ['-'],
-        'Undead': ['-'],
-        'Eldarim': ['-'],
-        'Eldarim, Black': ['-'],
-        'Eldarim, Blue': ['-'],
-        'Eldarim, Green': ['-'],
-        'Eldarim, Gold': ['-'],
-        'Eldarim, Red': ['-'],
-        'Dragon': ['-'],
-        'Dragonkin': ['-'],
-        'Medallion': ['-'],
-        'Item': ['-'],
-        'Royalty': ['-'],
-        'Dracolem': ['-'],
-        'Relic': ['-'],
-        'Terrain': ['-'],
-        'Minor Terrain': ['-']
-      },
-
     };
   },
   methods: {
@@ -133,7 +60,14 @@ export default {
     const uid = usernames[this.$route.params.id];
     this.profile = await getCollectionByField('profiles', uid) || {};
     this.dice = await getCollectionByField('collections', uid) || [];
-    this.setSpeciesFilter();
+    this.dice.sort((a,b) => {
+      let result = a.name.localeCompare(b.name);
+      if (result == 0) {
+        return a.edition.localeCompare(b.edition);
+      }
+
+      return result;
+    });
   },
 }
 </script>

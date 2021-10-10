@@ -138,10 +138,16 @@ export default {
       }
 
       this.dice = await getEntireCollection('dice');
-      this.setSpeciesFilter();
+
+      this.speciesFilter = this.$store.state.filters.species;
+      this.editionFilter = this.$store.state.filters.edition;
+      
+      let that = this;
+      this.editions = this.menu[this.speciesFilter];
+      this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
     },
     methods: {
-        ...mapActions(['setCollectionDie']),
+        ...mapActions(['setCollectionDie', 'setFilters']),
         setCurrentDie(die) {
           die.amount = 1;
           this.setCollectionDie(die);
@@ -159,6 +165,7 @@ export default {
         },
         setEditionFilter: function() {
             let that = this;
+            this.setFilters({species: this.speciesFilter, edition: this.editionFilter});
             this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
         },
     },

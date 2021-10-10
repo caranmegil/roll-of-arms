@@ -58,6 +58,7 @@ export default {
     for(let key in profiles) {
       let profile = profiles[key];
       profile.uid = key;
+      console.log(profile);
 
       if (profile != null && profile.geolocation != null) {
         for (let userNameKey in usernames) {

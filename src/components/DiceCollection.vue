@@ -156,13 +156,19 @@ export default {
         saveCollection('collections', this.dice);
         this.setCurrentDie(null);
       }
-      this.setSpeciesFilter();
+
+      this.speciesFilter = this.$store.state.filters.species;
+      this.editionFilter = this.$store.state.filters.edition;
+      
+      let that = this;
+      this.editions = this.menu[this.speciesFilter];
+      this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
     },
     unmounted() {
       this.setCollectionDie(null);
     },
     methods: {
-        ...mapActions(['setCollectionDie']),
+        ...mapActions(['setCollectionDie', 'setFilters']),
         browseDice() {
           this.$router.push('/dicebrowser');
         },
@@ -173,14 +179,13 @@ export default {
             let newDie = this.filteredDice[index];
             newDie.amount = amount;
             this.dice = this.dice.map(die => {
-              if (die.species === newDie.species && die.edition === newDie.edition) {
+              if (die.species === newDie.species && die.edition === newDie.edition && die.name === newDie.name) {
                 return newDie;
               }
 
               return die;
             }).filter(die => die.amount > 0);
             saveCollection('collections', this.dice);
-            this.setSpeciesFilter();
           }
         },
         setCurrentDie(die) {
@@ -198,7 +203,9 @@ export default {
         },
         setEditionFilter: function() {
             let that = this;
+            this.setFilters({species: this.speciesFilter, edition: this.editionFilter});
             this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+            this.filteredDice.sort( (a, b) => a.name.localeCompare(b.name) );
         },
     },
 };
