@@ -4,16 +4,16 @@
     ".read": false,
     "profiles": {
       ".read": true,
-    	".write": "auth.uid != null && newData.exists() && newData.child(auth.uid).exists()",
+    	".write": "auth.uid != null && newData.exists()",
       "$user_id": {
-        ".write": "auth.uid != null && $user_id == auth.uid && newData.exists() && newData.child('name').exists()"
+        ".write": "auth.uid != null && $user_id == auth.uid && newData.exists()"
       }
     },
     "collections": {
       ".read": true,
     	".write": "auth.uid != null && newData.exists() && newData.child(auth.uid).exists()",
       "$user_id": {
-        ".write": "auth.uid != null && $user_id === auth.uid && newData.exists()"
+        ".write": "auth.uid != null && $user_id === auth.uid"
       }
     },
     "dice": {

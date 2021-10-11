@@ -57,7 +57,7 @@
                   <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
                   <div>{{die.rarity}}</div>
                   <div>{{die.type}}</div>
-                  <div><input type="number" @keyup="(evt) => changeAmount(index, evt)" :value="die.amount"></div>
+                  <div><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
               </div>
           </div>
       </div>
@@ -179,12 +179,10 @@ export default {
         browseDice() {
           this.$router.push('/dicebrowser');
         },
-        changeAmount(index, evt) {
-          const amount = parseInt(evt.target.value);
-
-          if (!isNaN(amount) && this.filteredDice[index]) {
+        changeAmount(index) {
+          console.log(this.filteredDice[index])
+          if (this.filteredDice[index]&& !isNaN(this.filteredDice[index].amount)) {
             let newDie = this.filteredDice[index];
-            newDie.amount = amount;
             this.dice = this.dice.map(die => {
               if (die.species === newDie.species && die.edition === newDie.edition && die.name === newDie.name) {
                 return newDie;
