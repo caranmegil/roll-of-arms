@@ -24,12 +24,13 @@
 </template>
 
 <script>
-import {signIntoGoogle} from '@/firebase';
+import {
+  getCollection,
+  getEntireCollection,
+  signIntoGoogle
+} from '@/firebase';
 import {mapActions} from 'vuex';
 import L from 'leaflet';
-import {
-  getEntireCollection,
-} from '@/firebase';
 import 'es6-promise/auto';
 
 export default {
@@ -38,70 +39,85 @@ export default {
   },
   data() {
       return {
+          map: null,
           hasError: false,
       }
   },
   async mounted() {
-    let map = L.map('map', { preferCanvas: false });
-
-    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-        id: 'mapbox/streets-v11',
-        tileSize: 256,
-        accessToken: 'pk.eyJ1IjoiY2FyYW5tZWdpbCIsImEiOiJja3VhazE5dXEwaGl0MndxcGdhY3pyd2ZoIn0.-ViWEiOeeUvL2Tnj4gH2Hg',
-    }).addTo(map);
-
-    const profiles = await getEntireCollection('profiles');
-    const usernames = await getEntireCollection('usernames');
-    let profilesArray = {};
-
-    for(let key in profiles) {
-      let profile = profiles[key];
-      profile.uid = key;
-
-      if (profile != null && profile.geolocation != null) {
-        for (let userNameKey in usernames) {
-          if (usernames[userNameKey] === key) {
-            profile.username = userNameKey;
-            break;
-          }
-          profile.username=key;
-        }
-        const locKey = `${profile.geolocation}`;
-
-        if (profilesArray[locKey] === undefined) {
-          profilesArray[locKey] = [profile]
-        } else {
-          profilesArray[locKey].push(profile);
-        }
-      }
-    }
-
-    for(let key in profilesArray) {
-      const profiles = profilesArray[key];
-      const geolocation = profiles[0].geolocation;
-
-      profiles.sort((a,b) => a.name.localeCompare(b.name));
-
-      const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`,  null)
-
-      L.marker(geolocation).addTo(map)
-          .bindPopup(names)
-          .openPopup();
-    }
-
-    if (navigator.geolocation) { 
-      navigator.geolocation.getCurrentPosition((position) => {
-        map.setView([position.coords.latitude, position.coords.longitude], 13);
-      }, () => {
-        map.setView([33.69702810000002, -84.3251817], 13);
-      });
-    } else {
-        map.setView([33.69702810000002, -84.3251817], 13);
-    }
+    this.map = L.map('map', { preferCanvas: false });
+    this.loadMap();
   },
   methods: {
     ...mapActions(['setUser', 'setCredentials']),
+    async loadMap() {
+      let that = this;
+      this.profile = await getCollection('profiles') || {name: '', location: ''};
+
+      L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+          id: 'mapbox/streets-v11',
+          tileSize: 256,
+          accessToken: 'pk.eyJ1IjoiY2FyYW5tZWdpbCIsImEiOiJja3VhazE5dXEwaGl0MndxcGdhY3pyd2ZoIn0.-ViWEiOeeUvL2Tnj4gH2Hg',
+      }).addTo(this.map);
+
+      const profiles = await getEntireCollection('profiles');
+      const usernames = await getEntireCollection('usernames');
+      let profilesArray = {};
+
+      for(let key in profiles) {
+        let profile = profiles[key];
+        profile.uid = key;
+
+        if (profile != null && profile.geolocation != null) {
+          for (let userNameKey in usernames) {
+            if (usernames[userNameKey] === key) {
+              profile.username = userNameKey;
+              break;
+            }
+            profile.username=key;
+          }
+          const locKey = `${profile.geolocation}`;
+
+          if (profilesArray[locKey] === undefined) {
+            profilesArray[locKey] = [profile]
+          } else {
+            profilesArray[locKey].push(profile);
+          }
+        }
+      }
+
+      for(let key in profilesArray) {
+        const profiles = profilesArray[key];
+        const geolocation = profiles[0].geolocation;
+
+        profiles.sort((a,b) => a.name.localeCompare(b.name));
+
+        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`,  null)
+
+        L.marker(geolocation).addTo(this.map)
+            .bindPopup(names)
+            .openPopup();
+      }
+
+
+      const defaultPosition = () => {
+        that.map.setView([33.69702810000002, -84.3251817], 13)
+      }
+
+      if (this.profile && this.profile.geolocation) {
+        this.map.setView(this.profile.geolocation, 13);
+      } else {
+        if (navigator.geolocation) { 
+          navigator.geolocation.getCurrentPosition((position) => {
+            that.map.setView([position.coords.latitude, position.coords.longitude], 13);
+          }, () => {
+            defaultPosition();
+          });
+        } else if (this.profile && this.profile.geolocation) {
+          defaultPosition();
+        }
+      }
+    },
     signIn: async function() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
