@@ -195,6 +195,8 @@ button {
     grid-column: 1;
     align-self: center;
     justify-self: start;
+    padding-left: .05em;
+    padding-right: 1.5em;
 }
 
 .roll-of-arms-body > header > .title-bar-banner {

@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <h1>Welcome, kindly Dragon Dicer!</h1>
-    <section class="welcome-msg">This is the Roll of Arms for the game <a href="https://www.dragondice.com">Dragon Dice <sup>TM</sup></a> by <a href="https://sfr-inc.com">SFR, Inc.</a>  It is a magnificent system for player and collection management with many more features to come!</section>
+    <section class="welcome-msg">This is the Roll of Arms for the game <a href="https://www.dragondice.com">Dragon Dice <sup>TM</sup></a> by <a href="https://sfr-inc.com">SFR, Inc.</a>  It is a magnificent system for player and collection management with many more features to come!  Locate us on <a href="https://discord.gg/bn2ZAh9Y">Discord</a> for exciting games!</section>
     <div v-if="hasError" class="error">Please make sure your email and password are correct!</div>
     <div class="login-form">
         <div class="element">
@@ -58,7 +58,6 @@ export default {
     for(let key in profiles) {
       let profile = profiles[key];
       profile.uid = key;
-      console.log(profile);
 
       if (profile != null && profile.geolocation != null) {
         for (let userNameKey in usernames) {
@@ -66,6 +65,7 @@ export default {
             profile.username = userNameKey;
             break;
           }
+          profile.username=key;
         }
         const locKey = `${profile.geolocation}`;
 
@@ -190,5 +190,5 @@ export default {
         color: red;
     }
 
-    #map { height: 50vh; width: 100%; }
+    #map { height: 30vh; width: 100%; }
 </style>

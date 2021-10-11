@@ -2,7 +2,7 @@
     <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
       <h1>Collection Manager</h1>
-      <button @click="browseDice">Locate</button>
+      <button id="locate" @click="browseDice">Locate</button>
       <span id="filters">
         <div class="element">
             <label for="speciesFilter">Species</label>
@@ -86,13 +86,20 @@ export default {
                 content: 'Set your species and edition filters here.',
               },
               {
+                target: '#locate',
+                header: {
+                  title: 'Locate Die!',
+                },
+                content: 'Press this button to locate dice to add using the dice browser.',
+              },
+              {
                 target: '.body',
                 header: {
                   title: 'The Dice!',
                 },
                 content: 'Scroll through this list and locate the die you want and modify your collection.  Changing the amount to 0 removes it.',
                 params: {
-                  placement: 'left-start',
+                  placement: 'auto',
                 },
               },
             ],

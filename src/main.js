@@ -79,7 +79,6 @@ const store = createStore({
             state.filters = filters;
         },
         signOut(state) {
-            state.isProfileMenuOpen = false;
             state.user = null;
             state.credentials = {}
             state.filters = {species: 'Amazon', edition: '-'}

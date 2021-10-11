@@ -1,7 +1,6 @@
 <template>
   <div class="main">
     <div class="profiles">
-        <h1>Change your profile</h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
         <div class="element">
             <label for="name">Name</label>
@@ -14,7 +13,7 @@
         <button @click="save">Save!</button>
     </div>
 
-    <h2>Use the map below to find players in your area!</h2>
+    <div class="heading">Use the map below to find players in your area and connect on <a href="https://discord.gg/bn2ZAh9Y">Discord</a>!</div>
     <div id="map"></div>
   </div>
 </template>
@@ -101,6 +100,7 @@ export default {
             profile.username = userNameKey;
             break;
           }
+          profile.username=key;
         }
         const locKey = `${profile.geolocation}`;
 
@@ -148,8 +148,6 @@ export default {
 </script>
 
 <style scoped>
-  #map { height: 70vh; width: 100%; }
-
     .profiles {
     display: grid;
     grid-auto-flow: row;
@@ -182,4 +180,8 @@ export default {
       justify-self: center;
       color: red;
   }
+
+  .heading { font-weight: bold; }
+
+  #map { height: 70vh; width: 100%; }
 </style>

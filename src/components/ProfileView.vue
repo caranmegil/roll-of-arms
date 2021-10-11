@@ -57,7 +57,7 @@ export default {
   },
   async mounted() {
     const usernames = await getEntireCollection('usernames');
-    const uid = usernames[this.$route.params.id];
+    const uid = usernames[this.$route.params.id] || this.$route.params.id;
     this.profile = await getCollectionByField('profiles', uid) || {};
     this.dice = await getCollectionByField('collections', uid) || [];
     this.dice.sort((a,b) => {

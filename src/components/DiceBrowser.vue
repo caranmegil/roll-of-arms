@@ -91,7 +91,7 @@ export default {
                 },
                 content: 'Scroll through this list and locate the die you want to add to your collection and select the "+" to add.',
                 params: {
-                  placement: 'left-start',
+                  placement: 'auto',
                 },
               },
             ],
