@@ -73,7 +73,7 @@ export default {
     editCollection: function () {
       let menuElem = document.getElementById('menu');
       menuElem.style.display = 'none';
-      this.$router.push('/collection');
+      this.$router.push('/armylists');
     },
     openDiceBrowser: function () {
       let menuElem = document.getElementById('menu');

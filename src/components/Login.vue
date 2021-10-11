@@ -18,24 +18,25 @@
             <a @click="register">Registration</a> <a @click="forgotPassword">Forgot Password</a>
         </div>
     </div>
-    <h2>Use the map below to find players in your area!</h2>
-    <div id="map"></div>
+    <div class="heading">Use the map below to find players in your area!</div>
+    <Map/>
   </div>
 </template>
 
 <script>
 import {
-  getCollection,
-  getEntireCollection,
   signIntoGoogle
 } from '@/firebase';
 import {mapActions} from 'vuex';
-import L from 'leaflet';
 import 'es6-promise/auto';
+import Map from './Map.vue';
 
 export default {
   name: 'Login',
   props: {
+  },
+  components: {
+    Map
   },
   data() {
       return {
@@ -44,80 +45,9 @@ export default {
       }
   },
   async mounted() {
-    this.map = L.map('map', { preferCanvas: false });
-    this.loadMap();
   },
   methods: {
     ...mapActions(['setUser', 'setCredentials']),
-    async loadMap() {
-      let that = this;
-      this.profile = await getCollection('profiles') || {name: '', location: ''};
-
-      L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-          attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-          id: 'mapbox/streets-v11',
-          tileSize: 256,
-          accessToken: 'pk.eyJ1IjoiY2FyYW5tZWdpbCIsImEiOiJja3VhazE5dXEwaGl0MndxcGdhY3pyd2ZoIn0.-ViWEiOeeUvL2Tnj4gH2Hg',
-      }).addTo(this.map);
-
-      const profiles = await getEntireCollection('profiles');
-      const usernames = await getEntireCollection('usernames');
-      let profilesArray = {};
-
-      for(let key in profiles) {
-        let profile = profiles[key];
-        profile.uid = key;
-
-        if (profile != null && profile.geolocation != null) {
-          for (let userNameKey in usernames) {
-            if (usernames[userNameKey] === key) {
-              profile.username = userNameKey;
-              break;
-            }
-            profile.username=key;
-          }
-          const locKey = `${profile.geolocation}`;
-
-          if (profilesArray[locKey] === undefined) {
-            profilesArray[locKey] = [profile]
-          } else {
-            profilesArray[locKey].push(profile);
-          }
-        }
-      }
-
-      for(let key in profilesArray) {
-        const profiles = profilesArray[key];
-        const geolocation = profiles[0].geolocation;
-
-        profiles.sort((a,b) => a.name.localeCompare(b.name));
-
-        const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`,  null)
-
-        L.marker(geolocation).addTo(this.map)
-            .bindPopup(names)
-            .openPopup();
-      }
-
-
-      const defaultPosition = () => {
-        that.map.setView([33.69702810000002, -84.3251817], 13)
-      }
-
-      if (this.profile && this.profile.geolocation) {
-        this.map.setView(this.profile.geolocation, 13);
-      } else {
-        if (navigator.geolocation) { 
-          navigator.geolocation.getCurrentPosition((position) => {
-            that.map.setView([position.coords.latitude, position.coords.longitude], 13);
-          }, () => {
-            defaultPosition();
-          });
-        } else if (this.profile && this.profile.geolocation) {
-          defaultPosition();
-        }
-      }
-    },
     signIn: async function() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -143,68 +73,73 @@ export default {
 </script>
 
 <style scoped>
-    .login {
-        display: grid;
-        grid-auto-flow: row;
-        grid-template-columns: auto;
-        gap: .5em;
-    }
+  .heading {
+    font-weight: bold;
+  }
 
-    .login h1 {
-        align-self: center;
-        justify-self: center;
-    }
+  .login {
+      display: grid;
+      grid-template-rows: auto;
+      align-content: center;
+      justify-content: center;
+      gap: .5em;
+  }
 
-    .welcome-msg {
-        align-self: center;
-        justify-self: center;
-    }
+  .login h1 {
+      align-self: center;
+      justify-self: center;
+  }
 
-    .login-form {
-        margin-top: 2em;
-        display: grid;
-        justify-self: center;
-        align-content: center;
-        justify-content: center;
-        grid-auto-flow: row;
-        gap: .5em;
-    }
+  .welcome-msg {
+      align-self: center;
+      justify-self: center;
+  }
 
-    .login-form .element {
-        align-self: center;
-        justify-self: center;
-        display: grid;
-        grid-auto-flow: column;
-        grid-template-columns: 1fr 1fr;
-    }
+  .login-form {
+      margin-top: 2em;
+      display: grid;
+      justify-self: center;
+      align-content: center;
+      justify-content: center;
+      grid-auto-flow: row;
+      gap: .5em;
+  }
 
-    .login-form .element > label {
-        font-weight: bold;
-        justify-self: start;
-        align-self: start;
-    }
+  .login-form .element {
+      align-self: center;
+      justify-self: center;
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: 1fr 1fr;
+  }
 
-    .separator {
-        border-top: 1px solid #D3D3D3;
-    }
+  .login-form .element > label {
+      font-weight: bold;
+      justify-self: start;
+      align-self: start;
+  }
 
-    .bottom-links {
-        align-items: center;
-        justify-items: center;
-        align-self: center;
-        justify-self: center;
-        margin-top: .5em;
-        display: grid;
-        grid-auto-flow: column;
-        grid-template-columns: 1fr;
-        gap: .75em;
-    }
+  .separator {
+      border-top: 1px solid #D3D3D3;
+  }
 
-    .error {
-        align-self: center;
-        justify-self: center;
-        color: red;
-    }
+  .bottom-links {
+      align-items: center;
+      justify-items: center;
+      align-self: center;
+      justify-self: center;
+      margin-top: .5em;
+      display: grid;
+      grid-auto-flow: column;
+      grid-template-columns: 1fr;
+      gap: .75em;
+  }
 
-    #map { height: 30vh; width: 100%; }
+  .error {
+      align-self: center;
+      justify-self: center;
+      color: red;
+  }
+
+  #map { height: 70vh; width: 100%; }
 </style>

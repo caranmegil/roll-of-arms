@@ -1,7 +1,7 @@
 <template>
     <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
-      <h1>Collection Manager</h1>
+      <h1>Army Lists Manager</h1>
       <button id="locate" @click="browseDice">Locate</button>
       <span id="filters">
         <div class="element">

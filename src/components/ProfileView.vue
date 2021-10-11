@@ -1,7 +1,7 @@
 <template>
     <div class="collections">
-      <h1>Profile for {{(profile != null) ? profile.name : ''}}</h1>
-      <h1>Their Collection</h1>
+      <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
+      <h1>Their Army Lists</h1>
 
       <div id="dice">
           <div class="header">
@@ -56,9 +56,20 @@ export default {
     }
   },
   async mounted() {
-    const usernames = await getEntireCollection('usernames');
+    const usernames = await getEntireCollection('usernames');    
     const uid = usernames[this.$route.params.id] || this.$route.params.id;
     this.profile = await getCollectionByField('profiles', uid) || {};
+    this.profile.displayName = this.profile.name;
+
+    if( this.profile.displayName === undefined || this.profile.displayName === '' ) {
+      for ( let key in usernames ) {
+        if (usernames[key] === uid) {
+          this.profile.displayName = key;
+          break;
+        }
+      }
+    }
+
     this.dice = await getCollectionByField('collections', uid) || [];
     this.dice.sort((a,b) => {
       let result = a.name.localeCompare(b.name);
