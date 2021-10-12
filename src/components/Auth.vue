@@ -104,7 +104,7 @@ export default {
                             case 'auth/user-disabled':
                                 that.message = 'The account is disabled.';
                                 break;
-                            case 'auth/invalid/action-code':
+                            case 'auth/invalid-action-code':
                                 that.message = 'The link you were sent is stale.';
                                 break;
                             default:
