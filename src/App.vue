@@ -32,7 +32,7 @@
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
-  signIntoGoogle,
+//  signIntoGoogle,
   signOutOfGoogle,
 } from '@/firebase';
 
@@ -46,12 +46,12 @@ export default {
   components: {
   },
   async mounted() {
-    const credentials = this.$store.state.credentials;
+//    const credentials = this.$store.state.credentials;
 
-    if ( this.$store.state.user == null && credentials && credentials.email ) {
-      let user = await signIntoGoogle(credentials.email, credentials.password);
-      this.setUser(user);
-    }
+//    if ( this.$store.state.user == null && credentials && credentials.email ) {
+//      let user = await signIntoGoogle(credentials.email, credentials.password);
+//      this.setUser(user);
+//    }
 
     this.isLoaded = true;
   },

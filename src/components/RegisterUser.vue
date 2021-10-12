@@ -3,19 +3,10 @@
     <h1>Hey, Dragon Dicer!</h1>
     <section class="welcome-msg">Time to register!</section>
     <div v-if="hasError" class="error">{{message}}</div>
-    <div v-if="hasPasswordMismatch" class="error">Please make sure the password fields are the same!</div>
     <div class="login-form">
         <div class="element">
             <label for="email">email</label>
             <input id="email" v-model="email" type="text"/>
-        </div>
-        <div class="element">
-            <label for="password">password</label>
-            <input id="password" v-model="password" type="password"/>
-        </div>
-        <div class="element">
-            <label for="retype-password">Re-type password</label>
-            <input id="retype-password" v-model="retypePassword" type="password"/>
         </div>
         <button @click="register">Register!</button>
         <div class="separator"></div>
@@ -39,42 +30,62 @@ export default {
   data() {
       return {
           email: null,
-          password: null,
-          retypePassword: null,
           hasError: false,
-          hasPasswordMismatch: false,
           message: null,
       }
   },
   methods: {
     ...mapActions(['setUser', 'setCredentials']),
+    generateSecureRandomPassword() {
+        function generatePassword(passwordLength) {
+            var numberChars = "0123456789";
+            var upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var lowerChars = "abcdefghijklmnopqrstuvwxyz";
+            var specialChars = "#?!@$%^&*-";
+            var allChars = numberChars + upperChars + lowerChars + specialChars;
+            var randPasswordArray = Array(passwordLength);
+            randPasswordArray[0] = numberChars;
+            randPasswordArray[1] = upperChars;
+            randPasswordArray[2] = lowerChars;
+            randPasswordArray[3] = specialChars;
+            randPasswordArray = randPasswordArray.fill(allChars, 4);
+            return shuffleArray(randPasswordArray.map(function(x) { return x[Math.floor(Math.random() * x.length)] })).join('');
+        }
+        
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array;
+        }
+
+        return generatePassword(15);
+    },
     back: function() {
         this.$router.go(-1);
     },
     register: async function() {
-        
-        if (this.password === this.retypePassword) {
-            this.hasPasswordMismatch = false;
+        const securePassword = this.generateSecureRandomPassword();
 
-            try {
-                if(await createUserInGoogle(this.email, this.password)) {
-                    this.$router.push('/signin');
-                    this.hasError = false;
-                } else {
-                    this.message = 'Unable to create account.';
-                    this.hasError = true;
-                }
-            } catch (e) {
-                if (e.code === 'auth/email-already-in-use') {
-                    resendEmailWithLink(this.email);
-                    this.$router.push('/signin')
-                } else {
-                    this.hasError = true;
-                    this.message = 'Please make sure the form is filled out correctly!';
-                }
+        try {
+            if(await createUserInGoogle(this.email, securePassword)) {
+                this.$router.push('/signin');
+                this.hasError = false;
+            } else {
+                this.message = 'Unable to create account.';
+                this.hasError = true;
             }
-        } else {
-            this.hasPasswordMismatch = true;
+        } catch (e) {
+            if (e.code === 'auth/email-already-in-use') {
+                resendEmailWithLink(this.email);
+                this.$router.push('/signin')
+            } else {
+                this.hasError = true;
+                this.message = 'Please make sure the form is filled out correctly!';
+            }
         }
     }
   }

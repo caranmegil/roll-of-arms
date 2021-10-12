@@ -180,7 +180,6 @@ export default {
           this.$router.push('/dicebrowser');
         },
         changeAmount(index) {
-          console.log(this.filteredDice[index])
           if (this.filteredDice[index]&& !isNaN(this.filteredDice[index].amount)) {
             let newDie = this.filteredDice[index];
             this.dice = this.dice.map(die => {

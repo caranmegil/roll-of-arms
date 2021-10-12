@@ -45,7 +45,6 @@ import {
     getEntireCollection,
     saveCollectionByField,
     verifyEmailWithLink,
-    // signOutOfGoogle,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -66,7 +65,7 @@ export default {
     methods: {
         ...mapActions(['setUser']),
         resetPassword: async function() {
-            if (this.password === this.password2) {
+            if (this.password != null && this.password.trim() && this.password === this.password2) {
                 this.hasPasswordMismatch = false;
 
                 if(await confirmPassword(this.$route.query.oobCode, this.password)) {
@@ -87,7 +86,6 @@ export default {
                 this.username = (this.username == null) ? this.username : this.username.trim() 
                 if ( this.username != null && this.username !== '' && this.username != null && !usernames[this.username] ) {
                     verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
-                        console.log(user);
                         if (saveCollectionByField('usernames', that.username, user.uid)) {
                             that.hasError = false;
                             that.$router.push('/');

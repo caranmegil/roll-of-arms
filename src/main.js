@@ -8,7 +8,7 @@ import VueTour from 'v3-tour';
 
 import 'v3-tour/dist/vue-tour.css';
 
-import { signIntoGoogle } from '@/firebase';
+//import { signIntoGoogle } from '@/firebase';
 
 import App from './App.vue'
 
@@ -41,10 +41,8 @@ const router = createRouter( {
 
 router.beforeEach( async (to, from, next) => {
 
-    if (to.meta && to.meta.requiresAuth && store.state.credentials.email !== undefined) {
-        const user = await signIntoGoogle(store.state.credentials.email, store.state.credentials.password);
-        store._actions.setUser[0](user);
-        if(user != null) {
+    if (to.meta && to.meta.requiresAuth) {
+        if(store.state.user != null) {
             next();
         } else {
             next({ path: '/signin'});
@@ -58,7 +56,7 @@ router.beforeEach( async (to, from, next) => {
 const store = createStore({
     state() {
         return {
-            user: null,
+            user: JSON.parse(localStorage.getItem('user') || null),
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             collectionDie: null,
             filters: {species: 'Amazon', edition: '-'}
@@ -66,6 +64,7 @@ const store = createStore({
     },
     mutations: {
         setUser(state, user) {
+            localStorage.setItem('user', JSON.stringify(user));
             state.user = user;
         },
         setCredentials(state, credentials) {
