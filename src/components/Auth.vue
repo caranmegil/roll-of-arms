@@ -1,7 +1,7 @@
 <template>
   <div v-if="$route.query.mode === 'signIn'" class="verify">
     <h1>Time to verify!</h1>
-    <div v-if="hasError" class="error">Please make sure your email and username are correct!</div>
+    <div v-if="hasError" class="error">{{message}}</div>
     <div class="verify-form">
         <div class="element">
             <label for="username">username</label>
@@ -10,6 +10,14 @@
         <div class="element">
             <label for="email">email</label>
             <input id="email" v-model="email" type="text"/>
+        </div>
+        <div class="element">
+            <label for="password">password</label>
+            <input id="password" v-model="password" type="password"/>
+        </div>
+        <div class="element">
+            <label for="retype-password">Re-type password</label>
+            <input id="retype-password" v-model="password2" type="password"/>
         </div>
         <button @click="verify">Verify</button>
     </div>
@@ -35,9 +43,9 @@
 import {
     confirmPassword,
     getEntireCollection,
-    getCurrentUser,
     saveCollectionByField,
-    verifyEmailwithLink,
+    verifyEmailWithLink,
+    // signOutOfGoogle,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -52,6 +60,7 @@ export default {
             email: null,
             hasError: false,
             hasPasswordMismatch: false,
+            message: null,
         }
     },
     methods: {
@@ -71,22 +80,48 @@ export default {
             }
         },
         verify: async function() {
-            let that = this;
-            const actionCode = this.$route.query.oobCode;
-            const usernames = await getEntireCollection('usernames');
-            if ( (that.username !== '' || that.username != null) && !usernames[that.username]) {
-                verifyEmailwithLink(that.email, actionCode).then(function() {
-                    const user = getCurrentUser();
-                    that.setUser(user);
-                    saveCollectionByField('usernames', that.username, user.uid);
-                    that.hasError = false;
-                    that.$router.push('/');
-                }).catch( function (e) {
-                    that.hasError = true;
-                    console.error('There was an exception while verifying email!', e);
-                });
+            if (this.password != null && this.password.trim() !== '' && this.password === this.password2) {
+                let that = this;
+                const actionCode = this.$route.query.oobCode;
+                const usernames = await getEntireCollection('usernames');
+                this.username = (this.username == null) ? this.username : this.username.trim() 
+                if ( this.username != null && this.username !== '' && this.username != null && !usernames[this.username] ) {
+                    verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
+                        console.log(user);
+                        if (saveCollectionByField('usernames', that.username, user.uid)) {
+                            that.hasError = false;
+                            that.$router.push('/');
+                        } else {
+                            that.message = 'There was an error while trying to link your account up!'
+                            that.hasError = true;
+                        }
+                    }).catch( function (e) {
+                        switch (e.code) {
+                            case 'auth/expired-action-code':
+                                that.message = 'The link you were sent is stale.';
+                                break;
+                            case 'auth/invalid-email':
+                                that.message = 'An invalid email was entered.';
+                                break;
+                            case 'auth/user-disabled':
+                                that.message = 'The account is disabled.';
+                                break;
+                            case 'auth/invalid/action-code':
+                                that.message = 'The link you were sent is stale.';
+                                break;
+                            default:
+                                console.error(e);
+                                break;
+                        }
+                        that.hasError = true;
+                    });
+                } else {
+                    this.message = 'Please make sure your email and username are correct!';
+                    this.hasError = true;
+                }
             } else {
-                that.hasError = true;
+                this.message = 'Please make sure the password fields match!';
+                this.hasError = true;
             }
         },
     },

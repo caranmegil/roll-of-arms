@@ -71,14 +71,12 @@ export default {
         that.hasError = false;
         that.profile = profile;
         that.hasProfileSaved = true;
+        window.location.reload();
       }).catch(function (e) {
         console.error(e);
         that.hasError = true;
       });
     },
-    back: function () {
-      this.$router.go(-1);
-    }
   },
   async mounted() {
     // Find if there is this weird state happening

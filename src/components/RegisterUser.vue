@@ -2,20 +2,20 @@
   <div class="login">
     <h1>Hey, Dragon Dicer!</h1>
     <section class="welcome-msg">Time to register!</section>
-    <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
+    <div v-if="hasError" class="error">{{message}}</div>
     <div v-if="hasPasswordMismatch" class="error">Please make sure the password fields are the same!</div>
     <div class="login-form">
         <div class="element">
             <label for="email">email</label>
-            <input id="email" type="text"/>
+            <input id="email" v-model="email" type="text"/>
         </div>
         <div class="element">
             <label for="password">password</label>
-            <input id="password" type="password"/>
+            <input id="password" v-model="password" type="password"/>
         </div>
         <div class="element">
             <label for="retype-password">Re-type password</label>
-            <input id="retype-password" type="password"/>
+            <input id="retype-password" v-model="retypePassword" type="password"/>
         </div>
         <button @click="register">Register!</button>
         <div class="separator"></div>
@@ -25,7 +25,10 @@
 </template>
 
 <script>
-import {createUserInGoogle} from '@/firebase';
+import {
+    createUserInGoogle,
+    resendEmailWithLink,
+} from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
 
@@ -35,8 +38,12 @@ export default {
   },
   data() {
       return {
+          email: null,
+          password: null,
+          retypePassword: null,
           hasError: false,
           hasPasswordMismatch: false,
+          message: null,
       }
   },
   methods: {
@@ -45,18 +52,26 @@ export default {
         this.$router.go(-1);
     },
     register: async function() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const retypePassword = document.getElementById('retype-password').value;
         
-        if (password === retypePassword) {
+        if (this.password === this.retypePassword) {
             this.hasPasswordMismatch = false;
 
-            if(await createUserInGoogle(email, password)) {
-                this.$router.push('/signin');
-                this.hasError = false;
-            } else {
-                this.hasError = true;
+            try {
+                if(await createUserInGoogle(this.email, this.password)) {
+                    this.$router.push('/signin');
+                    this.hasError = false;
+                } else {
+                    this.message = 'Unable to create account.';
+                    this.hasError = true;
+                }
+            } catch (e) {
+                if (e.code === 'auth/email-already-in-use') {
+                    resendEmailWithLink(this.email);
+                    this.$router.push('/signin')
+                } else {
+                    this.hasError = true;
+                    this.message = 'Please make sure the form is filled out correctly!';
+                }
             }
         } else {
             this.hasPasswordMismatch = true;

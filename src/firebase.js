@@ -10,7 +10,9 @@ import {
     isSignInWithEmailLink,
     signInWithEmailLink,
     confirmPasswordReset,
+    updatePassword,
 } from "firebase/auth";
+
 import { getAnalytics } from "firebase/analytics";
 
 import firebaseConfig from './firebaseConfig.json';
@@ -21,6 +23,13 @@ let auth = null;
 let user = null;
 // utils
 const db = getDatabase(app);
+const actionCodeSettings = {
+    // URL you want to redirect back to. The domain (www.example.com) for this
+    // URL must be in the authorized domains list in the Firebase Console.
+    url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
+    // This must be true.
+    handleCodeInApp: true,
+};
 
 
 // generic collection actions
@@ -98,24 +107,12 @@ const getEntireCollection = async (collectionName) => {
 }
 
 const createUserInGoogle = async (email, password) => {
-    try {
-        const auth = getAuth();
-        const actionCodeSettings = {
-            // URL you want to redirect back to. The domain (www.example.com) for this
-            // URL must be in the authorized domains list in the Firebase Console.
-            url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
-            // This must be true.
-            handleCodeInApp: true,
-        };
+    const auth = getAuth();
 
-        await createUserWithEmailAndPassword(auth, email, password);
-        sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    await createUserWithEmailAndPassword(auth, email, password);
+    sendSignInLinkToEmail(auth, email, actionCodeSettings);
 
-        return true;
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+    return true;
 };
 
 const confirmPassword = async (authCode, password) => {
@@ -130,22 +127,17 @@ const confirmPassword = async (authCode, password) => {
 };
 
 const signIntoGoogle = async (email, password) => {
-    try {
-        auth = getAuth();
-        if (user == null) {
-            user = auth.currentUser;
-            if (user != null) {
-                return user;
-            }
+    auth = getAuth();
+    if (user == null) {
+        user = auth.currentUser;
+        if (user != null) {
+            return user;
         }
-
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        user = userCredential.user;
-        return user;
-    } catch (e) {
-        console.error(e);
-        return null;
     }
+
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    user = userCredential.user;
+    return user;
 };
 
 const isVerifyEmailWithLink = async () => {
@@ -153,14 +145,22 @@ const isVerifyEmailWithLink = async () => {
     return isSignInWithEmailLink(auth, window.location.href);
 };
 
-const verifyEmailwithLink = async (email) => {
+const verifyEmailWithLink = async (email, password) => {
     auth = getAuth();
     if ( isSignInWithEmailLink(auth, window.location.href) ) {
-        return signInWithEmailLink(auth, email, window.location.href);
+        const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
+        const user = userCredentials.user;
+        await updatePassword(user, password);
+        return auth.currentUser;
     } else {
         return null;
     }
 };
+
+const resendEmailWithLink = async (email) => {
+    auth = getAuth();
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+}
 
 const signOutOfGoogle = async () => {
     try {
@@ -204,7 +204,8 @@ export {
   resetPasswordInGoogle,
   createUserInGoogle,
   isVerifyEmailWithLink,
-  verifyEmailwithLink,
+  verifyEmailWithLink,
+  resendEmailWithLink,
   signIntoGoogle,
   signOutOfGoogle,
 };

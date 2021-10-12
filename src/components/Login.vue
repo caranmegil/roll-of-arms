@@ -6,11 +6,11 @@
     <div class="login-form">
         <div class="element">
             <label for="email">email</label>
-            <input id="email" type="text"/>
+            <input id="email" v-model="email" type="text"/>
         </div>
         <div class="element">
             <label for="password">password</label>
-            <input id="password" type="password"/>
+            <input id="password" v-model="password" type="password"/>
         </div>
         <button @click="signIn">Sign In</button>
         <div class="separator"></div>
@@ -25,7 +25,8 @@
 
 <script>
 import {
-  signIntoGoogle
+  signIntoGoogle,
+  getCurrentUser,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -40,6 +41,8 @@ export default {
   },
   data() {
       return {
+          email: null,
+          password: null,
           map: null,
           hasError: false,
       }
@@ -49,12 +52,21 @@ export default {
   methods: {
     ...mapActions(['setUser', 'setCredentials']),
     signIn: async function() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const user = await signIntoGoogle(email, password);
+        let user = null;
+        try {
+          user = await signIntoGoogle(this.email, this.password);
+        } catch (e) {
+          switch (e.code) {
+            case 'auth/wrong-password':
+              user = getCurrentUser();
+              break;
+            default:
+              console.error(e);
+          }
+        }
 
         if(user != null) {
-            this.setCredentials({email, password,})
+            this.setCredentials({email: this.email, pasword: this.password,})
             this.setUser(user);
             this.hasError = false;
             this.$router.push('/');
