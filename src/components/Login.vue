@@ -66,7 +66,7 @@ export default {
         }
 
         if(user != null) {
-            this.setCredentials({email: this.email, pasword: this.password,})
+            this.setCredentials({email: this.email, password: this.password,})
             this.setUser(user);
             this.hasError = false;
             this.$router.push('/');

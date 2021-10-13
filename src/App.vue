@@ -48,7 +48,7 @@ export default {
   async mounted() {
     const credentials = this.$store.state.credentials;
 
-    if ( this.$store.state.user == null && credentials && credentials.email ) {
+    if ( this.$store.state.user == null && credentials && credentials.email && credentials.password ) {
       let user = await signIntoGoogle(credentials.email, credentials.password);
       this.setUser(user);
     }

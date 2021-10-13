@@ -46,19 +46,17 @@ export default {
   methods: {
     ...mapActions(['setCredentials']),
     save: async function () {
-      const name = document.getElementById('name').value;
-      const location = document.getElementById('location').value;
       let that = this;
 
       let profile = {
-        name,
-        location,
+        name: this.name,
+        location: this.location,
       };
       profile.firstTime = false;
       if (profile.location === '') {
         profile.geolocation = null;
       } else {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${location.replaceAll(/\s/g, '%20')}&format=geojson`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.location.replaceAll(/\s/g, '%20')}&format=geojson`);
         const json = await response.json();
         if (json.features.length > 0) {
           const coords = json.features[0].geometry.coordinates;
@@ -85,7 +83,7 @@ export default {
       this.setCredentials({});
       this.$router.push('/signin');
     }
-    this.profile = await getCollection('profiles') || null;
+    this.profile = await getCollection('profiles') || {name: '', location: ''};
   },
 }
 </script>

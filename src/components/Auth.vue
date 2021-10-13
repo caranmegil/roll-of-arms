@@ -7,7 +7,7 @@
             <label for="username">username</label>
             <input id="username" v-model="username" type="text"/>
         </div>
-        <div class="element">
+            <div class="element">
             <label for="email">email</label>
             <input id="email" v-model="email" type="text"/>
         </div>
@@ -45,7 +45,6 @@ import {
     getEntireCollection,
     saveCollectionByField,
     verifyEmailWithLink,
-    // signOutOfGoogle,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -80,12 +79,16 @@ export default {
             }
         },
         verify: async function() {
-            if (this.password != null && this.password.trim() !== '' && this.password === this.password2) {
+            this.username = (this.username == null) ? '' :  this.username.trim() 
+
+            if (this.username === '') {
+                this.message = 'Please make sure your username is correct!';
+                this.hasError = true;
+            } else if (this.password != null && this.password.trim() !== '' && this.password === this.password2) {
                 let that = this;
                 const actionCode = this.$route.query.oobCode;
                 const usernames = await getEntireCollection('usernames');
-                this.username = (this.username == null) ? this.username : this.username.trim() 
-                if ( this.username != null && this.username !== '' && this.username != null && !usernames[this.username] ) {
+                if ( !usernames[this.username] ) {
                     verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
                         console.log(user);
                         if (saveCollectionByField('usernames', that.username, user.uid)) {
@@ -116,7 +119,7 @@ export default {
                         that.hasError = true;
                     });
                 } else {
-                    this.message = 'Please make sure your email and username are correct!';
+                    this.message = 'Please make sure your username is correct!';
                     this.hasError = true;
                 }
             } else {
