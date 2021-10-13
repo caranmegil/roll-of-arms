@@ -65,7 +65,7 @@ export default {
     methods: {
         ...mapActions(['setUser']),
         resetPassword: async function() {
-            if (this.password === this.password2) {
+            if (this.password != null && this.password.trim() && this.password === this.password2) {
                 this.hasPasswordMismatch = false;
 
                 if(await confirmPassword(this.$route.query.oobCode, this.password)) {
@@ -90,7 +90,6 @@ export default {
                 const usernames = await getEntireCollection('usernames');
                 if ( !usernames[this.username] ) {
                     verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
-                        console.log(user);
                         if (saveCollectionByField('usernames', that.username, user.uid)) {
                             that.hasError = false;
                             that.$router.push('/');
@@ -109,7 +108,7 @@ export default {
                             case 'auth/user-disabled':
                                 that.message = 'The account is disabled.';
                                 break;
-                            case 'auth/invalid/action-code':
+                            case 'auth/invalid-action-code':
                                 that.message = 'The link you were sent is stale.';
                                 break;
                             default:

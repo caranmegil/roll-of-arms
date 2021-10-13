@@ -55,6 +55,7 @@ export default {
         let user = null;
         try {
           user = await signIntoGoogle(this.email, this.password);
+          this.setUser(user);
         } catch (e) {
           switch (e.code) {
             case 'auth/wrong-password':

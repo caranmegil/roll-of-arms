@@ -60,11 +60,15 @@ const getCollection = async (collectionName) => {
     try {
         auth = getAuth();
         const user = auth.currentUser;
-        const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
-        const snapshot = await get(collectionNameUserRef)
+        if (user != null) {
+            const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
+            const snapshot = await get(collectionNameUserRef)
 
-        if (snapshot.exists()) {
-            return snapshot.val();
+            if (snapshot.exists()) {
+                return snapshot.val();
+            } else {
+                return null;
+            }
         } else {
             return null;
         }
@@ -117,9 +121,8 @@ const createUserInGoogle = async (email, password) => {
 
 const confirmPassword = async (authCode, password) => {
     try {
-        const auth = getAuth();
-        await confirmPasswordReset(auth, authCode, password);
-        return true;
+        let auth = getAuth();
+        return await confirmPasswordReset(auth, authCode, password);
     } catch (e) {
         console.error(e);
         return false;
@@ -138,6 +141,10 @@ const signIntoGoogle = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     user = userCredential.user;
     return user;
+};
+
+const signInAgain = async (func) => {
+    getAuth().onAuthStateChanged(func);
 };
 
 const isVerifyEmailWithLink = async () => {
@@ -207,5 +214,6 @@ export {
   verifyEmailWithLink,
   resendEmailWithLink,
   signIntoGoogle,
+  signInAgain,
   signOutOfGoogle,
 };

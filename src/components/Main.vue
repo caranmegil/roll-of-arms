@@ -5,11 +5,11 @@
         <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
         <div class="element">
             <label for="name">Name</label>
-            <input id="name" :value="profile.name" type="text"/>
+            <input id="name" v-model="name" type="text"/>
         </div>
         <div class="element">
             <label for="location">Current Location</label>
-            <input id="location" :value="profile.location" type="text"/>
+            <input id="location" v-model="location" type="text"/>
         </div>
         <button @click="save">Save!</button>
     </div>
@@ -21,6 +21,8 @@
 
 <script>
 import {
+  signIntoGoogle,
+  signInAgain,
   getCollection,
   saveCollection
 } from '@/firebase';
@@ -37,10 +39,12 @@ export default {
   },
   data() {
     return {
+      name: '',
+      location: '',
       hasProfileSaved: false,
       map: null,
       hasError: false,
-      profile: {name: '', location: ''},
+      profile: null,
     };
   },
   methods: {
@@ -77,11 +81,29 @@ export default {
     },
   },
   async mounted() {
+    let that = this;
+
     // Find if there is this weird state happening
     // If so, kill the credentials and go to sign-in page.
     if (this.$store.state.user == null) {
-      this.setCredentials({});
-      this.$router.push('/signin');
+      if(this.$store.state.credentials != undefined && this.$store.state.credentials != null && this.$store.state.credentials.email != undefined) {
+        const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
+        this.setUser(user);
+        this.profile = await getCollection('profiles') || null;
+      } else {
+        this.setCredentials({});
+        this.$router.push('/signin');
+      }
+
+      this.name = (this.profile != null) ? this.profile.name : '';
+      this.location = (this.profile != null) ? this.profile.location : '';
+    } else {
+      signInAgain(async function() {
+        that.profile = await getCollection('profiles') || null;
+
+        that.name = (that.profile != null) ? that.profile.name : '';
+        that.location = (that.profile != null) ? that.profile.location : '';
+      });
     }
     this.profile = await getCollection('profiles') || {name: '', location: ''};
   },
