@@ -32,8 +32,8 @@
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
-  signIntoGoogle,
   signOutOfGoogle,
+  getEntireCollection,
 } from '@/firebase';
 
 export default {
@@ -45,18 +45,18 @@ export default {
   },
   components: {
   },
-  async mounted() {
+  async beforeMount() {
     const credentials = this.$store.state.credentials;
 
-    if ( this.$store.state.user == null && credentials && credentials.email && credentials.password ) {
-      let user = await signIntoGoogle(credentials.email, credentials.password);
-      this.setUser(user);
+    if ( credentials.email && credentials.password ) {
+      const dice = await getEntireCollection('dice');
+      this.setDice(dice);
     }
 
     this.isLoaded = true;
   },
   methods: {
-    ...mapActions(['setUser', 'signOut']),
+    ...mapActions(['setUser', 'signOut', 'setDice',]),
     goHome: function() {
       let menuElem = document.getElementById('menu');
       menuElem.style.display = 'none';

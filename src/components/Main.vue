@@ -48,7 +48,7 @@ export default {
     };
   },
   methods: {
-    ...mapActions(['setCredentials']),
+    ...mapActions(['setCredentials',]),
     save: async function () {
       let that = this;
 

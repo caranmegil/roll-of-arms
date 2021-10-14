@@ -66,7 +66,7 @@
 <script>
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
-import { getEntireCollection, getCollection, saveCollection } from '@/firebase';
+import { getCollection, saveCollection } from '@/firebase';
 
 export default {
     name: 'DiceBrowser',
@@ -95,7 +95,6 @@ export default {
                 },
               },
             ],
-            dice: [],
             filteredDice: [],
             speciesFilter: 'Amazon',
             editionFilter: null,
@@ -137,14 +136,12 @@ export default {
         this.$tours['diceBrowserTour'].start();
       }
 
-      this.dice = await getEntireCollection('dice');
-
       this.speciesFilter = this.$store.state.filters.species;
       this.editionFilter = this.$store.state.filters.edition;
       
       let that = this;
       this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+      this.filteredDice = this.$store.state.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
@@ -166,7 +163,7 @@ export default {
         setEditionFilter: function() {
             let that = this;
             this.setFilters({species: this.speciesFilter, edition: this.editionFilter});
-            this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+            this.filteredDice = this.$store.state.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
         },
     },
 };
