@@ -65,8 +65,10 @@ const store = createStore({
             user: JSON.parse(localStorage.getItem('user') || null),
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             collectionDie: null,
+            forceSlot: 'Home',
             filters: {species: 'Amazon', edition: '-'},
             dice: [],
+            forcesDice: [],
         };
     },
     mutations: {
@@ -87,11 +89,19 @@ const store = createStore({
         setDice(state, dice) {
             state.dice = dice;
         },
+        setForcesDice(state, dice) {
+            state.forcesDice = dice;
+        },
+        setForceSlot(state, slot) {
+            state.forceSlot = slot;
+        },
         signOut(state) {
             state.user = null;
             state.credentials = {}
             state.filters = {species: 'Amazon', edition: '-'}
             state.dice = [];
+            state.forcesDice = [];
+            state.forceSlot = 'Home';
             localStorage.setItem('credentials', JSON.stringify({}));
         },
     },
@@ -110,6 +120,12 @@ const store = createStore({
         },
         setDice({ commit }, dice) {
             commit('setDice', dice);
+        },
+        setForcesDice({ commit }, dice) {
+            commit('setForcesDice', dice);
+        },
+        setForceSlot({ commit }, slot) {
+            commit('setForceSlot', slot);
         },
         signOut({ commit }) {
             commit('signOut');

@@ -51,12 +51,17 @@ export default {
     if ( credentials.email && credentials.password ) {
       const dice = await getEntireCollection('dice');
       this.setDice(dice);
+      this.setForcesDice(dice.filter(die => die.edition === '-').map(die => {
+        let newDie = {...die};
+        delete newDie.edition;
+        return newDie;
+      }))
     }
 
     this.isLoaded = true;
   },
   methods: {
-    ...mapActions(['setUser', 'signOut', 'setDice',]),
+    ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
     goHome: function() {
       let menuElem = document.getElementById('menu');
       menuElem.style.display = 'none';
