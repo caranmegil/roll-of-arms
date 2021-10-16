@@ -1,25 +1,28 @@
 <template>
     <div class="collections">
       <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
-      <h1>Their Army Lists</h1>
-
-      <div id="dice">
-          <div class="header">
-              <div>ID</div>
-              <div>Edition</div>
-              <div>Rarity</div>
-              <div>Type</div>
-              <div></div>
-          </div>
-          <div class="body">
-              <div v-for="die in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
-                  <div class="die-id"><img :src="'../../images/dice/' + die.id"/><div>{{die.name}}</div></div>
-                  <div>{{die.edition}}</div>
-                  <div>{{die.rarity}}</div>
-                  <div>{{die.type}}</div>
-                  <div>{{die.amount}}</div>
-              </div>
-          </div>
+      <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
+      <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
+      <div v-if="profile.isCollectionPublic">
+        <h1>Their Army Lists</h1>
+        <div id="dice">
+            <div class="header">
+                <div>ID</div>
+                <div>Edition</div>
+                <div>Rarity</div>
+                <div>Type</div>
+                <div></div>
+            </div>
+            <div class="body">
+                <div v-for="die in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
+                    <div class="die-id"><img :src="'../../images/dice/' + die.id"/><div>{{die.name}}</div></div>
+                    <div>{{die.edition}}</div>
+                    <div>{{die.rarity}}</div>
+                    <div>{{die.type}}</div>
+                    <div>{{die.amount}}</div>
+                </div>
+            </div>
+        </div>
       </div>
     </div>
 </template>
@@ -37,48 +40,33 @@ export default {
   },
   data() {
     return {
-      profile: null,
+      profile: {},
       dice: [],
     };
   },
   methods: {
-    setSpeciesFilter: function() {
-        this.editions = this.menu[this.speciesFilter];
-        this.editionFilter = this.editions[0];
-        this.setEditionFilter();
-    },
-    setEditionFilter: function() {
-        let that = this;
-        this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
-    },
-    back: function () {
-      this.$router.push('/');
-    }
   },
   async mounted() {
-    const usernames = await getEntireCollection('usernames');    
+    const usernames = await getEntireCollection('usernames');
     const uid = usernames[this.$route.params.id] || this.$route.params.id;
-    this.profile = await getCollectionByField('profiles', uid) || {};
+    this.profile = await getCollectionByField('profiles', uid);
     this.profile.displayName = this.profile.name;
 
     if( this.profile.displayName === undefined || this.profile.displayName === '' ) {
-      for ( let key in usernames ) {
-        if (usernames[key] === uid) {
-          this.profile.displayName = key;
-          break;
-        }
-      }
+      this.profile.displayName = this.$route.params.id;
     }
 
-    this.dice = await getCollectionByField('collections', uid) || [];
-    this.dice.sort((a,b) => {
-      let result = a.name.localeCompare(b.name);
-      if (result == 0) {
-        return a.edition.localeCompare(b.edition);
-      }
+    if (this.profile.isCollectionPublic) {
+      this.dice = await getCollectionByField('collections', uid) || [];
+      this.dice.sort((a,b) => {
+        let result = a.name.localeCompare(b.name);
+        if (result == 0) {
+          return a.edition.localeCompare(b.edition);
+        }
 
-      return result;
-    });
+        return result;
+      });
+    }
   },
 }
 </script>

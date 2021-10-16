@@ -148,7 +148,7 @@ export default {
         setCurrentDie(die) {
           die.amount = 1;
           this.setCollectionDie(die);
-          this.$router.push('/armylists');
+          this.$router.push('/collection');
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');

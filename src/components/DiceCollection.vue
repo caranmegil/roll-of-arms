@@ -1,7 +1,11 @@
 <template>
     <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
-      <h1>Army Lists Manager</h1>
+      <h1>Collection Manager</h1>
+      <div class="element">
+        <label for="privacy">Make Public</label>
+        <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
+      </div>
       <button id="locate" @click="browseDice">Locate</button>
       <span id="filters">
         <div class="element">
@@ -73,6 +77,7 @@ export default {
     name: 'DiceBrowser',
     data() {
         return {
+            profile: {},
             tourCallbacks: {
               onSkip: this.noMoreTours,
               onFinish: this.noMoreTours,
@@ -140,9 +145,13 @@ export default {
         };
     },
     async mounted() {
-      const profile = await getCollection('profiles');
-      if (profile.collectionTour || profile.collectionTour === undefined) {
+      this.profile = await getCollection('profiles');
+      if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
         this.$tours['collectionTour'].start();
+      }
+
+      if (this.profile.isCollectionPublic === undefined) {
+        this.profile.isCollectionPublic = false;
       }
 
       this.dice = await getCollection('collections') || [];
@@ -176,6 +185,9 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
+        saveTheProfile() {
+          saveCollection('profiles', this.profile);
+        },
         browseDice() {
           this.$router.push('/dicebrowser');
         },

@@ -31,7 +31,7 @@ const routes = [
     { path: '/profile/:id', component: ProfileView },
     { path: '/auth', component: Auth },
     { path: '/dicebrowser', component: DiceBrowser, meta: { requiresAuth: true } },
-    { path: '/armylists', component: DiceCollection, meta: { requiresAuth: true } },
+    { path: '/collection', component: DiceCollection, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter( {

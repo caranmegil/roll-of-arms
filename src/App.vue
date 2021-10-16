@@ -1,7 +1,7 @@
 <template>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <span id="menu-button" @click="openMenu" v-if="$store.state.user != null" class="title-bar-menu material-icons material-icons-outlined">menu</span>
+      <div class="menu-item" @click="openMenu" v-if="$store.state.user != null"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
     </header>
     <div id="menu" class="menu-container">
@@ -78,7 +78,7 @@ export default {
     editCollection: function () {
       let menuElem = document.getElementById('menu');
       menuElem.style.display = 'none';
-      this.$router.push('/armylists');
+      this.$router.push('/collection');
     },
     openDiceBrowser: function () {
       let menuElem = document.getElementById('menu');

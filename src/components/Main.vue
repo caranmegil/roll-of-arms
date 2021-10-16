@@ -5,11 +5,26 @@
         <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
         <div class="element">
             <label for="name">Name</label>
-            <input id="name" v-model="name" type="text"/>
+            <input id="name" v-model="profile.name" type="text"/>
         </div>
         <div class="element">
             <label for="location">Current Location</label>
-            <input id="location" v-model="location" type="text"/>
+            <input id="location" v-model="profile.location" type="text"/>
+        </div>
+        <div class="element">
+            <label for="facebook">Facebook User ID</label>
+            <input id="facebook" v-model="profile.facebook" type="text"/>
+        </div>
+        <h3>Discord Information (<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID" target="_blank">Where can I find it?</a>)</h3>
+        <div class="social">
+            <div class="element">
+                <label for="discord">Handle</label>
+                <input id="discord" v-model="profile.discord" type="text"/>
+            </div>
+            <div class="element">
+                <label for="discordNum">ID</label>
+                <input id="discordNum" v-model="profile.discord_number" type="text"/>
+            </div>
         </div>
         <button @click="save">Save!</button>
     </div>
@@ -39,12 +54,10 @@ export default {
   },
   data() {
     return {
-      name: '',
-      location: '',
       hasProfileSaved: false,
       map: null,
       hasError: false,
-      profile: null,
+      profile: {},
     };
   },
   methods: {
@@ -52,26 +65,22 @@ export default {
     save: async function () {
       let that = this;
 
-      let profile = {
-        name: this.name,
-        location: this.location,
-      };
-      profile.firstTime = false;
-      if (profile.location === '') {
-        profile.geolocation = null;
+      this.profile.firstTime = false;
+      if (this.profile.location === '') {
+        this.profile.geolocation = null;
       } else {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.location.replaceAll(/\s/g, '%20')}&format=geojson`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.profile.location.replaceAll(/\s/g, '%20')}&format=geojson`);
         const json = await response.json();
         if (json.features.length > 0) {
           const coords = json.features[0].geometry.coordinates;
-          profile.geolocation = [coords[1], coords[0]];
+          this.profile.geolocation = [coords[1], coords[0]];
         }
       }
       this.hasProfileSaved = false;
       this.hasError = false;
-      saveCollection('profiles', profile).then(function () {
+      console.log(this.profile);
+      saveCollection('profiles', this.profile).then(function () {
         that.hasError = false;
-        that.profile = profile;
         that.hasProfileSaved = true;
         window.location.reload();
       }).catch(function (e) {
@@ -94,15 +103,9 @@ export default {
         this.setCredentials({});
         this.$router.push('/signin');
       }
-
-      this.name = (this.profile != null) ? this.profile.name : '';
-      this.location = (this.profile != null) ? this.profile.location : '';
-    } else {
+    } else { 
       signInAgain(async function() {
         that.profile = await getCollection('profiles') || null;
-
-        that.name = (that.profile != null) ? that.profile.name : '';
-        that.location = (that.profile != null) ? that.profile.location : '';
       });
     }
     this.profile = await getCollection('profiles') || {name: '', location: ''};
@@ -111,6 +114,15 @@ export default {
 </script>
 
 <style scoped>
+  @media screen and (max-width: 480px) {
+    .social {
+      display: grid;
+      grid-auto-flow: row;
+      grid-template-rows: 1fr 1fr;
+      gap: .5em;
+    }
+  }
+
   .main {
     display: grid;
     grid-template-rows: 1fr auto;
@@ -141,13 +153,21 @@ export default {
 
   .profiles .element > label {
     font-weight: bold;
-    justify-self: start;
+    justify-self: end;
     align-self: start;
+    padding-right: .5em;
   }
+
   .error {
       align-self: center;
       justify-self: center;
       color: red;
+  }
+
+  .social {
+    display: grid;
+    grid-auto-flow: column;
+    gap: .5em;
   }
 
   .heading { font-weight: bold; }
