@@ -145,7 +145,7 @@ export default {
         };
     },
     async mounted() {
-      this.profile = await getCollection('profiles');
+      this.profile = await getCollection('profiles') || {};
       if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
         this.$tours['collectionTour'].start();
       }

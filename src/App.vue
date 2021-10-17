@@ -1,11 +1,14 @@
 <template>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <div class="menu-item" @click="openMenu" v-if="$store.state.user != null"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
+      <div class="menu-button" @click="openMenu" v-if="$store.state.user != null"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
     </header>
     <div id="menu" class="menu-container">
       <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">home</span> Home</div>
+      <div class="separator"></div>
+      <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
+      <div class="separator"></div>
       <div @click="openDiceBrowser" class="menu-item"><span class="material-icons material-icons-outlined">square</span> Dice Browser</div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> Dice Collection</div>
       <div class="separator"></div>
@@ -74,6 +77,11 @@ export default {
       } else {
         menuElem.style.display = 'none';
       }
+    },
+    openProfileEdit: function () {
+      let menuElem = document.getElementById('menu');
+      menuElem.style.display = 'none';
+      this.$router.push('/profile');
     },
     editCollection: function () {
       let menuElem = document.getElementById('menu');
@@ -219,6 +227,14 @@ button {
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
+}
+
+.menu-button {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  padding: 2px;
 }
 
 .menu-item {

@@ -1,19 +1,28 @@
 <template>
     <div class="profiles">
-        <h1>Change your profile</h1>
+      <h1>Profile Edit</h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
+        <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
         <div class="element">
             <label for="name">Name</label>
-            <input id="name" type="text"/>
+            <input id="name" v-model="profile.name" type="text"/>
         </div>
         <div class="element">
-            <label for="location">Current Location</label>
-            <input id="location" type="text"/>
+            <label for="facebook">Facebook User ID</label>
+            <input id="facebook" v-model="profile.facebook" type="text"/>
+        </div>
+        <h3>Discord Information (<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID" target="_blank">Where can I find it?</a>)</h3>
+        <div class="social">
+            <div class="element">
+                <label for="discord">Handle</label>
+                <input id="discord" v-model="profile.discord" type="text"/>
+            </div>
+            <div class="element">
+                <label for="discordNum">ID</label>
+                <input id="discordNum" v-model="profile.discord_number" type="text"/>
+            </div>
         </div>
         <button @click="save">Save!</button>
-        <button @click="changePassword">Reset Password</button>
-        <div class="separator"></div>
-        <a class="element" @click="back">Back</a>
     </div>
 </template>
 
@@ -31,7 +40,9 @@ export default {
   },
   data() {
     return {
+      hasProfileSaved: false,
       hasError: false,
+      profile: {},
     };
   },
   methods: {
@@ -39,39 +50,24 @@ export default {
       await resetPasswordInGoogle(this.$store.state.credentials.email);
       this.$router.go(-1);
     },
-    save: async function () {
-      const name = document.getElementById('name').value;
-      const location = document.getElementById('location').value;
+    async save() {
       let that = this;
 
-      let profile = {
-        name,
-        location,
-      };
-
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${location.replaceAll(/\s/g, '%20')}&format=geojson`);
-      const json = await response.json();
-      if (json.features.length > 0) {
-        const coords = json.features[0].geometry.coordinates;
-        profile.geolocation = [coords[1], coords[0]];
-      }
-      saveCollection('profiles', profile).then(function () {
+      this.profile.firstTime = false;
+      this.hasProfileSaved = false;
+      this.hasError = false;
+      console.log(this.profile);
+      saveCollection('profiles', this.profile).then(function () {
         that.hasError = false;
-        that.$router.go(-1);
-      }).catch(function () {
+        that.hasProfileSaved = true;
+      }).catch(function (e) {
+        console.error(e);
         that.hasError = true;
       });
     },
-    back: function () {
-      this.$router.go(-1);
-    }
   },
   async mounted() {
-    let name = document.getElementById('name');
-    let location = document.getElementById('location');
-    const profileData = await getCollection('profiles') || {};
-    name.value = profileData.name || '';
-    location.value = profileData.location || '';
+    this.profile = await getCollection('profiles') || {};
   }
 }
 </script>
@@ -79,11 +75,15 @@ export default {
 <style scoped>
   .profiles {
     display: grid;
-    grid-auto-flow: row;
-    grid-template-columns: auto;
     align-content: center;
     justify-content: center;
+    justify-items: center;
+    align-items: center;
     gap: .5em;
+  }
+
+  .profiles button {
+    width: 100%;
   }
 
   .profiles h1 {
@@ -107,6 +107,12 @@ export default {
 
   .separator {
     border-bottom: 1px solid #D3D3D3;
+  }
+
+  .social {
+    display: grid;
+    grid-auto-flow: column;
+    gap: .5em;
   }
 
   .error {

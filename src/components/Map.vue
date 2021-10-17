@@ -89,5 +89,5 @@ export default {
 </script>
 
 <style scoped>
-  #map { height: 55vh; width: 100%; }
+  #map { height: 60vh; width: 100%; }
 </style>

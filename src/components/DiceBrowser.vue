@@ -131,7 +131,7 @@ export default {
         };
     },
     async mounted() {
-      const profile = await getCollection('profiles');
+      const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
         this.$tours['diceBrowserTour'].start();
       }
