@@ -19,7 +19,10 @@
           <label for="region">Country</label>
           <input type="text" v-model="profile.location.country"/>
         </div>
-        <button @click="save">Locate!</button>
+        <div class="button-bar">
+          <button @click="save">Locate!</button>
+          <button @click="emptyFields"><span class="material-icons material-icons-outlined">cleaning_services</span> Clear</button>
+        </div>
       </div>
     <div class="heading">Use the map below to find players in your area and connect on <a href="https://discord.gg/bn2ZAh9Y">Discord</a>!</div>
     <Map/>
@@ -65,6 +68,15 @@ export default {
         expanded.style.display = 'block';
       }
     },
+    async emptyFields() {
+      this.profile.location = {};
+      delete this.profile.geolocation;
+      saveCollection('profiles',this.profile).then(function () {
+        window.location.reload();
+      }).catch(function (e) {
+        console.error(e);
+      });
+    },
     async save() {
       if (this.profile.location && this.profile.location.city.trim() !== '' && this.profile.location.region.trim() !== '' && this.profile.location.country.trim() !== '') {
         const location = `${this.profile.location.city} ${this.profile.location.region} ${this.profile.location.country}`
@@ -85,8 +97,6 @@ export default {
             });
           }
         }
-      } else {
-        this.hasError = true;
       }
     },
     correctProfile() {
@@ -130,6 +140,10 @@ export default {
     gap: .5em;
   }
 
+  .material-icons {
+    font-size: 16px;
+  }
+
   .profiles {
     display: grid;
     grid-auto-flow: row;
@@ -141,7 +155,18 @@ export default {
   }
 
   .profiles button {
-    width: 100%;
+    padding-left: 3em;
+    padding-right: 3em;
+  }
+
+  .button-bar {
+    align-content: center;
+    justify-content: center;
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
+    justify-items: center;
+    gap: 1em;
   }
 
   .expander {

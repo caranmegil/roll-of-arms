@@ -41,6 +41,7 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
       hasProfileSaved: false,
       hasError: false,
       profile: {},
@@ -72,6 +73,7 @@ export default {
   },
   async mounted() {
     this.profile = await getCollection('profiles') || {};
+    this.isLoading = true;
     if (!this.profile.name || this.profile.name.trim() === '') {
       const usernames = await getEntireCollection('usernames');
 
@@ -88,6 +90,7 @@ export default {
           this.profile.name = this.profile.username;
       }
     }
+    this.isLoading = false;
   }
 }
 </script>
