@@ -67,7 +67,7 @@ const store = createStore({
             collectionDie: null,
             forceSlot: 'Home',
             filters: {species: 'Amazon', edition: '-'},
-            dice: [],
+            dice: JSON.parse(localStorage.getItem('dice') || 'null'),
             forcesDice: [],
         };
     },
@@ -88,6 +88,7 @@ const store = createStore({
         },
         setDice(state, dice) {
             state.dice = dice;
+            localStorage.setItem('dice', JSON.stringify(dice));
         },
         setForcesDice(state, dice) {
             state.forcesDice = dice;

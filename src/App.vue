@@ -52,9 +52,11 @@ export default {
     const credentials = this.$store.state.credentials;
 
     if ( credentials.email && credentials.password ) {
-      const dice = await getEntireCollection('dice');
-      this.setDice(dice);
-      this.setForcesDice(dice.filter(die => die.edition === '-').map(die => {
+      if (this.$store.state.dice == null) {
+        const dice = await getEntireCollection('dice');
+        this.setDice(dice);
+      }
+      this.setForcesDice(this.$store.state.dice.filter(die => die.edition === '-').map(die => {
         let newDie = {...die};
         delete newDie.edition;
         return newDie;
