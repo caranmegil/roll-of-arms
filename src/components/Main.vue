@@ -2,9 +2,10 @@
   <div class="main">
       <header>
         <h2>Welcome to Roll of Arms!</h2>
-        <h3>Enter your location information below:</h3>
       </header>
-      <div class="profiles" v-if="profile.location">
+      <div id="location-info-collapsed" @click="expand_collapse"><div class="expander"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_more</span></div></div>
+      <div id="location-info-expanded" class="profiles" v-if="profile.location">
+        <div class="expander" @click="expand_collapse"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_less</span></div>
         <div class="error" v-if="hasError">Please make sure that every field is filled out for your location!</div>
         <div class="element">
           <label for="city">City</label>
@@ -52,6 +53,18 @@ export default {
   },
   methods: {
     ...mapActions(['setCredentials',]),
+    expand_collapse() {
+      let collapsed = document.getElementById('location-info-collapsed');
+      let expanded = document.getElementById('location-info-expanded');
+
+      if (window.getComputedStyle(collapsed).display === 'none') {
+        collapsed.style.display = 'block';
+        expanded.style.display = 'none';
+      } else {
+        collapsed.style.display = 'none';
+        expanded.style.display = 'block';
+      }
+    },
     async save() {
       if (this.profile.location && this.profile.location.city.trim() !== '' && this.profile.location.region.trim() !== '' && this.profile.location.country.trim() !== '') {
         const location = `${this.profile.location.city} ${this.profile.location.region} ${this.profile.location.country}`
@@ -124,6 +137,33 @@ export default {
     align-content: center;
     justify-content: center;
     gap: .5em;
+    display: none;
+  }
+
+  .profiles button {
+    width: 100%;
+  }
+
+  .expander {
+    width: 100%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 2px;
+  }
+
+  .expander h3 {
+    width: 10.5em;
+  }
+  
+  .expander .material-icons {
+    width: 1em;
+  }
+
+  .expander .spacer {
+    width: 6.5em;
   }
 
   header {
