@@ -1,6 +1,6 @@
 <template>
     <div class="profiles">
-      <h1>Profile Edit</h1>
+      <h1>My Profile</h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
         <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
         <div class="element">
@@ -30,6 +30,7 @@
 import {
   saveCollection,
   getCollection,
+  getEntireCollection,
   resetPasswordInGoogle,
 } from '@/firebase';
 import 'es6-promise/auto';
@@ -56,7 +57,10 @@ export default {
       this.profile.firstTime = false;
       this.hasProfileSaved = false;
       this.hasError = false;
-      console.log(this.profile);
+
+      this.profile.name = this.profile.username;
+      delete this.profile.username;
+
       saveCollection('profiles', this.profile).then(function () {
         that.hasError = false;
         that.hasProfileSaved = true;
@@ -68,11 +72,35 @@ export default {
   },
   async mounted() {
     this.profile = await getCollection('profiles') || {};
+    if (!this.profile.name || this.profile.name.trim() === '') {
+      const usernames = await getEntireCollection('usernames');
+
+      for (let userNameKey in usernames) {
+          if (usernames[userNameKey] === this.$store.state.user.uid) {
+              this.profile.username = userNameKey;
+              break;
+          }
+      }
+
+      // for those older profiles that do not have a name,
+      // set to username per the ProfileEdit.vue
+      if (!this.profile.name || this.profile.name.trim() === '') {
+          this.profile.name = this.profile.username;
+      }
+    }
   }
 }
 </script>
 
 <style scoped>
+  @media screen and (max-width: 480px) {
+    .social {
+      display: grid;
+      grid-auto-flow: row;
+      grid-template-rows: 1fr 1fr;
+      gap: .5em;
+    }
+  }
   .profiles {
     display: grid;
     align-content: center;
