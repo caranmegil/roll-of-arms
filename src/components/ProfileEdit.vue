@@ -72,9 +72,9 @@ export default {
     },
   },
   async mounted() {
-    this.profile = await getCollection('profiles') || {};
+    let profile = await getCollection('profiles') || {};
     this.isLoading = true;
-    if (!this.profile.name || this.profile.name.trim() === '') {
+    if (!profile.name || profile.name.trim() === '') {
       const usernames = await getEntireCollection('usernames');
 
       for (let userNameKey in usernames) {
@@ -86,10 +86,11 @@ export default {
 
       // for those older profiles that do not have a name,
       // set to username per the ProfileEdit.vue
-      if (!this.profile.name || this.profile.name.trim() === '') {
-          this.profile.name = this.profile.username;
+      if (!profile.name || profile.name.trim() === '') {
+          profile.name = profile.username;
       }
     }
+    this.profile = profile;
     this.isLoading = false;
   }
 }
