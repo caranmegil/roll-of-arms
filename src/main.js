@@ -104,6 +104,8 @@ const store = createStore({
             state.forcesDice = [];
             state.forceSlot = 'Home';
             localStorage.setItem('credentials', JSON.stringify({}));
+            localStorage.setItem('dice', JSON.stringify(null));
+            localStorage.setItem('user', JSON.stringify(null));
         },
     },
     actions: {
