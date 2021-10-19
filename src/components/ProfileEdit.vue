@@ -45,6 +45,7 @@ export default {
       hasProfileSaved: false,
       hasError: false,
       profile: {},
+      username: null,
     };
   },
   methods: {
@@ -59,8 +60,7 @@ export default {
       this.hasProfileSaved = false;
       this.hasError = false;
 
-      this.profile.name = this.profile.username;
-      delete this.profile.username;
+      this.profile.name = this.username;
 
       saveCollection('profiles', this.profile).then(function () {
         that.hasError = false;
@@ -74,21 +74,19 @@ export default {
   async mounted() {
     let profile = await getCollection('profiles') || {};
     this.isLoading = true;
+    const usernames = await getEntireCollection('usernames');
+
+    for (let userNameKey in usernames) {
+        if (usernames[userNameKey] === this.$store.state.user.uid) {
+            this.username = userNameKey;
+            break;
+        }
+    }
+
+    // for those older profiles that do not have a name,
+    // set to username per the ProfileEdit.vue
     if (!profile.name || profile.name.trim() === '') {
-      const usernames = await getEntireCollection('usernames');
-
-      for (let userNameKey in usernames) {
-          if (usernames[userNameKey] === this.$store.state.user.uid) {
-              this.profile.username = userNameKey;
-              break;
-          }
-      }
-
-      // for those older profiles that do not have a name,
-      // set to username per the ProfileEdit.vue
-      if (!profile.name || profile.name.trim() === '') {
-          profile.name = profile.username;
-      }
+        profile.name = this.username;
     }
     this.profile = profile;
     this.isLoading = false;

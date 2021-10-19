@@ -43,7 +43,6 @@ export default {
                     profile.username = userNameKey;
                     break;
                 }
-//                profile.username=key;
             }
 
             // for those older profiles that do not have a name,
@@ -74,7 +73,6 @@ export default {
                 .openPopup();
         }
 
-
         const defaultPosition = () => {
             that.map.setView([33.69702810000002, -84.3251817], 13)
         }
@@ -95,5 +93,8 @@ export default {
 </script>
 
 <style scoped>
-  #map { height: 60vh; width: 100%; }
+#map {
+    height: 60vh;
+    width: 95%;
+}
 </style>

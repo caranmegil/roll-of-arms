@@ -112,7 +112,6 @@ export default {
 <style>
 body {
     font-family: 'Roboto', sans-serif;
-    padding: .5em;
     background-color: #F8F6F0;
 }
 
@@ -236,7 +235,7 @@ button {
   grid-auto-flow: row;
   grid-template-columns: auto 1fr;
   align-items: center;
-  padding: 2px;
+  padding-right: 1em;
 }
 
 .menu-item {
@@ -278,7 +277,7 @@ button {
 }
 
 .roll-of-arms-body > div#footer > footer {
-    grid-area: 1 / 1 / 1 / 3;
+    grid-area: 1 / 1 / 1 / 4;
     align-self: center;
     justify-self: center;
 }

@@ -3,9 +3,9 @@
       <header>
         <h2>Welcome to Roll of Arms!</h2>
       </header>
-      <div id="location-info-collapsed" @click="expand_collapse"><div class="expander"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_more</span></div></div>
+      <div id="location-info-collapsed" @click="toggleExpand"><div class="expander"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_more</span></div></div>
       <div id="location-info-expanded" class="profiles" v-if="profile.location">
-        <div class="expander" @click="expand_collapse"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_less</span></div>
+        <div class="expander" @click="toggleExpand"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_less</span></div>
         <div class="error" v-if="hasError">Please make sure that every field is filled out for your location!</div>
         <div class="element">
           <label for="city">City</label>
@@ -19,10 +19,8 @@
           <label for="region">Country</label>
           <input type="text" v-model="profile.location.country"/>
         </div>
-        <div class="button-bar">
-          <button @click="save">Locate!</button>
-          <button @click="emptyFields"><span class="material-icons material-icons-outlined">cleaning_services</span> Clear</button>
-        </div>
+        <button @click="save">Add to Map</button>
+        <button @click="emptyFields">Remove from Map</button>
       </div>
     <div class="heading">Use the map below to find players in your area and connect on <a href="https://discord.gg/bn2ZAh9Y">Discord</a>!</div>
     <Map/>
@@ -56,7 +54,7 @@ export default {
   },
   methods: {
     ...mapActions(['setCredentials',]),
-    expand_collapse() {
+    toggleExpand() {
       let collapsed = document.getElementById('location-info-collapsed');
       let expanded = document.getElementById('location-info-expanded');
 
@@ -108,6 +106,11 @@ export default {
       return {location: {city: '', region: '', country: ''}};
     },
   },
+  updated() {
+    if (!this.profile.location || (this.profile.location.city === '' && this.profile.location.region === '' && this.profile.location.country === '')) {
+      this.toggleExpand();
+    }
+  },
   async mounted() {
     let that = this;
 
@@ -137,7 +140,9 @@ export default {
   .main {
     display: grid;
     grid-template-rows: 1fr auto;
-    gap: .5em;
+    align-items: center;
+    justify-items: center;
+    width: 100%;
   }
 
   .material-icons {
@@ -148,6 +153,8 @@ export default {
     display: grid;
     grid-auto-flow: row;
     grid-template-columns: auto;
+    align-items: center;
+    justify-items: center;
     align-content: center;
     justify-content: center;
     gap: .5em;
@@ -157,16 +164,8 @@ export default {
   .profiles button {
     padding-left: 3em;
     padding-right: 3em;
-  }
-
-  .button-bar {
-    align-content: center;
-    justify-content: center;
-    display: grid;
-    grid-auto-flow: column;
-    align-items: center;
-    justify-items: center;
-    gap: 1em;
+    width: 100%;
+    margin: .2em;
   }
 
   .expander {
