@@ -120,16 +120,24 @@ export default {
       if(this.$store.state.credentials != undefined && this.$store.state.credentials != null && this.$store.state.credentials.email != undefined) {
         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
         this.setUser(user);
-        this.profile = await getCollection('profiles') || this.genDefaultProfile();
-        this.correctProfile();
+        this.profile = await getCollection('profiles') || null;
+        if (this.profile == null) {
+          this.$router.push('/profile');
+        } else {
+          this.correctProfile();
+        }
       } else {
         this.setCredentials({});
         this.$router.push('/signin');
       }
     } else { 
       signInAgain(async function() {
-        that.profile = await getCollection('profiles') || that.genDefaultProfile();
-        that.correctProfile();
+        that.profile = await getCollection('profiles') || null;
+        if (that.profile == null) {
+          that.$router.push('/profile');
+        } else {
+          that.correctProfile();
+        }
       });
     }
   },

@@ -7,6 +7,7 @@ import {
     createUserWithEmailAndPassword,
     sendPasswordResetEmail,
     sendSignInLinkToEmail,
+    checkActionCode,
     isSignInWithEmailLink,
     signInWithEmailLink,
     confirmPasswordReset,
@@ -152,9 +153,10 @@ const isVerifyEmailWithLink = async () => {
     return isSignInWithEmailLink(auth, window.location.href);
 };
 
-const verifyEmailWithLink = async (email, password) => {
+const verifyEmailWithLink = async (email, password, actionCode) => {
     auth = getAuth();
     if ( isSignInWithEmailLink(auth, window.location.href) ) {
+        await checkActionCode(auth, actionCode);
         const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
         const user = userCredentials.user;
         await updatePassword(user, password);

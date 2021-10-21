@@ -63,7 +63,7 @@ export default {
         }
     },
     methods: {
-        ...mapActions(['setUser']),
+        ...mapActions(['setUser', 'setCredentials']),
         resetPassword: async function() {
             if (this.password != null && this.password.trim() && this.password === this.password2) {
                 this.hasPasswordMismatch = false;
@@ -85,12 +85,20 @@ export default {
                 this.message = 'Please make sure your username is correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '' && this.password === this.password2) {
+                if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&].{6,}/.test(this.password)) {
+                    this.message = 'Please make sure your password is at least 6 characters and contains letters, numbers, and special symbols.';
+                    this.hasError = true;
+                    return;
+                }
+
                 let that = this;
                 const actionCode = this.$route.query.oobCode;
                 const usernames = await getEntireCollection('usernames');
                 if ( !usernames[this.username] ) {
                     verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
                         if (saveCollectionByField('usernames', that.username, user.uid)) {
+                            that.setUser(user);
+                            that.setCredentials({email: that.email, password: that.password});
                             that.hasError = false;
                             that.$router.push('/');
                         } else {
@@ -108,10 +116,17 @@ export default {
                             case 'auth/user-disabled':
                                 that.message = 'The account is disabled.';
                                 break;
+                            case 'auth/user-not-found':
+                                that.message = 'The account was not found.';
+                                break;
                             case 'auth/invalid-action-code':
-                                that.message = 'The link you were sent is stale.';
+                                that.message = 'The link is invalid or has already been used previously.';
+                                break;
+                            case 'auth/weak-password':
+                                that.message = 'Please choose a stronger password that is at least 6 characters.';
                                 break;
                             default:
+                                that.message = 'There was an unknown error.  Please contact support at service2@sfr-inc.com'
                                 console.error(e);
                                 break;
                         }
