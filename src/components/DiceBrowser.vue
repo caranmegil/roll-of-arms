@@ -12,21 +12,19 @@
                 <option value="Dragon">Dragons</option>
                 <option value="Dragonkin">Dragonkin</option>
                 <option value="Dwarf">Dwarves</option>
-                <option value="Eldarim">Eldarim</option>
                 <option value="Eldarim, Black">Eldarim, Black</option>
                 <option value="Eldarim, Blue">Eldarim, Blue</option>
                 <option value="Eldarim, Green">Eldarim, Green</option>
-                <option value="Eldarim, Gold">Eldarim, Gold</option>
-                <option value="Eldarim, Red<">Eldarim, Red</option>
+                <option value="Eldarim, Red">Eldarim, Red</option>
+                <option value="Eldarim, Yellow">Eldarim, Yellow</option>
+                <option value="Eldarim, White">Eldarim, White</option>
                 <option value="Frostwings">Frostwings</option>
                 <option value="Ferals">Ferals</option>
                 <option value="Firewalkers">Firewalkers</option>
                 <option value="Goblins">Goblins</option>
-                <option value="Item">Item</option>
+                <option value="Equipment">Equipment</option>
                 <option value="Lava Elves">Lava Elves</option>
                 <option value="Medallion">Medallion</option>
-                <option value="Minor Terrain">Minor Terrain</option>
-                <option value="Relic">Relic</option>
                 <option value="Royalty">Royalty</option>
                 <option value="Scalders">Scalders</option>
                 <option value="Swamp Stalkers">Swamp Stalkers</option>
@@ -36,7 +34,7 @@
             </select>
         </div>
         <div class="element">
-            <label for="editionFilter">Edition</label>
+            <label for="editionFilter">Set</label>
             <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
                 <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
             </select>
@@ -48,7 +46,7 @@
       <div id="dice">
           <div class="header">
               <div>ID</div>
-              <div>Rarity</div>
+              <div>Size</div>
               <div>Type</div>
           </div>
           <div class="body">
@@ -66,12 +64,17 @@
 <script>
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
-import { getCollection, saveCollection } from '@/firebase';
+import {
+  getCollection,
+  getEntireCollection,
+  saveCollection,
+} from '@/firebase';
 
 export default {
     name: 'DiceBrowser',
     data() {
         return {
+            dice: [],
             tourCallbacks: {
               onSkip: this.noMoreTours,
               onFinish: this.noMoreTours,
@@ -112,25 +115,24 @@ export default {
                 'Swamp Stalkers': ['-', 'Dark', 'Alt-Ink', 'Purple-Ink'],
                 'Treefolk': ['-'],
                 'Undead': ['-'],
-                'Eldarim': ['-'],
                 'Eldarim, Black': ['-'],
                 'Eldarim, Blue': ['-'],
                 'Eldarim, Green': ['-'],
-                'Eldarim, Gold': ['-'],
+                'Eldarim, Yellow': ['-'],
                 'Eldarim, Red': ['-'],
+                'Eldarim, White': ['-'],
                 'Dragon': ['-'],
                 'Dragonkin': ['-'],
                 'Medallion': ['-'],
-                'Item': ['-'],
+                'Equipment': ['-'],
                 'Royalty': ['-'],
                 'Dracolem': ['-'],
-                'Relic': ['-'],
                 'Terrain': ['-'],
-                'Minor Terrain': ['-']
             },
         };
     },
     async mounted() {
+      this.dice = await getEntireCollection('dice');
       const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
         this.$tours['diceBrowserTour'].start();
@@ -141,7 +143,7 @@ export default {
       
       let that = this;
       this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.$store.state.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+      this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
@@ -163,7 +165,7 @@ export default {
         setEditionFilter: function() {
             let that = this;
             this.setFilters({species: this.speciesFilter, edition: this.editionFilter});
-            this.filteredDice = this.$store.state.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+            this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
         },
     },
 };

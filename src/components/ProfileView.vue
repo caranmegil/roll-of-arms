@@ -8,8 +8,8 @@
         <div id="dice">
             <div class="header">
                 <div>ID</div>
-                <div>Edition</div>
-                <div>Rarity</div>
+                <div>Set</div>
+                <div>Size</div>
                 <div>Type</div>
                 <div></div>
             </div>
@@ -58,6 +58,50 @@ export default {
 
     if (this.profile.isCollectionPublic) {
       this.dice = await getCollectionByField('collections', uid) || [];
+      this.dice = this.dice.map(die => {
+          let newDie = {...die};
+          delete newDie['faces'];
+          if (die.species === 'Eldarim') {
+              newDie.species = 'Eldarim, White';
+          }
+          if (die.species === 'Item' && die.name.startsWith('Gold')) {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Eldarim, Gold') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+              newDie.species = 'Eldarim, Yellow';
+          }
+          if (die.species === 'Item') {
+              if (die.rarity !== 'Artifact') {
+                  newDie.rarity = `${die.rarity} Equipment`
+              }
+              newDie.species = 'Equipment';
+          }
+          if (die.species === 'Medallion') {
+              newDie.species = 'Equipment';
+          }
+          if (die.species === 'Relic') {
+              newDie.species = 'Equipment';
+          }
+          if (die.species.endsWith('Terrain')) {
+              newDie.species = 'Terrain';
+              const nameSplit = die.name.split(' ');
+              if (nameSplit.length == 2) {
+                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
+              } else {
+                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
+              }
+          }
+          if (newDie.species === 'Terrain') {
+              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
+                  newDie.rarity = 'Advanced Terrain';
+              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
+                  newDie.rarity = 'Basic Terrain';
+              }
+          }
+          return newDie;
+      });
+
       this.dice.sort((a,b) => {
         let result = a.name.localeCompare(b.name);
         if (result == 0) {

@@ -17,21 +17,19 @@
                 <option value="Dragon">Dragons</option>
                 <option value="Dragonkin">Dragonkin</option>
                 <option value="Dwarf">Dwarves</option>
-                <option value="Eldarim">Eldarim</option>
                 <option value="Eldarim, Black">Eldarim, Black</option>
                 <option value="Eldarim, Blue">Eldarim, Blue</option>
                 <option value="Eldarim, Green">Eldarim, Green</option>
-                <option value="Eldarim, Gold">Eldarim, Gold</option>
-                <option value="Eldarim, Red<">Eldarim, Red</option>
+                <option value="Eldarim, Red">Eldarim, Red</option>
+                <option value="Eldarim, White">Eldarim, White</option>
+                <option value="Eldarim, Yellow">Eldarim, Yellow</option>
                 <option value="Frostwings">Frostwings</option>
                 <option value="Ferals">Ferals</option>
                 <option value="Firewalkers">Firewalkers</option>
                 <option value="Goblins">Goblins</option>
-                <option value="Item">Item</option>
+                <option value="Equipment">Equipment</option>
                 <option value="Lava Elves">Lava Elves</option>
                 <option value="Medallion">Medallion</option>
-                <option value="Minor Terrain">Minor Terrain</option>
-                <option value="Relic">Relic</option>
                 <option value="Royalty">Royalty</option>
                 <option value="Scalders">Scalders</option>
                 <option value="Swamp Stalkers">Swamp Stalkers</option>
@@ -41,7 +39,7 @@
             </select>
         </div>
         <div class="element">
-            <label for="editionFilter">Edition</label>
+            <label for="editionFilter">Set</label>
             <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
                 <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
             </select>
@@ -126,21 +124,19 @@ export default {
                 'Swamp Stalkers': ['-', 'Dark', 'Alt-Ink', 'Purple-Ink'],
                 'Treefolk': ['-'],
                 'Undead': ['-'],
-                'Eldarim': ['-'],
                 'Eldarim, Black': ['-'],
                 'Eldarim, Blue': ['-'],
                 'Eldarim, Green': ['-'],
-                'Eldarim, Gold': ['-'],
+                'Eldarim, Yellow': ['-'],
                 'Eldarim, Red': ['-'],
+                'Eldarim, White': ['-'],
                 'Dragon': ['-'],
                 'Dragonkin': ['-'],
                 'Medallion': ['-'],
-                'Item': ['-'],
+                'Equipment': ['-'],
                 'Royalty': ['-'],
                 'Dracolem': ['-'],
-                'Relic': ['-'],
                 'Terrain': ['-'],
-                'Minor Terrain': ['-']
             },
         };
     },
@@ -155,6 +151,49 @@ export default {
       }
 
       this.dice = await getCollection('collections') || [];
+      this.dice = this.dice.map(die => {
+          let newDie = {...die};
+          delete newDie['faces'];
+          if (die.species === 'Eldarim') {
+              newDie.species = 'Eldarim, White';
+          }
+          if (die.species === 'Item' && die.name.startsWith('Gold')) {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Eldarim, Gold') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+              newDie.species = 'Eldarim, Yellow';
+          }
+          if (die.species === 'Item') {
+              if (die.rarity !== 'Artifact') {
+                  newDie.rarity = `${die.rarity} Equipment`
+              }
+              newDie.species = 'Equipment';
+          }
+          if (die.species === 'Medallion') {
+              newDie.species = 'Equipment';
+          }
+          if (die.species === 'Relic') {
+              newDie.species = 'Equipment';
+          }
+          if (die.species.endsWith('Terrain')) {
+              newDie.species = 'Terrain';
+              const nameSplit = die.name.split(' ');
+              if (nameSplit.length == 2) {
+                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
+              } else {
+                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
+              }
+          }
+          if (newDie.species === 'Terrain') {
+              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
+                  newDie.rarity = 'Advanced Terrain';
+              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
+                  newDie.rarity = 'Basic Terrain';
+              }
+          }
+          return newDie;
+      });
       if (this.$store.state.collectionDie != null) {
         const collectionDie = this.$store.state.collectionDie;
         if (this.dice.filter(die => die.name === collectionDie.name && die.edition === collectionDie.edition).length > 0) {
