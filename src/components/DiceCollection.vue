@@ -12,6 +12,7 @@
           <div class="element">
               <label for="speciesFilter">Species/Set</label>
               <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
+                  <option value="">All</option>
                   <option value="Amazon">Amazons</option>
                   <option value="Coral Elf">Coral Elves</option>
                   <option value="Dracolem">Dracolem</option>
@@ -42,6 +43,7 @@
           <div class="element">
               <label for="editionFilter">Edition</label>
               <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
+                  <option value="">All</option>
                   <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
               </select>
           </div>
@@ -128,8 +130,8 @@ export default {
             ],
             dice: [],
             filteredDice: [],
-            speciesFilter: 'Amazon',
-            editionFilter: null,
+            speciesFilter: '',
+            editionFilter: '',
             editions: [],
             sizes: [],
             sizeFilter: '',
@@ -241,9 +243,8 @@ export default {
       this.sizeFilter = this.$store.state.filters.size;
       this.typeFilter = this.$store.state.filters.type;
       
-      let that = this;
       this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+      this.filteredDice = this.applyFiltersAndSort()
     },
     unmounted() {
       this.setCollectionDie(null);
@@ -280,8 +281,8 @@ export default {
         applyFiltersAndSort() {
           let that = this;
           let dice = this.dice.filter(  die =>
-                                        die.species === that.speciesFilter 
-                                         && die.edition === that.editionFilter
+                                        (that.speciesFilter === '' || die.species === that.speciesFilter)
+                                        && (that.editionFilter === '' || die.edition === that.editionFilter)
                                       );
 
           let sizes = [];
@@ -344,7 +345,7 @@ export default {
         },
         setSpeciesFilter: function() {
             this.editions = this.menu[this.speciesFilter];
-            this.editionFilter = this.editions[0];
+            this.editionFilter = '';
             this.setEditionFilter();
         },
         setEditionFilter: function() {

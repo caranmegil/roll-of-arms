@@ -66,7 +66,7 @@ const store = createStore({
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             collectionDie: null,
             forceSlot: 'Home',
-            filters: {species: 'Amazon', edition: '-', size: '', type: ''},
+            filters: {species: '', edition: '', size: '', type: ''},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
             forcesDice: [],
         };
