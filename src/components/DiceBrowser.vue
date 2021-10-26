@@ -1,60 +1,66 @@
 <template>
     <v-tour name="diceBrowserTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="dice-browser">
-      <h1>Dice Browser</h1>
-      <span id="filters">
-        <div class="element">
-            <label for="speciesFilter">Species</label>
-            <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
-                <option value="Amazon">Amazons</option>
-                <option value="Coral Elf">Coral Elves</option>
-                <option value="Dracolem">Dracolem</option>
-                <option value="Dragon">Dragons</option>
-                <option value="Dragonkin">Dragonkin</option>
-                <option value="Dwarf">Dwarves</option>
-                <option value="Eldarim, Black">Eldarim, Black</option>
-                <option value="Eldarim, Blue">Eldarim, Blue</option>
-                <option value="Eldarim, Green">Eldarim, Green</option>
-                <option value="Eldarim, Red">Eldarim, Red</option>
-                <option value="Eldarim, Yellow">Eldarim, Yellow</option>
-                <option value="Eldarim, White">Eldarim, White</option>
-                <option value="Frostwings">Frostwings</option>
-                <option value="Ferals">Ferals</option>
-                <option value="Firewalkers">Firewalkers</option>
-                <option value="Goblins">Goblins</option>
-                <option value="Equipment">Equipment</option>
-                <option value="Lava Elves">Lava Elves</option>
-                <option value="Medallion">Medallion</option>
-                <option value="Royalty">Royalty</option>
-                <option value="Scalders">Scalders</option>
-                <option value="Swamp Stalkers">Swamp Stalkers</option>
-                <option value="Terrain">Terrain</option>
-                <option value="Treefolk">Treefolk</option>
-                <option value="Undead">Undead</option>
-            </select>
-        </div>
-        <div class="element">
-            <label for="editionFilter">Set</label>
-            <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
-                <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
-            </select>
-        </div>
-      </span>
-
-      <div class="separator"></div>
-
       <div id="dice">
           <div class="header">
-              <div>ID</div>
-              <div>Size</div>
-              <div>Type</div>
+              <h1>Dice Browser</h1>
+              <span id="filters">
+                <div class="element">
+                    <label for="speciesFilter">Species</label>
+                    <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
+                        <option value="Amazon">Amazons</option>
+                        <option value="Coral Elf">Coral Elves</option>
+                        <option value="Dracolem">Dracolem</option>
+                        <option value="Dragon">Dragons</option>
+                        <option value="Dragonkin">Dragonkin</option>
+                        <option value="Dwarf">Dwarves</option>
+                        <option value="Eldarim, Black">Eldarim, Black</option>
+                        <option value="Eldarim, Blue">Eldarim, Blue</option>
+                        <option value="Eldarim, Green">Eldarim, Green</option>
+                        <option value="Eldarim, Red">Eldarim, Red</option>
+                        <option value="Eldarim, Yellow">Eldarim, Yellow</option>
+                        <option value="Eldarim, White">Eldarim, White</option>
+                        <option value="Frostwings">Frostwings</option>
+                        <option value="Ferals">Ferals</option>
+                        <option value="Firewalkers">Firewalkers</option>
+                        <option value="Goblins">Goblins</option>
+                        <option value="Equipment">Equipment</option>
+                        <option value="Lava Elves">Lava Elves</option>
+                        <option value="Medallion">Medallion</option>
+                        <option value="Royalty">Royalty</option>
+                        <option value="Scalders">Scalders</option>
+                        <option value="Swamp Stalkers">Swamp Stalkers</option>
+                        <option value="Terrain">Terrain</option>
+                        <option value="Treefolk">Treefolk</option>
+                        <option value="Undead">Undead</option>
+                    </select>
+                </div>
+                <div class="element">
+                    <label for="editionFilter">Set</label>
+                    <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
+                        <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
+                    </select>
+                </div>
+              </span>
+
+              <div class="table-header">
+                  <div>ID</div>
+                  <div>Size</div>
+                  <div>Type</div>
+              </div>
           </div>
           <div class="body">
-              <div v-for="die in filteredDice" :key="die.name + '/' + die.edition" class="row">
-                  <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
-                  <div>{{die.rarity}}</div>
-                  <div>{{die.type}}</div>
-                  <div class="add-button"><span @click="() => setCurrentDie(die)" class="material-icons material-icons-outlined">add</span></div>
+              <div v-for="die in filteredDice" :key="die.name + '/' + die.edition" class="row"  :id="die.name + '/' + die.edition">
+                <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
+                <div class="size">{{die.rarity}}</div>
+                <div class="type">{{die.type}}</div>
+                <div class="add-button"><span id="action-button" @click="() => expand(die.name + '/' + die.edition)" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div id="expansion" class="add-die">
+                  <span @click="decr" class="material-icons material-icons-outlined">remove</span>
+                  <input type="number" v-model="amount"/>
+                  <span @click="incr" class="material-icons material-icons-outlined">add</span>
+                  <button @click="() => setCurrentDie(die)">Add</button>
+                </div>
               </div>
           </div>
       </div>
@@ -79,6 +85,9 @@ export default {
               onSkip: this.noMoreTours,
               onFinish: this.noMoreTours,
             },
+            myCollection: [],
+            amount: 0,
+            openedId: null,
             steps: [
               {
                 target: '#filters',
@@ -133,6 +142,51 @@ export default {
     },
     async mounted() {
       this.dice = await getEntireCollection('dice');
+      this.myCollection = await getCollection('collections') || [];
+      this.myCollection = this.myCollection.map(die => {
+          let newDie = {...die};
+          delete newDie['faces'];
+          if (die.species === 'Eldarim') {
+              newDie.species = 'Eldarim, White';
+          }
+          if (die.species === 'Item' && die.name.startsWith('Gold')) {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Eldarim, Gold') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+              newDie.species = 'Eldarim, Yellow';
+          }
+          if (die.species === 'Item') {
+              if (die.rarity !== 'Artifact') {
+                  newDie.rarity = `${die.rarity} Equipment`
+              }
+              newDie.species = 'Equipment';
+          }
+          if (die.species === 'Medallion') {
+              newDie.species = 'Equipment';
+          }
+          if (die.species === 'Relic') {
+              newDie.species = 'Equipment';
+          }
+          if (die.species.endsWith('Terrain')) {
+              newDie.species = 'Terrain';
+              const nameSplit = die.name.split(' ');
+              if (nameSplit.length == 2) {
+                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
+              } else {
+                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
+              }
+          }
+          if (newDie.species === 'Terrain') {
+              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
+                  newDie.rarity = 'Advanced Terrain';
+              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
+                  newDie.rarity = 'Basic Terrain';
+              }
+          }
+          return newDie;
+      });
+
       const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
         this.$tours['diceBrowserTour'].start();
@@ -147,10 +201,46 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-        setCurrentDie(die) {
-          die.amount = 1;
-          this.setCollectionDie(die);
-          this.$router.push('/collection');
+        decr() {
+          if (this.amount > 0) {
+            this.amount--;
+          }
+        },
+        incr() {
+          this.amount++;
+        },
+        expand(id) {
+          let row = document.getElementById(id);
+          let actionButton = row.querySelector('#action-button');
+          let expansion = row.querySelector('#expansion');
+          if (window.getComputedStyle(expansion).display === 'none') {
+            let expansions = document.querySelectorAll('#expansion');
+            [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
+            expansion.style.display = 'grid';
+            actionButton.innerText = 'expand_less';
+          } else {
+            expansion.style.display = 'none';
+            actionButton.innerText = 'expand_more';
+          }
+        },
+        setCurrentDie(collectionDie) {
+          let that = this;
+          let added = false;
+          let newDie = {...collectionDie};
+          newDie.amount = this.amount;
+          this.expand(`${newDie.name}/${newDie.edition}`);
+          this.myCollection.forEach(die => {
+            if(die.name === newDie.name && die.edition === newDie.edition) {
+              die.amount += that.amount;
+              added = true;
+            }
+          });
+
+          if(!added) {
+            this.myCollection.push(newDie);
+          }
+          this.amount = 0;
+          saveCollection('collections', this.myCollection);
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
@@ -171,22 +261,17 @@ export default {
 };
 </script>
 
-<style scope>
+<style scoped>
   .dice-browser {
-    display: grid;
-    grid-auto-flow: row;
-    grid-template-columns: auto;
-    align-content: center;
-    justify-content: center;
-    gap: .5em;
+    padding: .5em;
   }
 
-  .dice-browser h1 {
+  #dice .header h1 {
     align-self: center;
     justify-self: center;    
   }
 
-  .dice-browser .element {
+  #dice .header .element {
     align-self: center;
     justify-self: center;
     display: grid;
@@ -195,28 +280,38 @@ export default {
     padding: .25em;
   }
 
-  .dice-browser .element > label {
+  #dice .header .element > label {
     font-weight: bold;
     justify-self: end;
     align-self: center;
     padding-right: .5em;
   }
 
-  .dice-browser select {
+  #dice .header select {
     border-radius: .25em;
-  }
-
-  .separator {
-    border-bottom: 1px solid #D3D3D3;
+    width: 15em;
   }
 
   #dice {
+    width: 100%;
     height: 60vh;
     display: grid;
+    grid-template-columns: auto;
     grid-template-rows: auto 1fr;
+    align-items: center;
+    justify-items: center;
   }
 
-  #dice div.header {
+  #dice .header {
+    width: 100%;
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-rows: 1fr 1fr 1fr;
+    font-weight: bold;
+  }
+
+  #dice .header .table-header {
+    width: 100%;
     margin-bottom: .75em;
     border-bottom: 1px solid black;
     display: grid;
@@ -227,21 +322,61 @@ export default {
     justify-items: center;
   }
 
-  #dice div.row {
-    display: grid;
+  #dice .body {
+    width: 100%;
+  }
+
+  .add-die {
+    grid-area: 2 / 1 / 2 / 5;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr 1fr 1fr;
+    justify-content: center;
+    align-content: center;
     justify-items: center;
     align-items: center;
+    gap: .5em;
+  }
+
+  #expansion {
+    display: none;
+    width: 100%;
+    border: 1px solid black;
+  }
+
+  .row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    gap: .25em;
+  }
+
+  .size {
+    grid-column: 2;
+    grid-row: 1;
+    width: 25%;
+  }
+
+  .type {
+    grid-column: 3;
+    grid-row: 1;
+    width: 25%;
   }
 
   .add-button {
+    grid-column: 4;
+    grid-row: 1;
     font-size: 24px;
+    width: 25%;
   }
 
   .die-id {
+    grid-column: 1;
+    grid-row: 1;
     display: grid;
-    grid-template-rows: 1fr 1fr;
     justify-items: center;
+    width: 25%;
   }
 </style>

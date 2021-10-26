@@ -1,67 +1,71 @@
 <template>
     <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
-      <h1>Collection Manager</h1>
-      <div class="element">
-        <label for="privacy">Make Public</label>
-        <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
+      <div class="header">
+        <h1>Collection Manager</h1>
+        <div class="element">
+          <label for="privacy">Make Public</label>
+          <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
+        </div>
+        <button id="locate" @click="browseDice">Locate</button>
+        <span id="filters">
+          <div class="element">
+              <label for="speciesFilter">Species</label>
+              <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
+                  <option value="Amazon">Amazons</option>
+                  <option value="Coral Elf">Coral Elves</option>
+                  <option value="Dracolem">Dracolem</option>
+                  <option value="Dragon">Dragons</option>
+                  <option value="Dragonkin">Dragonkin</option>
+                  <option value="Dwarf">Dwarves</option>
+                  <option value="Eldarim, Black">Eldarim, Black</option>
+                  <option value="Eldarim, Blue">Eldarim, Blue</option>
+                  <option value="Eldarim, Green">Eldarim, Green</option>
+                  <option value="Eldarim, Red">Eldarim, Red</option>
+                  <option value="Eldarim, White">Eldarim, White</option>
+                  <option value="Eldarim, Yellow">Eldarim, Yellow</option>
+                  <option value="Frostwings">Frostwings</option>
+                  <option value="Ferals">Ferals</option>
+                  <option value="Firewalkers">Firewalkers</option>
+                  <option value="Goblins">Goblins</option>
+                  <option value="Equipment">Equipment</option>
+                  <option value="Lava Elves">Lava Elves</option>
+                  <option value="Medallion">Medallion</option>
+                  <option value="Royalty">Royalty</option>
+                  <option value="Scalders">Scalders</option>
+                  <option value="Swamp Stalkers">Swamp Stalkers</option>
+                  <option value="Terrain">Terrain</option>
+                  <option value="Treefolk">Treefolk</option>
+                  <option value="Undead">Undead</option>
+              </select>
+          </div>
+          <div class="element">
+              <label for="editionFilter">Set</label>
+              <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
+                  <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
+              </select>
+          </div>
+        </span>
+
+        <div class="separator"></div>
+        <span class="dice">
+            <div class="header">
+                <div>ID</div>
+                <div>Rarity</div>
+                <div>Type</div>
+                <div>Amount</div>
+            </div>
+        </span>
       </div>
-      <button id="locate" @click="browseDice">Locate</button>
-      <span id="filters">
-        <div class="element">
-            <label for="speciesFilter">Species</label>
-            <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
-                <option value="Amazon">Amazons</option>
-                <option value="Coral Elf">Coral Elves</option>
-                <option value="Dracolem">Dracolem</option>
-                <option value="Dragon">Dragons</option>
-                <option value="Dragonkin">Dragonkin</option>
-                <option value="Dwarf">Dwarves</option>
-                <option value="Eldarim, Black">Eldarim, Black</option>
-                <option value="Eldarim, Blue">Eldarim, Blue</option>
-                <option value="Eldarim, Green">Eldarim, Green</option>
-                <option value="Eldarim, Red">Eldarim, Red</option>
-                <option value="Eldarim, White">Eldarim, White</option>
-                <option value="Eldarim, Yellow">Eldarim, Yellow</option>
-                <option value="Frostwings">Frostwings</option>
-                <option value="Ferals">Ferals</option>
-                <option value="Firewalkers">Firewalkers</option>
-                <option value="Goblins">Goblins</option>
-                <option value="Equipment">Equipment</option>
-                <option value="Lava Elves">Lava Elves</option>
-                <option value="Medallion">Medallion</option>
-                <option value="Royalty">Royalty</option>
-                <option value="Scalders">Scalders</option>
-                <option value="Swamp Stalkers">Swamp Stalkers</option>
-                <option value="Terrain">Terrain</option>
-                <option value="Treefolk">Treefolk</option>
-                <option value="Undead">Undead</option>
-            </select>
-        </div>
-        <div class="element">
-            <label for="editionFilter">Set</label>
-            <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
-                <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
-            </select>
-        </div>
-      </span>
-
-      <div class="separator"></div>
-
-      <div id="dice">
-          <div class="header">
-              <div>ID</div>
-              <div>Rarity</div>
-              <div>Type</div>
+      <div class="dice">
+        <div class="body">
+          <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
+              <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
+              <div>{{die.rarity}}</div>
+              <div>{{die.type}}</div>
+              <div><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
           </div>
-          <div class="body">
-              <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
-                  <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
-                  <div>{{die.rarity}}</div>
-                  <div>{{die.type}}</div>
-                  <div><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
-              </div>
-          </div>
+        </div>
       </div>
     </div>
 </template>
@@ -266,52 +270,44 @@ export default {
 };
 </script>
 
-<style scope>
+<style scoped>
+   button {
+     width: 10em;
+   }
   .collections {
+    width: 100%;
     display: grid;
-    grid-auto-flow: row;
-    grid-template-columns: auto;
-    align-content: center;
-    justify-content: center;
+    justify-items: center;
+  }
+
+  .collections .header {
+    width: 100%;
+    display: grid;
+    justify-items: center;
     gap: .5em;
   }
 
-  .collections h1 {
-    align-self: center;
-    justify-self: center;    
-  }
-
-  .collections .element {
+  .element {
     align-self: center;
     justify-self: center;
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
-    padding: .25em;
+    padding-bottom: .5em;
   }
 
-  .collections .element > label {
+  .element > label {
     font-weight: bold;
     justify-self: end;
     align-self: center;
     padding-right: .5em;
   }
 
-  .collections select {
-    border-radius: .25em;
+  .dice {
+    width: 100%;
   }
 
-  .separator {
-    border-bottom: 1px solid #D3D3D3;
-  }
-
-  #dice {
-    height: 60vh;
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-
-  #dice div.header {
+  .collections .dice .header {
     margin-bottom: .75em;
     border-bottom: 1px solid black;
     display: grid;
@@ -322,11 +318,25 @@ export default {
     justify-items: center;
   }
 
-  #dice div.row {
-    padding-top: .5em;
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+  .body {
+    width: 100%;
   }
 
+  .body .row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    gap: .25em;
+  }
+
+  .collections select {
+    border-radius: .25em;
+    width: 15em;
+  }
+
+  .separator {
+    border-bottom: 1px solid #D3D3D3;
+  }
 </style>

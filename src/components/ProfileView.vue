@@ -1,19 +1,22 @@
 <template>
-    <div class="collections">
-      <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
-      <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
-      <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
-      <div v-if="profile.isCollectionPublic">
-        <h1>Their Dice Collection</h1>
-        <div id="dice">
-            <div class="header">
-                <div>ID</div>
-                <div>Set</div>
-                <div>Size</div>
-                <div>Type</div>
-                <div></div>
-            </div>
-            <div class="body">
+  <div class="profiles">
+      <div class="collections">
+          <div class="header">
+            <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
+            <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
+            <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
+            <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
+            <span class="dice">
+              <div v-if="profile.isCollectionPublic" class="header">
+                  <div>ID</div>
+                  <div>Set</div>
+                  <div>Size</div>
+                  <div>Type</div>
+                  <div>Amount</div>
+              </div>
+            </span>
+          </div>
+            <div v-if="profile.isCollectionPublic" class="body">
                 <div v-for="die in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
                     <div class="die-id"><img :src="'../../images/dice/' + die.id"/><div>{{die.name}}</div></div>
                     <div>{{die.edition}}</div>
@@ -21,8 +24,7 @@
                     <div>{{die.type}}</div>
                     <div>{{die.amount}}</div>
                 </div>
-            </div>
-        </div>
+          </div>
       </div>
     </div>
 </template>
@@ -116,34 +118,6 @@ export default {
 </script>
 
 <style scoped>
-  .profiles {
-    display: grid;
-    grid-auto-flow: row;
-    grid-template-columns: auto;
-    align-content: center;
-    justify-content: center;
-    gap: .5em;
-  }
-
-  .profiles h1 {
-    align-self: center;
-    justify-self: center;    
-  }
-
-  .profiles .element {
-    align-self: center;
-    justify-self: center;
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .profiles .element > label {
-    font-weight: bold;
-    justify-self: start;
-    align-self: start;
-  }
-
   .separator {
     border-bottom: 1px solid #D3D3D3;
   }
@@ -154,16 +128,26 @@ export default {
       color: red;
   }
 
+  .profiles {
+    margin: .5em;
+  }
+
   .collections {
+    width: 100%;
     display: grid;
-    grid-auto-flow: row;
     grid-template-columns: auto;
-    align-content: center;
-    justify-content: center;
+    grid-template-rows: 1fr auto;
+    align-items: center;
+    justify-items: center;
     gap: .5em;
   }
 
-  .collections h1 {
+  .collections .header {
+    width: 100%;
+  }
+
+  .collections .header h1 {
+    text-align: center;
     align-self: center;
     justify-self: center;    
   }
@@ -183,35 +167,31 @@ export default {
     padding-right: .5em;
   }
 
-  .collections select {
-    border-radius: .25em;
+  .dice {
+    width: 100%;
   }
 
-  .separator {
-    border-bottom: 1px solid #D3D3D3;
-  }
-
-  #dice {
-    height: 60vh;
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-
-  #dice div.header {
+  .collections .dice .header {
     margin-bottom: .75em;
     border-bottom: 1px solid black;
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     font-weight: bold;
     align-items: center;
     justify-items: center;
   }
 
-  #dice div.row {
-    padding-top: .5em;
+  .body {
+    width: 100%;
+  }
+
+  .body .row {
+    width: 100%;
     display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    gap: .25em;
   }
 </style>
