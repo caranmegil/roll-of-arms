@@ -66,7 +66,7 @@ const store = createStore({
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             collectionDie: null,
             forceSlot: 'Home',
-            filters: {species: 'Amazon', edition: '-'},
+            filters: {species: 'Amazon', edition: '-', size: '', type: ''},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
             forcesDice: [],
         };
@@ -99,7 +99,7 @@ const store = createStore({
         signOut(state) {
             state.user = null;
             state.credentials = {}
-            state.filters = {species: 'Amazon', edition: '-'}
+            state.filters = {species: 'Amazon', edition: '-', size: '', type: ''}
             state.dice = [];
             state.forcesDice = [];
             state.forceSlot = 'Home';

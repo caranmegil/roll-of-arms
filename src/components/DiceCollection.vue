@@ -10,7 +10,7 @@
         <button id="locate" @click="browseDice">Locate</button>
         <span id="filters">
           <div class="element">
-              <label for="speciesFilter">Species</label>
+              <label for="speciesFilter">Species/Set</label>
               <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
                   <option value="Amazon">Amazons</option>
                   <option value="Coral Elf">Coral Elves</option>
@@ -40,7 +40,7 @@
               </select>
           </div>
           <div class="element">
-              <label for="editionFilter">Set</label>
+              <label for="editionFilter">Edition</label>
               <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
                   <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
               </select>
@@ -90,7 +90,7 @@ export default {
                 header: {
                   title: 'Filters!',
                 },
-                content: 'Set your species and edition filters here.',
+                content: 'Set your species/set and edition filters here.',
               },
               {
                 target: '#locate',

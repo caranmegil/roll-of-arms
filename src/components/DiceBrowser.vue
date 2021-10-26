@@ -6,7 +6,7 @@
               <h1>Dice Browser</h1>
               <span id="filters">
                 <div class="element">
-                    <label for="speciesFilter">Species</label>
+                    <label for="speciesFilter">Species/Set</label>
                     <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
                         <option value="Amazon">Amazons</option>
                         <option value="Coral Elf">Coral Elves</option>
@@ -36,9 +36,23 @@
                     </select>
                 </div>
                 <div class="element">
-                    <label for="editionFilter">Set</label>
+                    <label for="editionFilter">Edition</label>
                     <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
                         <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
+                    </select>
+                </div>
+                <div class="element">
+                    <label for="sizeFilter">Size</label>
+                    <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
+                        <option value="" selected="true">All</option>
+                        <option v-for="option in sizes" :key="option" :value="option">{{option}}</option>
+                    </select>
+                </div>
+                <div class="element">
+                    <label for="typeFilter">Type</label>
+                    <select id="typeFilter" v-model="typeFilter" @change="setTypeFilter">
+                        <option value="" selected="true">All</option>
+                        <option v-for="option in types" :key="option" :value="option">{{option}}</option>
                     </select>
                 </div>
               </span>
@@ -88,13 +102,17 @@ export default {
             myCollection: [],
             amount: 0,
             openedId: null,
+            sizes: [],
+            sizeFilter: '',
+            types: [],
+            typeFilter: '',
             steps: [
               {
                 target: '#filters',
                 header: {
                   title: 'Filters!',
                 },
-                content: 'Set your species and edition filters here.',
+                content: 'Set your species/set and edition filters here.',
               },
               {
                 target: '.body',
@@ -194,10 +212,11 @@ export default {
 
       this.speciesFilter = this.$store.state.filters.species;
       this.editionFilter = this.$store.state.filters.edition;
+      this.sizeFilter = this.$store.state.filters.size;
+      this.typeFilter = this.$store.state.filters.type;
       
-      let that = this;
       this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+      this.filteredDice = this.applyFilters();
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
@@ -208,6 +227,34 @@ export default {
         },
         incr() {
           this.amount++;
+        },
+        applyFilters() {
+          let that = this;
+          let dice = this.dice.filter(  die =>
+                                        die.species === that.speciesFilter 
+                                         && die.edition === that.editionFilter
+                                      );
+
+          let sizes = [];
+          let types = [];
+          dice.forEach( die => {
+            sizes.push(die.rarity);
+            types.push(die.type);
+          });
+
+          sizes = [...new Set(sizes)];
+          types = [...new Set(types)];
+
+          this.sizes = sizes;
+          this.types = types;
+
+          this.setFilters({species: this.speciesFilter, edition: this.editionFilter, size: this.sizeFilter, type: this.typeFilter});
+
+          dice = dice.filter( die =>
+                              (that.typeFilter === '' || die.type === that.typeFilter)
+                              && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
+                            );
+          return dice;
         },
         expand(id) {
           let row = document.getElementById(id);
@@ -253,9 +300,13 @@ export default {
             this.setEditionFilter();
         },
         setEditionFilter: function() {
-            let that = this;
-            this.setFilters({species: this.speciesFilter, edition: this.editionFilter});
-            this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+            this.filteredDice = this.applyFilters();
+        },
+        setSizeFilter: function() {
+            this.filteredDice = this.applyFilters();
+        },
+        setTypeFilter: function() {
+            this.filteredDice = this.applyFilters();
         },
     },
 };

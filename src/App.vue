@@ -9,7 +9,6 @@
       <div class="separator"></div>
       <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
       <div class="separator"></div>
-      <div @click="openDiceBrowser" class="menu-item"><span class="material-icons material-icons-outlined">search</span> Dice Browser</div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
       <div class="separator"></div>
       <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>

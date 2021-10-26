@@ -9,7 +9,7 @@
             <span class="dice">
               <div v-if="profile.isCollectionPublic" class="header">
                   <div>ID</div>
-                  <div>Set</div>
+                  <div>Edition</div>
                   <div>Size</div>
                   <div>Type</div>
                   <div>Amount</div>
