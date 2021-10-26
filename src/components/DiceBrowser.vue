@@ -58,9 +58,9 @@
               </span>
 
               <div class="table-header">
-                  <div>ID</div>
-                  <div>Size</div>
-                  <div>Type</div>
+                  <div class="column-header" @click="changeNameDirection">ID <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                  <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                  <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
               </div>
           </div>
           <div class="body">
@@ -99,6 +99,8 @@ export default {
               onSkip: this.noMoreTours,
               onFinish: this.noMoreTours,
             },
+            sortColumn: 0,
+            sortDirection: 1,
             myCollection: [],
             amount: 0,
             openedId: null,
@@ -216,7 +218,7 @@ export default {
       this.typeFilter = this.$store.state.filters.type;
       
       this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.applyFilters();
+      this.filteredDice = this.applyFiltersAndSort();
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
@@ -228,7 +230,7 @@ export default {
         incr() {
           this.amount++;
         },
-        applyFilters() {
+        applyFiltersAndSort() {
           let that = this;
           let dice = this.dice.filter(  die =>
                                         die.species === that.speciesFilter 
@@ -254,7 +256,45 @@ export default {
                               (that.typeFilter === '' || die.type === that.typeFilter)
                               && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
                             );
+
+          dice.sort( (a, b) => {
+            if (that.sortColumn == 0) {
+              return that.sortDirection * a.name.localeCompare(b.name);
+            } else if (that.sortColumn == 1) {
+              return that.sortDirection * a.rarity.localeCompare(b.rarity);
+            } else if (that.sortColumn == 2) {
+              return that.sortDirection * a.type.localeCompare(b.type);
+            }
+
+          });
           return dice;
+        },
+        changeNameDirection() {
+          if (this.sortColumn != 0) {
+            this.sortColumn = 0;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
+        },
+        changeSizeDirection() {
+          if (this.sortColumn != 1) {
+            this.sortColumn = 1;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
+        },
+        changeTypeDirection() {
+          if (this.sortColumn != 2) {
+            this.sortColumn = 2;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
         },
         expand(id) {
           let row = document.getElementById(id);
@@ -300,13 +340,13 @@ export default {
             this.setEditionFilter();
         },
         setEditionFilter: function() {
-            this.filteredDice = this.applyFilters();
+            this.filteredDice = this.applyFiltersAndSort();
         },
         setSizeFilter: function() {
-            this.filteredDice = this.applyFilters();
+            this.filteredDice = this.applyFiltersAndSort();
         },
         setTypeFilter: function() {
-            this.filteredDice = this.applyFilters();
+            this.filteredDice = this.applyFiltersAndSort();
         },
     },
 };
@@ -427,5 +467,16 @@ export default {
     display: grid;
     justify-items: center;
     width: 25%;
+  }
+
+  .column-header {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+  }
+
+  .sort-icon {
+    font-size: 24px;
   }
 </style>
