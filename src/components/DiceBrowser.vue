@@ -344,8 +344,6 @@ export default {
   }
 
   #dice {
-    width: 100%;
-    height: 60vh;
     display: grid;
     grid-template-columns: auto;
     grid-template-rows: auto 1fr;
