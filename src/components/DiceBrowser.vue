@@ -9,31 +9,7 @@
                     <label for="speciesFilter">Species/Set</label>
                     <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
                         <option value="">All</option>
-                        <option value="Amazon">Amazons</option>
-                        <option value="Coral Elf">Coral Elves</option>
-                        <option value="Dracolem">Dracolem</option>
-                        <option value="Dragon">Dragons</option>
-                        <option value="Dragonkin">Dragonkin</option>
-                        <option value="Dwarf">Dwarves</option>
-                        <option value="Eldarim, Black">Eldarim, Black</option>
-                        <option value="Eldarim, Blue">Eldarim, Blue</option>
-                        <option value="Eldarim, Green">Eldarim, Green</option>
-                        <option value="Eldarim, Red">Eldarim, Red</option>
-                        <option value="Eldarim, Yellow">Eldarim, Yellow</option>
-                        <option value="Eldarim, White">Eldarim, White</option>
-                        <option value="Frostwings">Frostwings</option>
-                        <option value="Ferals">Ferals</option>
-                        <option value="Firewalkers">Firewalkers</option>
-                        <option value="Goblins">Goblins</option>
-                        <option value="Equipment">Equipment</option>
-                        <option value="Lava Elves">Lava Elves</option>
-                        <option value="Medallion">Medallion</option>
-                        <option value="Royalty">Royalty</option>
-                        <option value="Scalders">Scalders</option>
-                        <option value="Swamp Stalkers">Swamp Stalkers</option>
-                        <option value="Terrain">Terrain</option>
-                        <option value="Treefolk">Treefolk</option>
-                        <option value="Undead">Undead</option>
+                        <option v-for="option in species" :key="option" :value="option">{{option}}</option>
                     </select>
                 </div>
                 <div class="element">
@@ -61,16 +37,18 @@
 
               <div class="table-header">
                   <div class="column-header" @click="changeNameDirection">ID <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                  <div class="column-header" @click="changeEditionDirection">Edition <span v-if="sortColumn == 3 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 3 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                   <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                   <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
               </div>
           </div>
           <div class="body">
               <div v-for="die in filteredDice" :key="die.name + '/' + die.edition" class="row"  :id="die.name + '/' + die.edition">
-                <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
-                <div class="size">{{die.rarity}}</div>
-                <div class="type">{{die.type}}</div>
-                <div class="add-button"><span id="action-button" @click="() => expand(die.name + '/' + die.edition)" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div  @click="() => expand(die.name + '/' + die.edition)" class="die-id"><img :src="die.id"/><div>{{die.name}}</div></div>
+                <div @click="() => expand(die.name + '/' + die.edition)" class="edition">{{die.edition}}</div>
+                <div @click="() => expand(die.name + '/' + die.edition)" class="size">{{die.rarity}}</div>
+                <div @click="() => expand(die.name + '/' + die.edition)" class="type">{{die.type}}</div>
+                <div @click="() => expand(die.name + '/' + die.edition)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion" class="add-die">
                   <span @click="decr" class="material-icons material-icons-outlined">remove</span>
                   <input type="number" v-model="amount"/>
@@ -132,34 +110,8 @@ export default {
             filteredDice: [],
             speciesFilter: '',
             editionFilter: '',
+            species: [],
             editions: [],
-            menu: {
-                'Amazon': ['-', 'Reprint', 'Alt-Ink'],
-                'Coral Elf': ['-'],
-                'Dwarf': ['-'],
-                'Frostwings': ['-', 'Reprint', 'Alt-Ink', 'Promos'],
-                'Ferals': ['-', 'Alt-Ink'],
-                'Firewalkers': ['-'],
-                'Goblins': ['-'],
-                'Lava Elves': ['-'],
-                'Scalders': ['-', 'Reprint', 'Promos'],
-                'Swamp Stalkers': ['-', 'Dark', 'Alt-Ink', 'Purple-Ink'],
-                'Treefolk': ['-'],
-                'Undead': ['-'],
-                'Eldarim, Black': ['-'],
-                'Eldarim, Blue': ['-'],
-                'Eldarim, Green': ['-'],
-                'Eldarim, Yellow': ['-'],
-                'Eldarim, Red': ['-'],
-                'Eldarim, White': ['-'],
-                'Dragon': ['-'],
-                'Dragonkin': ['-'],
-                'Medallion': ['-'],
-                'Equipment': ['-'],
-                'Royalty': ['-'],
-                'Dracolem': ['-'],
-                'Terrain': ['-'],
-            },
         };
     },
     async mounted() {
@@ -178,17 +130,36 @@ export default {
               newDie.name = die.name.replace('Gold', 'Yellow');
               newDie.species = 'Eldarim, Yellow';
           }
+          if (die.species === 'Dragon') {
+              if (!newDie.name.includes('/')) {
+                  newDie.type = 'Elemental';
+                  newDie.rarity = 'Elemental';
+              } else if (newDie.name.includes('White')) {
+                  newDie.type = 'White';
+                  newDie.rarity = 'White';
+              } else if (newDie.name.includes('Ivory')) {
+                  newDie.type = 'Ivory Hybrid';
+                  newDie.rarity = 'Ivory Hybrid';
+              } else {
+                  newDie.type = 'Hybrid';
+                  newDie.rarity = 'Hybrid';
+              }
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Dragonkin') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
           if (die.species === 'Item') {
               if (die.rarity !== 'Artifact') {
                   newDie.rarity = `${die.rarity} Equipment`
               }
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species === 'Medallion') {
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species === 'Relic') {
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species.endsWith('Terrain')) {
               newDie.species = 'Terrain';
@@ -218,9 +189,13 @@ export default {
       this.editionFilter = this.$store.state.filters.edition;
       this.sizeFilter = this.$store.state.filters.size;
       this.typeFilter = this.$store.state.filters.type;
-      
-      this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.applyFiltersAndSort();
+      let species = [];
+      for (let k in this.dice) {
+        species.push(k);
+      }
+
+      this.species = species;
+      this.setSpeciesFilter();      
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
@@ -234,10 +209,15 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter(  die =>
-                                        (that.speciesFilter === '' || die.species === that.speciesFilter)
-                                        && (that.editionFilter === '' || die.edition === that.editionFilter)
-                                      );
+          let species = Object.keys(this.dice).filter(species => that.speciesFilter === '' || species === that.speciesFilter);
+          let dice = []
+
+          species.forEach(species => {
+              let editions = Object.keys(that.dice[species]).filter(edition => that.editionFilter === '' || that.editionFilter === edition);
+              editions.forEach(edition => dice = dice.concat(that.dice[species][edition].map(die => {
+                return {...die, edition,}
+              })));
+          });
 
           let sizes = [];
           let types = [];
@@ -266,6 +246,8 @@ export default {
               return that.sortDirection * a.rarity.localeCompare(b.rarity);
             } else if (that.sortColumn == 2) {
               return that.sortDirection * a.type.localeCompare(b.type);
+            } else if (that.sortColumn == 3) {
+              return that.sortDirection * a.edition.localeCompare(b.edition);
             }
 
           });
@@ -292,6 +274,15 @@ export default {
         changeTypeDirection() {
           if (this.sortColumn != 2) {
             this.sortColumn = 2;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
+        },
+        changeEditionDirection() {
+          if (this.sortColumn != 3) {
+            this.sortColumn = 3;
             this.sortDirection = 1;
           } else {
             this.sortDirection *= -1;
@@ -337,9 +328,13 @@ export default {
           saveCollection('profiles', profile);
         },
         setSpeciesFilter: function() {
-            this.editions = this.menu[this.speciesFilter];
             this.editionFilter = '';
-            this.setEditionFilter();
+            this.filteredDice = this.applyFiltersAndSort();
+            let editions = [];
+            for (let edition in this.dice[this.speciesFilter]) {
+              editions.push(edition);
+            }
+            this.editions = editions;
         },
         setEditionFilter: function() {
             this.filteredDice = this.applyFiltersAndSort();
@@ -444,20 +439,26 @@ export default {
     gap: .25em;
   }
 
-  .size {
+  .edition {
     grid-column: 2;
     grid-row: 1;
     width: 25%;
   }
 
-  .type {
+  .size {
     grid-column: 3;
     grid-row: 1;
     width: 25%;
   }
 
-  .add-button {
+  .type {
     grid-column: 4;
+    grid-row: 1;
+    width: 25%;
+  }
+
+  .add-button {
+    grid-column: 5;
     grid-row: 1;
     font-size: 24px;
     width: 25%;

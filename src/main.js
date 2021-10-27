@@ -99,7 +99,7 @@ const store = createStore({
         signOut(state) {
             state.user = null;
             state.credentials = {}
-            state.filters = {species: 'Amazon', edition: '-', size: '', type: ''}
+            state.filters = {species: '', edition: '', size: '', type: ''}
             state.dice = [];
             state.forcesDice = [];
             state.forceSlot = 'Home';

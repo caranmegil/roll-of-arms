@@ -18,7 +18,7 @@
           </div>
             <div v-if="profile.isCollectionPublic" class="body">
                 <div v-for="die in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
-                    <div class="die-id"><img :src="'../../images/dice/' + die.id"/><div>{{die.name}}</div></div>
+                    <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}}</div></div>
                     <div>{{die.edition}}</div>
                     <div>{{die.rarity}}</div>
                     <div>{{die.type}}</div>
@@ -43,10 +43,15 @@ export default {
   data() {
     return {
       profile: {},
+      sourceDice: [],
       dice: [],
     };
   },
   methods: {
+    getImageID(die) {
+      const dice = this.sourceDice[die.species][die.edition].filter(sourceDie => sourceDie.name === die.name);
+      return dice[0].id; 
+    },
   },
   async mounted() {
     const usernames = await getEntireCollection('usernames');
@@ -59,6 +64,7 @@ export default {
     }
 
     if (this.profile.isCollectionPublic) {
+      this.sourceDice = await getEntireCollection('dice');
       this.dice = await getCollectionByField('collections', uid) || [];
       this.dice = this.dice.map(die => {
           let newDie = {...die};
@@ -73,17 +79,36 @@ export default {
               newDie.name = die.name.replace('Gold', 'Yellow');
               newDie.species = 'Eldarim, Yellow';
           }
+          if (die.species === 'Dragon') {
+              if (!newDie.name.includes('/')) {
+                  newDie.type = 'Elemental';
+                  newDie.rarity = 'Elemental';
+              } else if (newDie.name.includes('White')) {
+                  newDie.type = 'White';
+                  newDie.rarity = 'White';
+              } else if (newDie.name.includes('Ivory')) {
+                  newDie.type = 'Ivory Hybrid';
+                  newDie.rarity = 'Ivory Hybrid';
+              } else {
+                  newDie.type = 'Hybrid';
+                  newDie.rarity = 'Hybrid';
+              }
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Dragonkin') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
           if (die.species === 'Item') {
               if (die.rarity !== 'Artifact') {
                   newDie.rarity = `${die.rarity} Equipment`
               }
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species === 'Medallion') {
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species === 'Relic') {
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species.endsWith('Terrain')) {
               newDie.species = 'Terrain';

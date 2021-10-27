@@ -2,7 +2,7 @@
     <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
       <div class="header">
-        <h1>Collection Manager</h1>
+        <h1>My Collection</h1>
         <div class="element">
           <label for="privacy">Make Public</label>
           <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
@@ -13,31 +13,7 @@
               <label for="speciesFilter">Species/Set</label>
               <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
                   <option value="">All</option>
-                  <option value="Amazon">Amazons</option>
-                  <option value="Coral Elf">Coral Elves</option>
-                  <option value="Dracolem">Dracolem</option>
-                  <option value="Dragon">Dragons</option>
-                  <option value="Dragonkin">Dragonkin</option>
-                  <option value="Dwarf">Dwarves</option>
-                  <option value="Eldarim, Black">Eldarim, Black</option>
-                  <option value="Eldarim, Blue">Eldarim, Blue</option>
-                  <option value="Eldarim, Green">Eldarim, Green</option>
-                  <option value="Eldarim, Red">Eldarim, Red</option>
-                  <option value="Eldarim, White">Eldarim, White</option>
-                  <option value="Eldarim, Yellow">Eldarim, Yellow</option>
-                  <option value="Frostwings">Frostwings</option>
-                  <option value="Ferals">Ferals</option>
-                  <option value="Firewalkers">Firewalkers</option>
-                  <option value="Goblins">Goblins</option>
-                  <option value="Equipment">Equipment</option>
-                  <option value="Lava Elves">Lava Elves</option>
-                  <option value="Medallion">Medallion</option>
-                  <option value="Royalty">Royalty</option>
-                  <option value="Scalders">Scalders</option>
-                  <option value="Swamp Stalkers">Swamp Stalkers</option>
-                  <option value="Terrain">Terrain</option>
-                  <option value="Treefolk">Treefolk</option>
-                  <option value="Undead">Undead</option>
+                  <option v-for="option in species" :key="option" :value="option">{{option}}</option>
               </select>
           </div>
           <div class="element">
@@ -67,6 +43,7 @@
         <span class="dice">
             <div class="header">
                 <div class="column-header" @click="changeNameDirection">ID <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                <div class="column-header" @click="changeEditionDirection">Edition  <span v-if="sortColumn == 3 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 3 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div>Amount</div>
@@ -76,7 +53,8 @@
       <div class="dice">
         <div class="body">
           <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
-              <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
+              <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}}</div></div>
+              <div>{{die.edition}}</div>
               <div>{{die.rarity}}</div>
               <div>{{die.type}}</div>
               <div><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
@@ -89,7 +67,11 @@
 <script>
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
-import { getCollection, saveCollection } from '@/firebase';
+import {
+  getCollection,
+  saveCollection,
+  getEntireCollection,
+} from '@/firebase';
 
 export default {
     name: 'DiceBrowser',
@@ -128,45 +110,21 @@ export default {
                 },
               },
             ],
+            sourceDice: [],
             dice: [],
             filteredDice: [],
             speciesFilter: '',
+            species: [],
             editionFilter: '',
             editions: [],
             sizes: [],
             sizeFilter: '',
             types: [],
             typeFilter: '',
-            menu: {
-                'Amazon': ['-', 'Reprint', 'Alt-Ink'],
-                'Coral Elf': ['-'],
-                'Dwarf': ['-'],
-                'Frostwings': ['-', 'Reprint', 'Alt-Ink', 'Promos'],
-                'Ferals': ['-', 'Alt-Ink'],
-                'Firewalkers': ['-'],
-                'Goblins': ['-'],
-                'Lava Elves': ['-'],
-                'Scalders': ['-', 'Reprint', 'Promos'],
-                'Swamp Stalkers': ['-', 'Dark', 'Alt-Ink', 'Purple-Ink'],
-                'Treefolk': ['-'],
-                'Undead': ['-'],
-                'Eldarim, Black': ['-'],
-                'Eldarim, Blue': ['-'],
-                'Eldarim, Green': ['-'],
-                'Eldarim, Yellow': ['-'],
-                'Eldarim, Red': ['-'],
-                'Eldarim, White': ['-'],
-                'Dragon': ['-'],
-                'Dragonkin': ['-'],
-                'Medallion': ['-'],
-                'Equipment': ['-'],
-                'Royalty': ['-'],
-                'Dracolem': ['-'],
-                'Terrain': ['-'],
-            },
         };
     },
     async mounted() {
+      this.sourceDice = await getEntireCollection('dice');
       this.profile = await getCollection('profiles') || {};
       if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
         this.$tours['collectionTour'].start();
@@ -190,17 +148,36 @@ export default {
               newDie.name = die.name.replace('Gold', 'Yellow');
               newDie.species = 'Eldarim, Yellow';
           }
+          if (die.species === 'Dragon') {
+              if (!newDie.name.includes('/')) {
+                  newDie.type = 'Elemental';
+                  newDie.rarity = 'Elemental';
+              } else if (newDie.name.includes('White')) {
+                  newDie.type = 'White';
+                  newDie.rarity = 'White';
+              } else if (newDie.name.includes('Ivory')) {
+                  newDie.type = 'Ivory Hybrid';
+                  newDie.rarity = 'Ivory Hybrid';
+              } else {
+                  newDie.type = 'Hybrid';
+                  newDie.rarity = 'Hybrid';
+              }
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Dragonkin') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
           if (die.species === 'Item') {
               if (die.rarity !== 'Artifact') {
                   newDie.rarity = `${die.rarity} Equipment`
               }
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species === 'Medallion') {
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species === 'Relic') {
-              newDie.species = 'Equipment';
+              newDie.species = 'Item';
           }
           if (die.species.endsWith('Terrain')) {
               newDie.species = 'Terrain';
@@ -243,8 +220,13 @@ export default {
       this.sizeFilter = this.$store.state.filters.size;
       this.typeFilter = this.$store.state.filters.type;
       
-      this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.applyFiltersAndSort()
+      let species = [];
+      for (let k in this.sourceDice) {
+        species.push(k);
+      }
+
+      this.species = species;
+      this.setSpeciesFilter();
     },
     unmounted() {
       this.setCollectionDie(null);
@@ -263,6 +245,15 @@ export default {
         changeSizeDirection() {
           if (this.sortColumn != 1) {
             this.sortColumn = 1;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
+        },
+        changeEditioneDirection() {
+          if (this.sortColumn != 3) {
+            this.sortColumn = 3;
             this.sortDirection = 1;
           } else {
             this.sortDirection *= -1;
@@ -311,10 +302,16 @@ export default {
               return that.sortDirection * a.rarity.localeCompare(b.rarity);
             } else if (that.sortColumn == 2) {
               return that.sortDirection * a.type.localeCompare(b.type);
+            } else if (that.sortColumn == 3) {
+              return that.sortDirection * a.edition.localeCompare(b.edition);
             }
 
           });
           return dice;
+        },
+        getImageID(die) {
+          const dice = this.sourceDice[die.species][die.edition].filter(sourceDie => sourceDie.name === die.name);
+          return dice[0].id; 
         },
         saveTheProfile() {
           saveCollection('profiles', this.profile);
@@ -344,9 +341,13 @@ export default {
           saveCollection('profiles', profile);
         },
         setSpeciesFilter: function() {
-            this.editions = this.menu[this.speciesFilter];
             this.editionFilter = '';
-            this.setEditionFilter();
+            this.filteredDice = this.applyFiltersAndSort();
+            let editions = [];
+            for (let edition in this.sourceDice[this.speciesFilter]) {
+              editions.push(edition);
+            }
+            this.editions = editions;
         },
         setEditionFilter: function() {
             this.filteredDice = this.applyFiltersAndSort();
@@ -403,7 +404,7 @@ export default {
     border-bottom: 1px solid black;
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     font-weight: bold;
     align-items: center;
     justify-items: center;
@@ -416,7 +417,7 @@ export default {
   .body .row {
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     justify-items: center;
     align-items: center;
     gap: .25em;

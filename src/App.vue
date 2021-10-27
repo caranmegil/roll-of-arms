@@ -35,7 +35,7 @@ import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
   signOutOfGoogle,
-  getEntireCollection,
+  // getEntireCollection,
 } from '@/firebase';
 
 export default {
@@ -51,15 +51,15 @@ export default {
     const credentials = this.$store.state.credentials;
 
     if ( credentials.email && credentials.password ) {
-      if (this.$store.state.dice == null) {
-        const dice = await getEntireCollection('dice');
-        this.setDice(dice);
-      }
-      this.setForcesDice(this.$store.state.dice.filter(die => die.edition === '-').map(die => {
-        let newDie = {...die};
-        delete newDie.edition;
-        return newDie;
-      }))
+      // if (this.$store.state.dice == null) {
+      //   const dice = await getEntireCollection('dice');
+      //   this.setDice(dice);
+      // }
+      // this.setForcesDice(this.$store.state.dice.filter(die => die.edition === '-').map(die => {
+      //   let newDie = {...die};
+      //   delete newDie.edition;
+      //   return newDie;
+      // }))
     }
 
     this.isLoaded = true;
