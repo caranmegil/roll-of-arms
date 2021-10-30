@@ -13,13 +13,6 @@
                     </select>
                 </div>
                 <div class="element">
-                    <label for="editionFilter">Edition</label>
-                    <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
-                        <option value="">All</option>
-                        <option v-for="option in editions" :key="option" :value="option">{{option}}</option>
-                    </select>
-                </div>
-                <div class="element">
                     <label for="sizeFilter">Size</label>
                     <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
                         <option value="" selected="true">All</option>
@@ -37,23 +30,24 @@
 
               <div class="table-header">
                   <div class="column-header" @click="changeNameDirection">ID <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
-                  <div class="column-header" @click="changeEditionDirection">Edition <span v-if="sortColumn == 3 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 3 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                   <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                   <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
               </div>
           </div>
           <div class="body">
-              <div v-for="die in filteredDice" :key="die.name + '/' + die.edition" class="row"  :id="die.name + '/' + die.edition">
-                <div  @click="() => expand(die.name + '/' + die.edition)" class="die-id"><img :src="die.id"/><div>{{die.name}}</div></div>
-                <div @click="() => expand(die.name + '/' + die.edition)" class="edition">{{die.edition}}</div>
-                <div @click="() => expand(die.name + '/' + die.edition)" class="size">{{die.rarity}}</div>
-                <div @click="() => expand(die.name + '/' + die.edition)" class="type">{{die.type}}</div>
-                <div @click="() => expand(die.name + '/' + die.edition)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
-                <div id="expansion" class="add-die">
-                  <span @click="decr" class="material-icons material-icons-outlined">remove</span>
-                  <input type="number" v-model="amount"/>
-                  <span @click="incr" class="material-icons material-icons-outlined">add</span>
-                  <button @click="() => setCurrentDie(die)">Add</button>
+              <div v-for="die in filteredDice" :key="die.name" class="row"  :id="die.name">
+                <div class="die-id"><img @click="() => expand(die.name)" :src="die.id"/><div>{{die.name}}</div></div>
+                <div @click="() => expand(die.name)" class="size">{{die.rarity}}</div>
+                <div @click="() => expand(die.name)" class="type">{{die.type}}</div>
+                <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div id="expansion">
+                  <div v-for="edition in die.editions" :key="die.name + '/' + edition" class="add-die">
+                    <span>{{edition}}</span>
+                    <span @click="decr" class="material-icons material-icons-outlined">remove</span>
+                    <input type="number" v-model="amount"/>
+                    <span @click="incr" class="material-icons material-icons-outlined">add</span>
+                    <button @click="() => addDie(die, edition)">Add</button>
+                  </div>
                 </div>
               </div>
           </div>
@@ -109,9 +103,7 @@ export default {
             ],
             filteredDice: [],
             speciesFilter: '',
-            editionFilter: '',
             species: [],
-            editions: [],
         };
     },
     async mounted() {
@@ -186,13 +178,13 @@ export default {
       }
 
       this.speciesFilter = this.$store.state.filters.species;
-      this.editionFilter = this.$store.state.filters.edition;
       this.sizeFilter = this.$store.state.filters.size;
       this.typeFilter = this.$store.state.filters.type;
       let species = [];
-      for (let k in this.dice) {
-        species.push(k);
-      }
+
+      this.dice.forEach(die => species.push(die.species));
+      species = [...new Set(species)];
+      species.sort();
 
       this.species = species;
       this.setSpeciesFilter();      
@@ -209,15 +201,7 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let species = Object.keys(this.dice).filter(species => that.speciesFilter === '' || species === that.speciesFilter);
-          let dice = []
-
-          species.forEach(species => {
-              let editions = Object.keys(that.dice[species]).filter(edition => that.editionFilter === '' || that.editionFilter === edition);
-              editions.forEach(edition => dice = dice.concat(that.dice[species][edition].map(die => {
-                return {...die, edition,}
-              })));
-          });
+          let dice = this.dice.filter(die => that.speciesFilter === '' || die.species === that.speciesFilter);
 
           let sizes = [];
           let types = [];
@@ -246,8 +230,6 @@ export default {
               return that.sortDirection * a.rarity.localeCompare(b.rarity);
             } else if (that.sortColumn == 2) {
               return that.sortDirection * a.type.localeCompare(b.type);
-            } else if (that.sortColumn == 3) {
-              return that.sortDirection * a.edition.localeCompare(b.edition);
             }
 
           });
@@ -303,14 +285,17 @@ export default {
             actionButton.innerText = 'expand_more';
           }
         },
-        setCurrentDie(collectionDie) {
+        addDie(die, edition) {
           let that = this;
           let added = false;
-          let newDie = {...collectionDie};
+          let newDie = {...die};
+          delete newDie.editions;
+          delete newDie.id;
+          newDie.edition = edition;
           newDie.amount = this.amount;
-          this.expand(`${newDie.name}/${newDie.edition}`);
-          this.myCollection.forEach(die => {
-            if(die.name === newDie.name && die.edition === newDie.edition) {
+          this.expand(newDie.name);
+          this.myCollection.forEach( die => {
+            if (die.name === newDie.name && die.edition === newDie.edition) {
               die.amount += that.amount;
               added = true;
             }
@@ -318,6 +303,8 @@ export default {
 
           if(!added) {
             this.myCollection.push(newDie);
+            console.log(newDie);
+            console.log(this.myCollection);
           }
           this.amount = 0;
           saveCollection('collections', this.myCollection);
@@ -413,9 +400,9 @@ export default {
   }
 
   .add-die {
-    grid-area: 2 / 1 / 2 / 5;
     grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     justify-content: center;
     align-content: center;
     justify-items: center;
@@ -425,8 +412,9 @@ export default {
 
   #expansion {
     display: none;
+    grid-area: 2 / 1 / 2 / 5;
     width: 100%;
-    border: 1px solid black;
+    border: 1px dashed black;
   }
 
   .row {
@@ -439,26 +427,20 @@ export default {
     gap: .25em;
   }
 
-  .edition {
+  .size {
     grid-column: 2;
     grid-row: 1;
     width: 25%;
   }
 
-  .size {
+  .type {
     grid-column: 3;
     grid-row: 1;
     width: 25%;
   }
 
-  .type {
-    grid-column: 4;
-    grid-row: 1;
-    width: 25%;
-  }
-
   .add-button {
-    grid-column: 5;
+    grid-column: 4;
     grid-row: 1;
     font-size: 24px;
     width: 25%;

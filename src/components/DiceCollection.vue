@@ -54,10 +54,10 @@
         <div class="body">
           <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}}</div></div>
-              <div>{{die.edition}}</div>
-              <div>{{die.rarity}}</div>
-              <div>{{die.type}}</div>
-              <div><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
+              <div class="edition">{{die.edition}}</div>
+              <div class="size">{{die.rarity}}</div>
+              <div class="type">{{die.type}}</div>
+              <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
           </div>
         </div>
       </div>
@@ -121,6 +121,7 @@ export default {
             sizeFilter: '',
             types: [],
             typeFilter: '',
+            timerHandle: null,
         };
     },
     async mounted() {
@@ -221,19 +222,24 @@ export default {
       this.typeFilter = this.$store.state.filters.type;
       
       let species = [];
-      for (let k in this.sourceDice) {
-        species.push(k);
-      }
+      this.dice.forEach(die => species.push(die.species));
 
+      species = [...new Set(species)].sort();
       this.species = species;
+
       this.setSpeciesFilter();
+      this.timerHandle = setInterval(this.saveAndClear, 5000);
     },
     unmounted() {
-      this.setCollectionDie(null);
+      clearInterval(this.timerHandle);
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-                changeNameDirection() {
+        saveAndClear() {
+          this.dice = this.dice.filter(die => die.amount > 0);
+          saveCollection('collections', this.dice);
+        },
+        changeNameDirection() {
           if (this.sortColumn != 0) {
             this.sortColumn = 0;
             this.sortDirection = 1;
@@ -310,7 +316,7 @@ export default {
           return dice;
         },
         getImageID(die) {
-          const dice = this.sourceDice[die.species][die.edition].filter(sourceDie => sourceDie.name === die.name);
+          const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
           return dice[0].id; 
         },
         saveTheProfile() {
@@ -328,8 +334,7 @@ export default {
               }
 
               return die;
-            }).filter(die => die.amount > 0);
-            saveCollection('collections', this.dice);
+            });
           }
         },
         setCurrentDie(die) {
@@ -344,9 +349,9 @@ export default {
             this.editionFilter = '';
             this.filteredDice = this.applyFiltersAndSort();
             let editions = [];
-            for (let edition in this.sourceDice[this.speciesFilter]) {
-              editions.push(edition);
-            }
+            this.dice.filter(die => die.species === this.speciesFilter).forEach(die => editions.push(die.edition));
+            editions = [...new Set(editions)];
+            editions.sort();
             this.editions = editions;
         },
         setEditionFilter: function() {
@@ -441,5 +446,37 @@ export default {
 
   .sort-icon {
     font-size: 24px;
+  }
+
+  .die-id {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    justify-items: center;
+    width: 20%;
+  }
+
+  .edition {
+    grid-column: 2;
+    grid-row: 1;
+    width: 20%;
+  }
+
+  .size {
+    grid-column: 3;
+    grid-row: 1;
+    width: 20%;
+  }
+
+  .type {
+    grid-column: 4;
+    grid-row: 1;
+    width: 20%;
+  }
+
+  .amount {
+    grid-column: 5;
+    grid-row: 1;
+    width: 20%;
   }
 </style>

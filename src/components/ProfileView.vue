@@ -19,10 +19,10 @@
             <div v-if="profile.isCollectionPublic" class="body">
                 <div v-for="die in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
                     <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}}</div></div>
-                    <div>{{die.edition}}</div>
-                    <div>{{die.rarity}}</div>
-                    <div>{{die.type}}</div>
-                    <div>{{die.amount}}</div>
+                    <div class="edition">{{die.edition}}</div>
+                    <div class="size">{{die.rarity}}</div>
+                    <div class="type">{{die.type}}</div>
+                    <div class="amount">{{die.amount}}</div>
                 </div>
           </div>
       </div>
@@ -49,7 +49,7 @@ export default {
   },
   methods: {
     getImageID(die) {
-      const dice = this.sourceDice[die.species][die.edition].filter(sourceDie => sourceDie.name === die.name);
+      const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
       return dice[0].id; 
     },
   },
@@ -218,5 +218,38 @@ export default {
     justify-items: center;
     align-items: center;
     gap: .25em;
+  }
+
+
+  .die-id {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    justify-items: center;
+    width: 20%;
+  }
+
+  .edition {
+    grid-column: 2;
+    grid-row: 1;
+    width: 20%;
+  }
+
+  .size {
+    grid-column: 3;
+    grid-row: 1;
+    width: 20%;
+  }
+
+  .type {
+    grid-column: 4;
+    grid-row: 1;
+    width: 20%;
+  }
+
+  .amount {
+    grid-column: 5;
+    grid-row: 1;
+    width: 20%;
   }
 </style>
