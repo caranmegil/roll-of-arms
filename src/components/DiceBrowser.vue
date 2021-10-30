@@ -36,17 +36,17 @@
           </div>
           <div class="body">
               <div v-for="die in filteredDice" :key="die.name" class="row"  :id="die.name">
-                <div class="die-id"><img @click="() => expand(die.name)" :src="die.id"/><div>{{die.name}}</div></div>
-                <div @click="() => expand(die.name)" class="size">{{die.rarity}}</div>
-                <div @click="() => expand(die.name)" class="type">{{die.type}}</div>
-                <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div class="die-id"><img @click="() => expand(die)" :src="die.id"/><div>{{die.name}}</div></div>
+                <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
+                <div @click="() => expand(die)" class="type">{{die.type}}</div>
+                <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
-                  <div v-for="edition in die.editions" :key="die.name + '/' + edition" class="add-die">
-                    <span>{{edition}}</span>
-                    <span @click="decr" class="material-icons material-icons-outlined">remove</span>
-                    <input type="number" v-model="amount"/>
-                    <span @click="incr" class="material-icons material-icons-outlined">add</span>
-                    <button @click="() => addDie(die, edition)">Add</button>
+                  <div v-for="edAmnt in amount" :key="die.name + '/' + edAmnt.edition" class="add-die">
+                    <span>{{edAmnt.edition}}</span>
+                    <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
+                    <input type="number" v-model="edAmnt.value"/>
+                    <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
+                    <button @click="() => addDie(die, edAmnt)">Add</button>
                   </div>
                 </div>
               </div>
@@ -76,7 +76,7 @@ export default {
             sortColumn: 0,
             sortDirection: 1,
             myCollection: [],
-            amount: 0,
+            amount: {},
             openedId: null,
             sizes: [],
             sizeFilter: '',
@@ -191,13 +191,13 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-        decr() {
-          if (this.amount > 0) {
-            this.amount--;
+        decr(edAmnt) {
+          if (edAmnt.value > 0) {
+            edAmnt.value--;
           }
         },
-        incr() {
-          this.amount++;
+        incr(edAmnt) {
+          edAmnt.value++;
         },
         applyFiltersAndSort() {
           let that = this;
@@ -211,7 +211,9 @@ export default {
           });
 
           sizes = [...new Set(sizes)];
+          sizes.sort();
           types = [...new Set(types)];
+          types.sort();
 
           this.sizes = sizes;
           this.types = types;
@@ -231,8 +233,8 @@ export default {
             } else if (that.sortColumn == 2) {
               return that.sortDirection * a.type.localeCompare(b.type);
             }
-
           });
+
           return dice;
         },
         changeNameDirection() {
@@ -271,8 +273,8 @@ export default {
           }
           this.filteredDice = this.applyFiltersAndSort();
         },
-        expand(id) {
-          let row = document.getElementById(id);
+        expand(die) {
+          let row = document.getElementById(die.name);
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
           if (window.getComputedStyle(expansion).display === 'none') {
@@ -280,33 +282,32 @@ export default {
             [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
+            this.amount = die.editions.map(edition => { return {edition, value: 0} });
           } else {
             expansion.style.display = 'none';
             actionButton.innerText = 'expand_more';
+            this.amount = {};
           }
         },
-        addDie(die, edition) {
-          let that = this;
+        addDie(die, edAmnt) {
           let added = false;
           let newDie = {...die};
           delete newDie.editions;
           delete newDie.id;
-          newDie.edition = edition;
-          newDie.amount = this.amount;
-          this.expand(newDie.name);
+          newDie.edition = edAmnt.edition;
+          newDie.amount = edAmnt.value;
+          this.expand(die, );
           this.myCollection.forEach( die => {
             if (die.name === newDie.name && die.edition === newDie.edition) {
-              die.amount += that.amount;
+              die.amount += edAmnt.value;
               added = true;
             }
           });
 
           if(!added) {
             this.myCollection.push(newDie);
-            console.log(newDie);
-            console.log(this.myCollection);
           }
-          this.amount = 0;
+          this.amount = {};
           saveCollection('collections', this.myCollection);
         },
         async noMoreTours() {
@@ -316,14 +317,8 @@ export default {
         },
         setSpeciesFilter: function() {
             this.editionFilter = '';
-            this.filteredDice = this.applyFiltersAndSort();
-            let editions = [];
-            for (let edition in this.dice[this.speciesFilter]) {
-              editions.push(edition);
-            }
-            this.editions = editions;
-        },
-        setEditionFilter: function() {
+            this.sizeFilter = '';
+            this.typeFilter = '';
             this.filteredDice = this.applyFiltersAndSort();
         },
         setSizeFilter: function() {

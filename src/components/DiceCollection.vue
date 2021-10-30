@@ -17,13 +17,6 @@
               </select>
           </div>
           <div class="element">
-              <label for="editionFilter">Edition</label>
-              <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
-                  <option value="">All</option>
-                  <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
-              </select>
-          </div>
-          <div class="element">
               <label for="sizeFilter">Size</label>
               <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
                   <option value="" selected="true">All</option>
@@ -43,7 +36,6 @@
         <span class="dice">
             <div class="header">
                 <div class="column-header" @click="changeNameDirection">ID <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
-                <div class="column-header" @click="changeEditionDirection">Edition  <span v-if="sortColumn == 3 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 3 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div>Amount</div>
@@ -52,12 +44,17 @@
       </div>
       <div class="dice">
         <div class="body">
-          <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
+          <div v-for="(die) in filteredDice" :key="die.name" :id="die.name" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}}</div></div>
-              <div class="edition">{{die.edition}}</div>
               <div class="size">{{die.rarity}}</div>
               <div class="type">{{die.type}}</div>
-              <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
+                <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div id="expansion">
+                  <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
+                    <span>{{grDie.edition}}</span>
+                    <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
+                  </div>
+                </div>
           </div>
         </div>
       </div>
@@ -112,11 +109,10 @@ export default {
             ],
             sourceDice: [],
             dice: [],
+            diceGroupedByEdition: {},
             filteredDice: [],
             speciesFilter: '',
             species: [],
-            editionFilter: '',
-            editions: [],
             sizes: [],
             sizeFilter: '',
             types: [],
@@ -216,8 +212,7 @@ export default {
         this.setCurrentDie(null);
       }
 
-      this.speciesFilter = this.$store.state.filters.species;
-      this.editionFilter = this.$store.state.filters.edition;
+      this.speciesFilter = '';
       this.sizeFilter = this.$store.state.filters.size;
       this.typeFilter = this.$store.state.filters.type;
       
@@ -228,13 +223,27 @@ export default {
       this.species = species;
 
       this.setSpeciesFilter();
-      this.timerHandle = setInterval(this.saveAndClear, 5000);
+      this.timerHandle = setInterval(this.saveAndClear, 750);
     },
     unmounted() {
       clearInterval(this.timerHandle);
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
+        expand(id) {
+          let row = document.getElementById(id);
+          let actionButton = row.querySelector('#action-button');
+          let expansion = row.querySelector('#expansion');
+          if (window.getComputedStyle(expansion).display === 'none') {
+            let expansions = document.querySelectorAll('#expansion');
+            [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
+            expansion.style.display = 'grid';
+            actionButton.innerText = 'expand_less';
+          } else {
+            expansion.style.display = 'none';
+            actionButton.innerText = 'expand_more';
+          }
+        },
         saveAndClear() {
           this.dice = this.dice.filter(die => die.amount > 0);
           saveCollection('collections', this.dice);
@@ -257,15 +266,6 @@ export default {
           }
           this.filteredDice = this.applyFiltersAndSort();
         },
-        changeEditioneDirection() {
-          if (this.sortColumn != 3) {
-            this.sortColumn = 3;
-            this.sortDirection = 1;
-          } else {
-            this.sortDirection *= -1;
-          }
-          this.filteredDice = this.applyFiltersAndSort();
-        },
         changeTypeDirection() {
           if (this.sortColumn != 2) {
             this.sortColumn = 2;
@@ -277,10 +277,7 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter(  die =>
-                                        (that.speciesFilter === '' || die.species === that.speciesFilter)
-                                        && (that.editionFilter === '' || die.edition === that.editionFilter)
-                                      );
+          let dice = this.dice.filter( die => that.speciesFilter === '' || die.species === that.speciesFilter );
 
           let sizes = [];
           let types = [];
@@ -290,7 +287,9 @@ export default {
           });
 
           sizes = [...new Set(sizes)];
+          sizes.sort();
           types = [...new Set(types)];
+          types.sort();
 
           this.sizes = sizes;
           this.types = types;
@@ -313,6 +312,18 @@ export default {
             }
 
           });
+
+          this.diceGroupedByEdition = {};
+          dice.forEach(die => {
+            let namesArr = that.diceGroupedByEdition[die.name];
+            if (namesArr === undefined) {
+              namesArr = [];
+              that.diceGroupedByEdition[die.name] = namesArr;
+            }
+
+            namesArr.push(die);
+          });
+
           return dice;
         },
         getImageID(die) {
@@ -325,15 +336,16 @@ export default {
         browseDice() {
           this.$router.push('/dicebrowser');
         },
-        changeAmount(index) {
-          if (this.filteredDice[index]&& !isNaN(this.filteredDice[index].amount)) {
-            let newDie = this.filteredDice[index];
-            this.dice = this.dice.map(die => {
-              if (die.species === newDie.species && die.edition === newDie.edition && die.name === newDie.name) {
-                return newDie;
+        changeAmount(grDie) {
+          if (!isNaN(grDie.amount)) {
+            this.dice.map(die => {
+              let newDie = {...die};
+
+              if (die.name === grDie.name && die.edition === grDie.edition) {
+                newDie.amount = grDie.amount;
               }
 
-              return die;
+              return newDie;
             });
           }
         },
@@ -346,15 +358,8 @@ export default {
           saveCollection('profiles', profile);
         },
         setSpeciesFilter: function() {
-            this.editionFilter = '';
-            this.filteredDice = this.applyFiltersAndSort();
-            let editions = [];
-            this.dice.filter(die => die.species === this.speciesFilter).forEach(die => editions.push(die.edition));
-            editions = [...new Set(editions)];
-            editions.sort();
-            this.editions = editions;
-        },
-        setEditionFilter: function() {
+            this.sizeFilter = '';
+            this.typeFilter = '';
             this.filteredDice = this.applyFiltersAndSort();
         },
         setSizeFilter: function() {
@@ -423,6 +428,7 @@ export default {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     justify-items: center;
     align-items: center;
     gap: .25em;
@@ -453,30 +459,49 @@ export default {
     grid-row: 1;
     display: grid;
     justify-items: center;
-    width: 20%;
-  }
-
-  .edition {
-    grid-column: 2;
-    grid-row: 1;
-    width: 20%;
+    width: 25%;
   }
 
   .size {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1;
-    width: 20%;
+    width: 25%;
   }
 
   .type {
-    grid-column: 4;
+    grid-column: 3;
     grid-row: 1;
-    width: 20%;
+    width: 25%;
   }
 
-  .amount {
-    grid-column: 5;
+  /* .amount {
+    grid-column: 4;
     grid-row: 1;
-    width: 20%;
+    width: 25%;
+  } */
+
+  .add-die {
+    grid-auto-flow: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    align-items: center;
+    gap: .5em;
+  }
+
+  #expansion {
+    display: none;
+    grid-area: 2 / 1 / 2 / 5;
+    width: 100%;
+    border: 1px dashed black;
+  }
+
+  .add-button {
+    grid-column: 4;
+    grid-row: 1;
+    font-size: 24px;
+    width: 25%;
   }
 </style>
