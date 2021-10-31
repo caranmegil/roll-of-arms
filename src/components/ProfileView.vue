@@ -6,23 +6,50 @@
             <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
             <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
             <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
+            <span v-if="profile.isCollectionPublic" id="filters">
+              <div class="element">
+                  <label for="speciesFilter">Species/Set</label>
+                  <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
+                      <option value="">All</option>
+                      <option v-for="option in species" :key="option" :value="option">{{option}}</option>
+                  </select>
+              </div>
+              <div class="element">
+                  <label for="sizeFilter">Size</label>
+                  <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
+                      <option value="" selected="true">All</option>
+                      <option v-for="option in sizes" :key="option" :value="option">{{option}}</option>
+                  </select>
+              </div>
+              <div class="element">
+                  <label for="typeFilter">Type</label>
+                  <select id="typeFilter" v-model="typeFilter" @change="setTypeFilter">
+                      <option value="" selected="true">All</option>
+                      <option v-for="option in types" :key="option" :value="option">{{option}}</option>
+                  </select>
+              </div>
+            </span>
             <span class="dice">
               <div v-if="profile.isCollectionPublic" class="header">
-                  <div>ID</div>
-                  <div>Edition</div>
-                  <div>Size</div>
-                  <div>Type</div>
-                  <div>Amount</div>
+                <div class="column-header" @click="changeNameDirection">ID <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                <div></div>
               </div>
             </span>
           </div>
             <div v-if="profile.isCollectionPublic" class="body">
-                <div v-for="die in dice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
+                <div v-for="die in filteredDice" :key="die.name" :id="die.name" class="row">
                     <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}}</div></div>
-                    <div class="edition">{{die.edition}}</div>
                     <div class="size">{{die.rarity}}</div>
                     <div class="type">{{die.type}}</div>
-                    <div class="amount">{{die.amount}}</div>
+                    <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+                    <div id="expansion">
+                      <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
+                        <span>{{grDie.edition}}</span>
+                        <div class="amount">{{grDie.amount}}</div>
+                      </div>
+                    </div>
                 </div>
           </div>
       </div>
@@ -42,15 +69,126 @@ export default {
   },
   data() {
     return {
+      sortColumn: 0,
+      sortDirection: 1,
       profile: {},
       sourceDice: [],
       dice: [],
+      filteredDice: [],
+      diceGroupedByEdition: {},
+      speciesFilter: '',
+      species: [],
+      sizes: [],
+      sizeFilter: '',
+      types: [],
+      typeFilter: '',
     };
   },
   methods: {
     getImageID(die) {
       const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
       return dice[0].id; 
+    },
+    changeNameDirection() {
+      if (this.sortColumn != 0) {
+        this.sortColumn = 0;
+        this.sortDirection = 1;
+      } else {
+        this.sortDirection *= -1;
+      }
+      this.filteredDice = this.applyFiltersAndSort();
+    },
+    changeSizeDirection() {
+      if (this.sortColumn != 1) {
+        this.sortColumn = 1;
+        this.sortDirection = 1;
+      } else {
+        this.sortDirection *= -1;
+      }
+      this.filteredDice = this.applyFiltersAndSort();
+    },
+    changeTypeDirection() {
+      if (this.sortColumn != 2) {
+        this.sortColumn = 2;
+        this.sortDirection = 1;
+      } else {
+        this.sortDirection *= -1;
+      }
+      this.filteredDice = this.applyFiltersAndSort();
+    },
+    applyFiltersAndSort() {
+      let that = this;
+      let dice = this.dice.filter( die => that.speciesFilter === '' || die.species === that.speciesFilter );
+
+      let sizes = [];
+      let types = [];
+      dice.forEach( die => {
+        sizes.push(die.rarity);
+        types.push(die.type);
+      });
+
+      sizes = [...new Set(sizes)];
+      sizes.sort();
+      types = [...new Set(types)];
+      types.sort();
+
+      this.sizes = sizes;
+      this.types = types;
+
+      dice = dice.filter( die =>
+                          (that.typeFilter === '' || die.type === that.typeFilter)
+                          && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
+                        );
+      dice.sort( (a, b) => {
+        if (that.sortColumn == 0) {
+          return that.sortDirection * a.name.localeCompare(b.name);
+        } else if (that.sortColumn == 1) {
+          return that.sortDirection * a.rarity.localeCompare(b.rarity);
+        } else if (that.sortColumn == 2) {
+          return that.sortDirection * a.type.localeCompare(b.type);
+        } else if (that.sortColumn == 3) {
+          return that.sortDirection * a.edition.localeCompare(b.edition);
+        }
+
+      });
+
+      this.diceGroupedByEdition = {};
+      dice.forEach(die => {
+        let namesArr = that.diceGroupedByEdition[die.name];
+        if (namesArr === undefined) {
+          namesArr = [];
+          that.diceGroupedByEdition[die.name] = namesArr;
+        }
+
+        namesArr.push(die);
+      });
+
+      return dice;
+    },
+    expand(id) {
+      let row = document.getElementById(id);
+      let actionButton = row.querySelector('#action-button');
+      let expansion = row.querySelector('#expansion');
+      if (window.getComputedStyle(expansion).display === 'none') {
+        let expansions = document.querySelectorAll('#expansion');
+        [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
+        expansion.style.display = 'grid';
+        actionButton.innerText = 'expand_less';
+      } else {
+        expansion.style.display = 'none';
+        actionButton.innerText = 'expand_more';
+      }
+    },
+    setSpeciesFilter: function() {
+        this.sizeFilter = '';
+        this.typeFilter = '';
+        this.filteredDice = this.applyFiltersAndSort();
+    },
+    setSizeFilter: function() {
+        this.filteredDice = this.applyFiltersAndSort();
+    },
+    setTypeFilter: function() {
+        this.filteredDice = this.applyFiltersAndSort();
     },
   },
   async mounted() {
@@ -137,12 +275,29 @@ export default {
 
         return result;
       });
+
+      let species = [];
+      this.dice.forEach(die => species.push(die.species));
+
+      species = [...new Set(species)].sort();
+      this.species = species;
+
+      this.setSpeciesFilter();
     }
   },
 }
 </script>
 
 <style scoped>
+  .roll-of-arms-body > main > section#content {
+      overflow: none;
+  }
+  
+  select {
+    border-radius: .25em;
+    width: 15em;
+  }
+
   .separator {
     border-bottom: 1px solid #D3D3D3;
   }
@@ -169,6 +324,7 @@ export default {
 
   .collections .header {
     width: 100%;
+    position: sticky;
   }
 
   .collections .header h1 {
@@ -177,7 +333,7 @@ export default {
     justify-self: center;    
   }
 
-  .collections .element {
+  .element {
     align-self: center;
     justify-self: center;
     display: grid;
@@ -185,7 +341,7 @@ export default {
     grid-template-columns: 1fr 1fr;
   }
 
-  .collections .element > label {
+  .element > label {
     font-weight: bold;
     justify-self: end;
     align-self: center;
@@ -209,6 +365,8 @@ export default {
 
   .body {
     width: 100%;
+    overflow: auto;
+    height: 50vh;
   }
 
   .body .row {
@@ -226,30 +384,45 @@ export default {
     grid-row: 1;
     display: grid;
     justify-items: center;
-    width: 20%;
-  }
-
-  .edition {
-    grid-column: 2;
-    grid-row: 1;
-    width: 20%;
+    width: 25%;
   }
 
   .size {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1;
-    width: 20%;
+    width: 25%;
   }
 
   .type {
-    grid-column: 4;
+    grid-column: 3;
     grid-row: 1;
-    width: 20%;
+    width: 25%;
   }
 
-  .amount {
-    grid-column: 5;
-    grid-row: 1;
-    width: 20%;
+
+  .add-die {
+    grid-auto-flow: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    align-items: center;
+    gap: .5em;
   }
+
+  #expansion {
+    display: none;
+    grid-area: 2 / 1 / 2 / 5;
+    width: 100%;
+    border: 1px dashed black;
+  }
+
+  .add-button {
+    grid-column: 4;
+    grid-row: 1;
+    font-size: 24px;
+    width: 25%;
+  }
+
 </style>

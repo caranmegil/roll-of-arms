@@ -38,7 +38,7 @@
                 <div class="column-header" @click="changeNameDirection">ID <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
                 <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
-                <div>Amount</div>
+                <div></div>
             </div>
         </span>
       </div>
@@ -223,9 +223,10 @@ export default {
       this.species = species;
 
       this.setSpeciesFilter();
-      this.timerHandle = setInterval(this.saveAndClear, 750);
+      this.timerHandle = setInterval(this.saveAndClear, 5000);
     },
     unmounted() {
+      this.saveAndClear();
       clearInterval(this.timerHandle);
     },
     methods: {
@@ -373,9 +374,12 @@ export default {
 </script>
 
 <style scoped>
-   button {
-     width: 10em;
-   }
+  .roll-of-arms-body > main > section#content {
+      overflow: none;
+  }
+  button {
+    width: 10em;
+  }
   .collections {
     width: 100%;
     display: grid;
@@ -384,6 +388,7 @@ export default {
 
   .collections .header {
     width: 100%;
+    position: sticky;
     display: grid;
     justify-items: center;
     gap: .5em;
@@ -422,6 +427,8 @@ export default {
 
   .body {
     width: 100%;
+    overflow: auto;
+    height: 50vh;
   }
 
   .body .row {
@@ -473,12 +480,6 @@ export default {
     grid-row: 1;
     width: 25%;
   }
-
-  /* .amount {
-    grid-column: 4;
-    grid-row: 1;
-    width: 25%;
-  } */
 
   .add-die {
     grid-auto-flow: column;

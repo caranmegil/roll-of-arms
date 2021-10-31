@@ -289,7 +289,7 @@ export default {
             this.amount = {};
           }
         },
-        addDie(die, edAmnt) {
+        async addDie(die, edAmnt) {
           let added = false;
           let newDie = {...die};
           delete newDie.editions;
@@ -298,6 +298,7 @@ export default {
           newDie.amount = edAmnt.value;
           this.expand(die, );
           this.myCollection.forEach( die => {
+            if (added) return;
             if (die.name === newDie.name && die.edition === newDie.edition) {
               die.amount += edAmnt.value;
               added = true;
@@ -308,7 +309,7 @@ export default {
             this.myCollection.push(newDie);
           }
           this.amount = {};
-          saveCollection('collections', this.myCollection);
+          await saveCollection('collections', this.myCollection);
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
@@ -332,6 +333,9 @@ export default {
 </script>
 
 <style scoped>
+  .roll-of-arms-body > main > section#content {
+      overflow: none;
+  }
   .dice-browser {
     padding: .5em;
   }
@@ -365,13 +369,14 @@ export default {
   #dice {
     display: grid;
     grid-template-columns: auto;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 20vh 1fr;
     align-items: center;
     justify-items: center;
   }
 
   #dice .header {
     width: 100%;
+    position: sticky;
     display: grid;
     grid-auto-flow: row;
     grid-template-rows: 1fr 1fr 1fr;
@@ -390,10 +395,11 @@ export default {
     justify-items: center;
   }
 
-  #dice .body {
+  #dice > .body {
     width: 100%;
+    overflow: auto;
+    height: 50vh;
   }
-
   .add-die {
     grid-auto-flow: column;
     display: grid;
