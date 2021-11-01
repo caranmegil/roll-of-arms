@@ -167,7 +167,7 @@ button {
   z-index: 9999999;
   left: .75em;
   top: 5.5em;
-  width: 25%;
+  width: 50%;
   grid-auto-flow: row;
 }
 
