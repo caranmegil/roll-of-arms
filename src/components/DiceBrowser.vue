@@ -476,11 +476,22 @@ export default {
   .column-header {
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr auto;
     align-items: center;
   }
 
   .sort-icon {
     font-size: 24px;
+  }
+
+
+  @media screen and (max-width: 480px) {
+    .die-id {
+      width: 10em;
+    }
+
+    .size {
+      width: 5em;
+    }
   }
 </style>

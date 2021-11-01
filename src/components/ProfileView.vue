@@ -399,7 +399,12 @@ export default {
     width: 25%;
   }
 
-
+  .column-header {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
   .add-die {
     grid-auto-flow: column;
     display: grid;
@@ -425,4 +430,14 @@ export default {
     width: 25%;
   }
 
+
+  @media screen and (max-width: 480px) {
+    .die-id {
+      width: 10em;
+    }
+
+    .size {
+      width: 5em;
+    }
+  }
 </style>
