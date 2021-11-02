@@ -30,9 +30,9 @@
               </span>
 
               <div class="table-header">
-                  <div class="column-header" @click="changeNameDirection">Name <span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
-                  <div class="column-header" @click="changeSizeDirection">Size  <span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
-                  <div class="column-header" @click="changeTypeDirection">Type  <span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons mateiral-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons mateiral-icons-outlined">expand_more</span></div>
+                  <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+                  <div class="column-header size" @click="changeSizeDirection">Size  <span v-if="sortColumn != 1" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+                  <div class="column-header type" @click="changeTypeDirection">Type  <span v-if="sortColumn != 2" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
               </div>
           </div>
           <div class="body">
@@ -43,7 +43,7 @@
                 <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
                   <div v-for="edAmnt in amount" :key="die.name + '/' + edAmnt.edition" class="add-die">
-                    <span>{{edAmnt.edition}}</span>
+                    <span>{{ (edAmnt.edition === '-') ? 'Standard' : edAmnt.edition}}</span>
                     <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
                     <input type="number" v-model="edAmnt.value"/>
                     <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
@@ -411,6 +411,8 @@ export default {
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     font-weight: bold;
+    align-content: center;
+    justify-content: center;
     align-items: center;
     justify-items: center;
   }
@@ -443,9 +445,15 @@ export default {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
+    justify-content: center;
+    align-content: center;
     justify-items: center;
     align-items: center;
     gap: .25em;
+  }
+
+  input {
+    width: 5em;
   }
 
   .size {
@@ -471,6 +479,7 @@ export default {
     grid-column: 1;
     grid-row: 1;
     display: grid;
+    text-align: center;
     justify-items: center;
     width: 25%;
   }
@@ -478,21 +487,26 @@ export default {
   .column-header {
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: 1fr auto;
+    text-align: center;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
     align-items: center;
   }
 
   .sort-icon {
     font-size: 24px;
   }
-
-
   @media screen and (max-width: 480px) {
     .die-id {
-      width: 10em;
+      width: 8em;
     }
 
     .size {
+      width: 5em;
+    }
+
+    .type {
       width: 5em;
     }
   }
