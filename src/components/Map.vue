@@ -40,10 +40,15 @@ export default {
             if (profile != null && profile.geolocation != null) {
             for (let userNameKey in usernames) {
                 if (usernames[userNameKey] === key) {
-                profile.username = userNameKey;
-                break;
+                    profile.username = userNameKey;
+                    break;
                 }
-                profile.username=key;
+            }
+
+            // for those older profiles that do not have a name,
+            // set to username per the ProfileEdit.vue
+            if (!profile.name || profile.name.trim() === '') {
+                profile.name = profile.username;
             }
             const locKey = `${profile.geolocation}`;
 
@@ -61,13 +66,12 @@ export default {
 
             profiles.sort((a,b) => a.name.localeCompare(b.name));
 
-            const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.username}</a>` : `${previousValue}, <a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.username}</a>`,  null)
+            const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`,  null)
 
             L.marker(geolocation).addTo(this.map)
                 .bindPopup(names)
                 .openPopup();
         }
-
 
         const defaultPosition = () => {
             that.map.setView([33.69702810000002, -84.3251817], 13)
@@ -89,5 +93,8 @@ export default {
 </script>
 
 <style scoped>
-  #map { height: 70vh; width: 100%; }
+#map {
+    height: 60vh;
+    width: 95%;
+}
 </style>

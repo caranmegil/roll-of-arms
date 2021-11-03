@@ -1,19 +1,27 @@
 <template>
   <div class="main">
-    <div class="profiles">
-        <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
-        <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
+      <header>
+        <h2>Welcome to Roll of Arms!</h2>
+      </header>
+      <div id="location-info-collapsed" @click="toggleExpand"><div class="expander"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_more</span></div></div>
+      <div id="location-info-expanded" class="profiles" v-if="profile.location">
+        <div class="expander" @click="toggleExpand"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_less</span></div>
+        <div class="error" v-if="hasError">Please make sure that every field is filled out for your location!</div>
         <div class="element">
-            <label for="name">Name</label>
-            <input id="name" v-model="name" type="text"/>
+          <label for="city">City</label>
+          <input type="text" v-model="profile.location.city"/>
         </div>
         <div class="element">
-            <label for="location">Current Location</label>
-            <input id="location" v-model="location" type="text"/>
+          <label for="region">State/Province/Region</label>
+          <input type="text" v-model="profile.location.region"/>
         </div>
-        <button @click="save">Save!</button>
-    </div>
-
+        <div class="element">
+          <label for="region">Country</label>
+          <input type="text" v-model="profile.location.country"/>
+        </div>
+        <button @click="save">Add to Map</button>
+        <button @click="emptyFields">Remove from Map</button>
+      </div>
     <div class="heading">Use the map below to find players in your area and connect on <a href="https://discord.gg/bn2ZAh9Y">Discord</a>!</div>
     <Map/>
   </div>
@@ -24,11 +32,11 @@ import {
   signIntoGoogle,
   signInAgain,
   getCollection,
-  saveCollection
+  saveCollection,
 } from '@/firebase';
 import 'es6-promise/auto';
 import { mapActions } from 'vuex';
-import Map from './Map.vue';
+import Map from '@/components/Map.vue';
 
 export default {
   name: 'Main',
@@ -39,46 +47,69 @@ export default {
   },
   data() {
     return {
-      name: '',
-      location: '',
-      hasProfileSaved: false,
       map: null,
       hasError: false,
-      profile: null,
+      profile: {},
     };
   },
   methods: {
-    ...mapActions(['setCredentials']),
-    save: async function () {
-      let that = this;
+    ...mapActions(['setCredentials',]),
+    toggleExpand() {
+      let collapsed = document.getElementById('location-info-collapsed');
+      let expanded = document.getElementById('location-info-expanded');
 
-      let profile = {
-        name: this.name,
-        location: this.location,
-      };
-      profile.firstTime = false;
-      if (profile.location === '') {
-        profile.geolocation = null;
+      if (window.getComputedStyle(collapsed).display === 'none') {
+        collapsed.style.display = 'block';
+        expanded.style.display = 'none';
       } else {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.location.replaceAll(/\s/g, '%20')}&format=geojson`);
-        const json = await response.json();
-        if (json.features.length > 0) {
-          const coords = json.features[0].geometry.coordinates;
-          profile.geolocation = [coords[1], coords[0]];
-        }
+        collapsed.style.display = 'none';
+        expanded.style.display = 'block';
       }
-      this.hasProfileSaved = false;
-      this.hasError = false;
-      saveCollection('profiles', profile).then(function () {
-        that.hasError = false;
-        that.profile = profile;
-        that.hasProfileSaved = true;
+    },
+    async emptyFields() {
+      this.profile.location = {};
+      delete this.profile.geolocation;
+      saveCollection('profiles',this.profile).then(function () {
         window.location.reload();
       }).catch(function (e) {
         console.error(e);
-        that.hasError = true;
       });
     },
+    async save() {
+      if (this.profile.location && this.profile.location.city.trim() !== '' && this.profile.location.region.trim() !== '' && this.profile.location.country.trim() !== '') {
+        const location = `${this.profile.location.city} ${this.profile.location.region} ${this.profile.location.country}`
+
+        if (location === '') {
+          this.profile.geolocation = null;
+        } else {
+          const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${location.replaceAll(/\s/g, '%20')}&format=geojson`);
+          const json = await response.json();
+
+          if (json.features.length > 0) {
+            const coords = json.features[0].geometry.coordinates;
+            this.profile.geolocation = [coords[1], coords[0]];
+            saveCollection('profiles',this.profile).then(function () {
+              window.location.reload();
+            }).catch(function (e) {
+              console.error(e);
+            });
+          }
+        }
+      }
+    },
+    correctProfile() {
+      if (typeof this.profile.location !== 'object') {
+        this.profile.location = {city: '', region: '', country: ''}
+      }
+    },
+    genDefaultProfile() {
+      return {location: {city: '', region: '', country: ''}};
+    },
+  },
+  updated() {
+    if (!this.profile.location || (this.profile.location.city === '' && this.profile.location.region === '' && this.profile.location.country === '')) {
+      this.toggleExpand();
+    }
   },
   async mounted() {
     let that = this;
@@ -90,22 +121,25 @@ export default {
         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
         this.setUser(user);
         this.profile = await getCollection('profiles') || null;
+        if (this.profile == null) {
+          this.$router.push('/profile');
+        } else {
+          this.correctProfile();
+        }
       } else {
         this.setCredentials({});
         this.$router.push('/signin');
       }
-
-      this.name = (this.profile != null) ? this.profile.name : '';
-      this.location = (this.profile != null) ? this.profile.location : '';
-    } else {
+    } else { 
       signInAgain(async function() {
         that.profile = await getCollection('profiles') || null;
-
-        that.name = (that.profile != null) ? that.profile.name : '';
-        that.location = (that.profile != null) ? that.profile.location : '';
+        if (that.profile == null) {
+          that.$router.push('/profile');
+        } else {
+          that.correctProfile();
+        }
       });
     }
-    this.profile = await getCollection('profiles') || {name: '', location: ''};
   },
 }
 </script>
@@ -114,21 +148,64 @@ export default {
   .main {
     display: grid;
     grid-template-rows: 1fr auto;
-    gap: .5em;
+    align-items: center;
+    justify-items: center;
+    width: 100%;
+  }
+
+  .material-icons {
+    font-size: 16px;
   }
 
   .profiles {
     display: grid;
     grid-auto-flow: row;
     grid-template-columns: auto;
+    align-items: center;
+    justify-items: center;
     align-content: center;
     justify-content: center;
     gap: .5em;
+    display: none;
   }
 
-  .profiles h1 {
-    align-self: center;
-    justify-self: center;    
+  .profiles button {
+    padding-left: 3em;
+    padding-right: 3em;
+    width: 100%;
+    margin: .2em;
+  }
+
+  .expander {
+    width: 100%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    padding: 2px;
+  }
+
+  .expander h3 {
+    width: 10.5em;
+  }
+  
+  .expander .material-icons {
+    width: 1em;
+  }
+
+  .expander .spacer {
+    width: 6.5em;
+  }
+
+  header {
+    display: grid;
+    grid-auto-flow: row;
+    grid-template-columns: auto;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
   }
 
   .profiles .element {
@@ -141,9 +218,11 @@ export default {
 
   .profiles .element > label {
     font-weight: bold;
-    justify-self: start;
+    justify-self: end;
     align-self: start;
+    padding-right: .5em;
   }
+
   .error {
       align-self: center;
       justify-self: center;

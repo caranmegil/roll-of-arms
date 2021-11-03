@@ -7,6 +7,7 @@ import {
     createUserWithEmailAndPassword,
     sendPasswordResetEmail,
     sendSignInLinkToEmail,
+    checkActionCode,
     isSignInWithEmailLink,
     signInWithEmailLink,
     confirmPasswordReset,
@@ -37,8 +38,8 @@ const saveCollectionByField = async (collectionName, fieldName, data) => {
     try {
         auth = getAuth();
         const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
-        const result = await set(collectionNameUserRef, data);
-        return await result.then(() => true ).catch(() => false)
+        await set(collectionNameUserRef, data);
+        return true;
     } catch (e) {
         return false;
     }
@@ -49,9 +50,10 @@ const saveCollection = async (collectionName, data) => {
         auth = getAuth();
         const user = auth.currentUser;
         const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
-        const result = await set(collectionNameUserRef, data);
-        return await result.then(() => true ).catch(() => false)
+        await set(collectionNameUserRef, data);
+        return true;
     } catch (e) {
+        console.error(e);
         return false;
     }
 };
@@ -152,9 +154,10 @@ const isVerifyEmailWithLink = async () => {
     return isSignInWithEmailLink(auth, window.location.href);
 };
 
-const verifyEmailWithLink = async (email, password) => {
+const verifyEmailWithLink = async (email, password, actionCode) => {
     auth = getAuth();
     if ( isSignInWithEmailLink(auth, window.location.href) ) {
+        await checkActionCode(auth, actionCode);
         const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
         const user = userCredentials.user;
         await updatePassword(user, password);

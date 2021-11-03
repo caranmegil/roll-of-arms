@@ -8,7 +8,7 @@ import VueTour from 'v3-tour';
 
 import 'v3-tour/dist/vue-tour.css';
 
-//import { signIntoGoogle } from '@/firebase';
+import { signIntoGoogle } from '@/firebase';
 
 import App from './App.vue'
 
@@ -30,8 +30,8 @@ const routes = [
     { path: '/profile', component: ProfileEdit, meta: { requiresAuth: true } },
     { path: '/profile/:id', component: ProfileView },
     { path: '/auth', component: Auth },
-    { path: '/dicebrowser', component: DiceBrowser },
-    { path: '/armylists', component: DiceCollection },
+    { path: '/dicebrowser', component: DiceBrowser, meta: { requiresAuth: true } },
+    { path: '/collection', component: DiceCollection, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter( {
@@ -40,6 +40,12 @@ const router = createRouter( {
 });
 
 router.beforeEach( async (to, from, next) => {
+    const credentials = store.state.credentials;
+
+    if ( credentials && credentials.email && credentials.password ) {
+      let user = await signIntoGoogle(credentials.email, credentials.password);
+      store.commit('setUser', user);
+    }
 
     if (to.meta && to.meta.requiresAuth) {
         if(store.state.user != null) {
@@ -59,7 +65,10 @@ const store = createStore({
             user: JSON.parse(localStorage.getItem('user') || null),
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             collectionDie: null,
-            filters: {species: 'Amazon', edition: '-'}
+            forceSlot: 'Home',
+            filters: {species: '', edition: '', size: '', type: ''},
+            dice: JSON.parse(localStorage.getItem('dice') || 'null'),
+            forcesDice: [],
         };
     },
     mutations: {
@@ -77,11 +86,26 @@ const store = createStore({
         setFilters(state, filters) {
             state.filters = filters;
         },
+        setDice(state, dice) {
+            state.dice = dice;
+            localStorage.setItem('dice', JSON.stringify(dice));
+        },
+        setForcesDice(state, dice) {
+            state.forcesDice = dice;
+        },
+        setForceSlot(state, slot) {
+            state.forceSlot = slot;
+        },
         signOut(state) {
             state.user = null;
             state.credentials = {}
-            state.filters = {species: 'Amazon', edition: '-'}
+            state.filters = {species: '', edition: '', size: '', type: ''}
+            state.dice = [];
+            state.forcesDice = [];
+            state.forceSlot = 'Home';
             localStorage.setItem('credentials', JSON.stringify({}));
+            localStorage.setItem('dice', JSON.stringify(null));
+            localStorage.setItem('user', JSON.stringify(null));
         },
     },
     actions: {
@@ -96,6 +120,15 @@ const store = createStore({
         },
         setFilters({ commit }, filters) {
             commit('setFilters', filters);
+        },
+        setDice({ commit }, dice) {
+            commit('setDice', dice);
+        },
+        setForcesDice({ commit }, dice) {
+            commit('setForcesDice', dice);
+        },
+        setForceSlot({ commit }, slot) {
+            commit('setForceSlot', slot);
         },
         signOut({ commit }) {
             commit('signOut');

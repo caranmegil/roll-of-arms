@@ -1,13 +1,16 @@
 <template>
+    <div @click="toggleMenu" class="menu-overlay"></div>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <span id="menu-button" @click="openMenu" v-if="$store.state.user != null" class="title-bar-menu material-icons material-icons-outlined">menu</span>
+      <div class="menu-button" @click="toggleMenu" v-if="$store.state.user != null"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
     </header>
     <div id="menu" class="menu-container">
-      <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">home</span> Home</div>
-      <div @click="openDiceBrowser" class="menu-item"><span class="material-icons material-icons-outlined">square</span> Dice Browser</div>
-      <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> Dice Collection</div>
+      <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">public</span> Player Map</div>
+      <div class="separator"></div>
+      <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
+      <div class="separator"></div>
+      <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
       <div class="separator"></div>
       <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
     </div>
@@ -32,7 +35,6 @@
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
-  signIntoGoogle,
   signOutOfGoogle,
 } from '@/firebase';
 
@@ -45,47 +47,45 @@ export default {
   },
   components: {
   },
-  async mounted() {
-    const credentials = this.$store.state.credentials;
-
-    if ( this.$store.state.user == null && credentials && credentials.email && credentials.password ) {
-      let user = await signIntoGoogle(credentials.email, credentials.password);
-      this.setUser(user);
-    }
-
+  async beforeMount() {
     this.isLoaded = true;
   },
   methods: {
-    ...mapActions(['setUser', 'signOut']),
+    ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
     goHome: function() {
       let menuElem = document.getElementById('menu');
       menuElem.style.display = 'none';
       this.$router.push('/');
     },
-    openMenu: function() {
+    toggleMenu: function() {
       let menuElem = document.getElementById('menu');
+      let menuOverlay = document.querySelector('.menu-overlay');
+
       if(window.getComputedStyle(menuElem).display === 'none') {
         menuElem.style.display = 'block';
+        menuOverlay.style.display = 'block';
       } else {
         menuElem.style.display = 'none';
+        menuOverlay.style.display = 'none';
       }
     },
+    openProfileEdit: function () {
+      this.toggleMenu();
+      this.$router.push('/profile');
+    },
     editCollection: function () {
-      let menuElem = document.getElementById('menu');
-      menuElem.style.display = 'none';
-      this.$router.push('/armylists');
+      this.toggleMenu();
+      this.$router.push('/collection');
     },
     openDiceBrowser: function () {
-      let menuElem = document.getElementById('menu');
-      menuElem.style.display = 'none';
+      this.toggleMenu();
       this.$router.push('/dicebrowser');
     },
     logoff: async function () {
       const isSignedOut = await signOutOfGoogle();
 
       if (isSignedOut) {
-        let menuElem = document.getElementById('menu');
-        menuElem.style.display = 'none';
+        this.toggleMenu();
         this.signOut();
         this.$router.push('/signin');
       }
@@ -97,7 +97,6 @@ export default {
 <style>
 body {
     font-family: 'Roboto', sans-serif;
-    padding: .5em;
     background-color: #F8F6F0;
 }
 
@@ -154,8 +153,20 @@ button {
   z-index: 9999999;
   left: .75em;
   top: 5.5em;
-  width: 25%;
+  width: 50%;
   grid-auto-flow: row;
+}
+
+.menu-overlay {
+  display: none;
+  background-color: #D3D3D3;
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: .5;
+  width: 100%;
+  height: 100%;
+  z-index: 9999998;
 }
 
 .image-icon {
@@ -216,6 +227,14 @@ button {
     grid-template-columns: 1fr 1fr;
 }
 
+.menu-button {
+  display: grid;
+  grid-auto-flow: row;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  padding-right: 1em;
+}
+
 .menu-item {
   display: grid;
   grid-auto-flow: row;
@@ -255,7 +274,7 @@ button {
 }
 
 .roll-of-arms-body > div#footer > footer {
-    grid-area: 1 / 1 / 1 / 3;
+    grid-area: 1 / 1 / 1 / 4;
     align-self: center;
     justify-self: center;
 }

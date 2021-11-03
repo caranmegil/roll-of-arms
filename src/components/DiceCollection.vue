@@ -1,65 +1,65 @@
 <template>
     <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
-      <h1>Army Lists Manager</h1>
-      <button id="locate" @click="browseDice">Locate</button>
-      <span id="filters">
+      <div class="header">
+        <h1>My Collection</h1>
         <div class="element">
-            <label for="speciesFilter">Species</label>
-            <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
-                <option value="Amazon">Amazons</option>
-                <option value="Coral Elf">Coral Elves</option>
-                <option value="Dracolem">Dracolem</option>
-                <option value="Dragon">Dragons</option>
-                <option value="Dragonkin">Dragonkin</option>
-                <option value="Dwarf">Dwarves</option>
-                <option value="Eldarim">Eldarim</option>
-                <option value="Eldarim, Black">Eldarim, Black</option>
-                <option value="Eldarim, Blue">Eldarim, Blue</option>
-                <option value="Eldarim, Green">Eldarim, Green</option>
-                <option value="Eldarim, Gold">Eldarim, Gold</option>
-                <option value="Eldarim, Red<">Eldarim, Red</option>
-                <option value="Frostwings">Frostwings</option>
-                <option value="Ferals">Ferals</option>
-                <option value="Firewalkers">Firewalkers</option>
-                <option value="Goblins">Goblins</option>
-                <option value="Item">Item</option>
-                <option value="Lava Elves">Lava Elves</option>
-                <option value="Medallion">Medallion</option>
-                <option value="Minor Terrain">Minor Terrain</option>
-                <option value="Relic">Relic</option>
-                <option value="Royalty">Royalty</option>
-                <option value="Scalders">Scalders</option>
-                <option value="Swamp Stalkers">Swamp Stalkers</option>
-                <option value="Terrain">Terrain</option>
-                <option value="Treefolk">Treefolk</option>
-                <option value="Undead">Undead</option>
-            </select>
+          <label for="privacy">Make Public</label>
+          <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
         </div>
-        <div class="element">
-            <label for="editionFilter">Edition</label>
-            <select id="editionFilter" v-model="editionFilter" @change="setEditionFilter">
-                <option v-for="option in editions" :selected="(editions.length > 0 && editions[0] === option) ? 'true' : 'false'" :key="option" :value="option">{{option}}</option>
-            </select>
+        <button id="locate" @click="browseDice">Add Dice</button>
+        <span id="filters">
+          <div class="element">
+              <label for="speciesFilter">Species/Set</label>
+              <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
+                  <option value="">All</option>
+                  <option v-for="option in species" :key="option" :value="option">{{option}}</option>
+              </select>
+          </div>
+          <div class="element">
+              <label for="sizeFilter">Size</label>
+              <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
+                  <option value="" selected="true">All</option>
+                  <option v-for="option in sizes" :key="option" :value="option">{{option}}</option>
+              </select>
+          </div>
+          <div class="element">
+              <label for="typeFilter">Type</label>
+              <select id="typeFilter" v-model="typeFilter" @change="setTypeFilter">
+                  <option value="" selected="true">All</option>
+                  <option v-for="option in types" :key="option" :value="option">{{option}}</option>
+              </select>
+          </div>
+          <div class="element"><label for="totalDice">Total Dice</label><div id="totalDice">{{totalDice}}</div></div>
+        </span>
+
+        <div class="separator"></div>
+        <span class="dice">
+            <div class="header">
+                <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+                <div class="column-header size" @click="changeSizeDirection">Size  <span v-if="sortColumn != 1" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+                <div class="column-header type" @click="changeTypeDirection">Type  <span v-if="sortColumn != 2" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+                <div></div>
+            </div>
+        </span>
+      </div>
+      <div class="dice">
+        <div class="body">
+          <div v-for="(die) in filteredDice" :key="die.name" :id="die.name" class="row">
+              <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
+              <div class="size">{{die.rarity}}</div>
+              <div class="type">{{die.type}}</div>
+                <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div id="expansion">
+                  <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
+                    <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
+                    <span @click="() => decr(grDie)" class="material-icons material-icons-outlined">remove</span>
+                    <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
+                    <span @click="() => incr(grDie)" class="material-icons material-icons-outlined">add</span>
+                  </div>
+                </div>
+          </div>
         </div>
-      </span>
-
-      <div class="separator"></div>
-
-      <div id="dice">
-          <div class="header">
-              <div>ID</div>
-              <div>Rarity</div>
-              <div>Type</div>
-          </div>
-          <div class="body">
-              <div v-for="(die, index) in filteredDice" :key="die.name + '/' + die.edition" :id="die.name + '/' + die.edition" class="row">
-                  <div class="die-id"><img :src="'../images/dice/' + die.id"/><div>{{die.name}}</div></div>
-                  <div>{{die.rarity}}</div>
-                  <div>{{die.type}}</div>
-                  <div><input type="number" v-model="die.amount" @keyup="() => changeAmount(index)" @change="() => changeAmount(index)"></div>
-              </div>
-          </div>
       </div>
     </div>
 </template>
@@ -67,12 +67,20 @@
 <script>
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
-import { getCollection, saveCollection } from '@/firebase';
+import {
+  getCollection,
+  saveCollection,
+  getEntireCollection,
+} from '@/firebase';
 
 export default {
     name: 'DiceBrowser',
     data() {
         return {
+            totalDice: 0,
+            sortColumn: 0,
+            sortDirection: 1,
+            profile: {},
             tourCallbacks: {
               onSkip: this.noMoreTours,
               onFinish: this.noMoreTours,
@@ -83,7 +91,7 @@ export default {
                 header: {
                   title: 'Filters!',
                 },
-                content: 'Set your species and edition filters here.',
+                content: 'Set your species/set and edition filters here.',
               },
               {
                 target: '#locate',
@@ -103,94 +111,253 @@ export default {
                 },
               },
             ],
+            sourceDice: [],
             dice: [],
+            diceGroupedByEdition: {},
             filteredDice: [],
-            speciesFilter: 'Amazon',
-            editionFilter: null,
-            editions: [],
-            menu: {
-                'Amazon': ['-', 'Reprint', 'Alt-Ink'],
-                'Coral Elf': ['-'],
-                'Dwarf': ['-'],
-                'Frostwings': ['-', 'Reprint', 'Alt-Ink', 'Promos'],
-                'Ferals': ['-', 'Alt-Ink'],
-                'Firewalkers': ['-'],
-                'Goblins': ['-'],
-                'Lava Elves': ['-'],
-                'Scalders': ['-', 'Reprint', 'Promos'],
-                'Swamp Stalkers': ['-', 'Dark', 'Alt-Ink', 'Purple-Ink'],
-                'Treefolk': ['-'],
-                'Undead': ['-'],
-                'Eldarim': ['-'],
-                'Eldarim, Black': ['-'],
-                'Eldarim, Blue': ['-'],
-                'Eldarim, Green': ['-'],
-                'Eldarim, Gold': ['-'],
-                'Eldarim, Red': ['-'],
-                'Dragon': ['-'],
-                'Dragonkin': ['-'],
-                'Medallion': ['-'],
-                'Item': ['-'],
-                'Royalty': ['-'],
-                'Dracolem': ['-'],
-                'Relic': ['-'],
-                'Terrain': ['-'],
-                'Minor Terrain': ['-']
-            },
+            speciesFilter: '',
+            species: [],
+            sizes: [],
+            sizeFilter: '',
+            types: [],
+            typeFilter: '',
+            timerHandle: null,
         };
     },
     async mounted() {
-      const profile = await getCollection('profiles');
-      if (profile.collectionTour || profile.collectionTour === undefined) {
+      this.sourceDice = await getEntireCollection('dice');
+      this.profile = await getCollection('profiles') || {};
+      if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
         this.$tours['collectionTour'].start();
       }
 
-      this.dice = await getCollection('collections') || [];
-      if (this.$store.state.collectionDie != null) {
-        const collectionDie = this.$store.state.collectionDie;
-        if (this.dice.filter(die => die.name === collectionDie.name && die.edition === collectionDie.edition).length > 0) {
-          this.dice.forEach(die => {
-            if(die.name === collectionDie.name && die.edition === collectionDie.edition) {
-              if (die.amount === undefined) {
-                die.amount = 0;
-              }
-              die.amount += collectionDie.amount;
-            }
-          });
-        } else {
-          this.dice.push(this.$store.state.collectionDie);
-        }
-        saveCollection('collections', this.dice);
-        this.setCurrentDie(null);
+      if (this.profile.isCollectionPublic === undefined) {
+        this.profile.isCollectionPublic = false;
       }
 
-      this.speciesFilter = this.$store.state.filters.species;
-      this.editionFilter = this.$store.state.filters.edition;
+      this.dice = await getCollection('collections') || [];
+      this.dice = this.dice.map(die => {
+          let newDie = {...die};
+          delete newDie['faces'];
+          if (die.species === 'Eldarim') {
+              newDie.species = 'Eldarim, White';
+          }
+          if (die.species === 'Item' && die.name.startsWith('Gold')) {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Eldarim, Gold') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+              newDie.species = 'Eldarim, Yellow';
+          }
+          if (die.species === 'Dragon') {
+              if (!newDie.name.includes('/')) {
+                  newDie.type = 'Elemental';
+                  newDie.rarity = 'Elemental';
+              } else if (newDie.name.includes('White')) {
+                  newDie.type = 'White';
+                  newDie.rarity = 'White';
+              } else if (newDie.name.includes('Ivory')) {
+                  newDie.type = 'Ivory Hybrid';
+                  newDie.rarity = 'Ivory Hybrid';
+              } else {
+                  newDie.type = 'Hybrid';
+                  newDie.rarity = 'Hybrid';
+              }
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Dragonkin') {
+              newDie.name = die.name.replace('Gold', 'Yellow');
+          }
+          if (die.species === 'Equipment') {
+            newDie.species = 'Items';
+          }
+          if (die.species === 'Item') {
+              if (die.rarity !== 'Artifact') {
+                  newDie.rarity = `${die.rarity} Equipment`
+              }
+              newDie.species = 'Item';
+          }
+          if (die.species === 'Medallion') {
+              newDie.species = 'Item';
+          }
+          if (die.species === 'Relic') {
+              newDie.species = 'Item';
+          }
+          if (die.species.endsWith('Terrain')) {
+              newDie.species = 'Terrain';
+              const nameSplit = die.name.split(' ');
+              if (nameSplit.length == 2) {
+                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
+              } else {
+                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
+              }
+          }
+          if (newDie.species === 'Terrain') {
+              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
+                  newDie.rarity = 'Advanced Terrain';
+              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
+                  newDie.rarity = 'Basic Terrain';
+              }
+          }
+          return newDie;
+      });
+
+      this.speciesFilter = '';
+      this.sizeFilter = this.$store.state.filters.size;
+      this.typeFilter = this.$store.state.filters.type;
       
-      let that = this;
-      this.editions = this.menu[this.speciesFilter];
-      this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
+      let species = [];
+      this.dice.forEach(die => species.push(die.species));
+
+      species = [...new Set(species)].sort();
+      this.species = species;
+
+      this.setSpeciesFilter();
+      this.timerHandle = setInterval(this.saveAndClear, 5000);
     },
     unmounted() {
-      this.setCollectionDie(null);
+      this.saveAndClear();
+      clearInterval(this.timerHandle);
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
+        decr(die) {
+          if (die.amount > 0) {
+            die.amount--;
+          }
+        },
+        incr(die) {
+          die.amount++;
+        },
+        expand(id) {
+          let row = document.getElementById(id);
+          let actionButton = row.querySelector('#action-button');
+          let expansion = row.querySelector('#expansion');
+          if (window.getComputedStyle(expansion).display === 'none') {
+            let expansions = document.querySelectorAll('#expansion');
+            [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
+            expansion.style.display = 'grid';
+            actionButton.innerText = 'expand_less';
+          } else {
+            expansion.style.display = 'none';
+            actionButton.innerText = 'expand_more';
+          }
+        },
+        saveAndClear() {
+          this.dice = this.dice.filter(die => die.amount > 0);
+          this.filteredDice = this.applyFiltersAndSort();
+          this.recalcTotals();
+          saveCollection('collections', this.dice);
+        },
+        changeNameDirection() {
+          if (this.sortColumn != 0) {
+            this.sortColumn = 0;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
+        },
+        changeSizeDirection() {
+          if (this.sortColumn != 1) {
+            this.sortColumn = 1;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
+        },
+        changeTypeDirection() {
+          if (this.sortColumn != 2) {
+            this.sortColumn = 2;
+            this.sortDirection = 1;
+          } else {
+            this.sortDirection *= -1;
+          }
+          this.filteredDice = this.applyFiltersAndSort();
+        },
+        applyFiltersAndSort() {
+          let that = this;
+          let dice = this.dice.filter( die => that.speciesFilter === '' || die.species === that.speciesFilter );
+
+          let sizes = [];
+          let types = [];
+          dice.forEach( die => {
+            sizes.push(die.rarity);
+            types.push(die.type);
+          });
+
+          sizes = [...new Set(sizes)];
+          sizes.sort();
+          types = [...new Set(types)];
+          types.sort();
+
+          this.sizes = sizes;
+          this.types = types;
+
+          this.setFilters({species: this.speciesFilter, edition: this.editionFilter, size: this.sizeFilter, type: this.typeFilter});
+
+          dice = dice.filter( die =>
+                              (that.typeFilter === '' || die.type === that.typeFilter)
+                              && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
+                            );
+          dice.sort( (a, b) => {
+            if (that.sortColumn == 0) {
+              return that.sortDirection * a.name.localeCompare(b.name);
+            } else if (that.sortColumn == 1) {
+              return that.sortDirection * a.rarity.localeCompare(b.rarity);
+            } else if (that.sortColumn == 2) {
+              return that.sortDirection * a.type.localeCompare(b.type);
+            } else if (that.sortColumn == 3) {
+              return that.sortDirection * a.edition.localeCompare(b.edition);
+            }
+
+          });
+
+          this.diceGroupedByEdition = {};
+          dice.forEach(die => {
+            let namesArr = that.diceGroupedByEdition[die.name];
+            if (namesArr === undefined) {
+              namesArr = [];
+              that.diceGroupedByEdition[die.name] = namesArr;
+            }
+
+            namesArr.push(die);
+          });
+
+          return dice;
+        },
+        getImageID(die) {
+          const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
+          return dice[0].id; 
+        },
+        saveTheProfile() {
+          saveCollection('profiles', this.profile);
+        },
         browseDice() {
           this.$router.push('/dicebrowser');
         },
-        changeAmount(index) {
-          if (this.filteredDice[index]&& !isNaN(this.filteredDice[index].amount)) {
-            let newDie = this.filteredDice[index];
-            this.dice = this.dice.map(die => {
-              if (die.species === newDie.species && die.edition === newDie.edition && die.name === newDie.name) {
-                return newDie;
+        changeAmount(grDie) {
+          if (!isNaN(grDie.amount)) {
+            this.dice.map(die => {
+              let newDie = {...die};
+
+              if (die.name === grDie.name && die.edition === grDie.edition) {
+                newDie.amount = grDie.amount;
               }
 
-              return die;
-            }).filter(die => die.amount > 0);
-            saveCollection('collections', this.dice);
+              return newDie;
+            });
           }
+        },
+        recalcSubTotals(die) {
+          if (this.diceGroupedByEdition[die.name] === undefined) {
+            return 0;
+          }
+          return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
+        },
+        recalcTotals() {
+            this.totalDice = this.filteredDice.reduce((previousValue, currentValue) => previousValue += currentValue.amount, 0);
         },
         setCurrentDie(die) {
           this.setCollectionDie(die);
@@ -201,66 +368,75 @@ export default {
           saveCollection('profiles', profile);
         },
         setSpeciesFilter: function() {
-            this.editions = this.menu[this.speciesFilter];
-            this.editionFilter = this.editions[0];
-            this.setEditionFilter();
+            this.sizeFilter = '';
+            this.typeFilter = '';
+            this.filteredDice = this.applyFiltersAndSort();
+            this.recalcTotals();
         },
-        setEditionFilter: function() {
-            let that = this;
-            this.setFilters({species: this.speciesFilter, edition: this.editionFilter});
-            this.filteredDice = this.dice.filter(die => die.species === that.speciesFilter && die.edition === that.editionFilter);
-            this.filteredDice.sort( (a, b) => a.name.localeCompare(b.name) );
+        setSizeFilter: function() {
+            this.filteredDice = this.applyFiltersAndSort();
+            this.recalcTotals();
+        },
+        setTypeFilter: function() {
+            this.filteredDice = this.applyFiltersAndSort();
+            this.recalcTotals();
         },
     },
 };
 </script>
 
-<style scope>
+<style scoped>
+  input {
+    width: 5em;
+  }
+
+  .roll-of-arms-body > main {
+      overflow: none;
+  }
+
+  .roll-of-arms-body > main > section#content {
+      overflow: none;
+  }
+  button {
+    width: 10em;
+  }
   .collections {
+    width: 100%;
     display: grid;
-    grid-auto-flow: row;
-    grid-template-columns: auto;
     align-content: center;
-    justify-content: center;
+    justify-items: center;
+    align-items: center;
+  }
+
+  .collections .header {
+    width: 100%;
+    position: sticky;
+    display: grid;
+    justify-items: center;
     gap: .5em;
   }
 
-  .collections h1 {
-    align-self: center;
-    justify-self: center;    
-  }
-
-  .collections .element {
+  .element {
     align-self: center;
     justify-self: center;
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
-    padding: .25em;
+    padding-bottom: .5em;
   }
 
-  .collections .element > label {
+  .element > label {
     font-weight: bold;
     justify-self: end;
     align-self: center;
     padding-right: .5em;
   }
 
-  .collections select {
-    border-radius: .25em;
+  .dice {
+    width: 100%;
   }
 
-  .separator {
-    border-bottom: 1px solid #D3D3D3;
-  }
-
-  #dice {
-    height: 60vh;
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-
-  #dice div.header {
+  .collections .dice .header {
     margin-bottom: .75em;
     border-bottom: 1px solid black;
     display: grid;
@@ -271,11 +447,99 @@ export default {
     justify-items: center;
   }
 
-  #dice div.row {
-    padding-top: .5em;
+  .body {
+    width: 100%;
+    overflow: auto;
+    height: 50vh;
+  }
+
+  .body .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    gap: .25em;
+  }
+
+  .collections select {
+    border-radius: .25em;
+    width: 15em;
+  }
+
+  .separator {
+    border-bottom: 1px solid #D3D3D3;
+  }
+
+  .column-header {
     display: grid;
     grid-auto-flow: column;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+
+  .sort-icon {
+    font-size: 24px;
+  }
+
+  .die-id {
+    grid-column: 1;
+    grid-row: 1;
+    display: grid;
+    text-align: center;
+    justify-items: center;
+    width: 25%;
+  }
+
+  .size {
+    grid-column: 2;
+    grid-row: 1;
+    width: 25%;
+  }
+
+  .type {
+    grid-column: 3;
+    grid-row: 1;
+    width: 25%;
+  }
+
+  .add-die {
+    grid-auto-flow: column;
+    display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
+    justify-content: center;
+    align-content: center;
+    justify-items: center;
+    align-items: center;
+    gap: .5em;
+  }
+
+  #expansion {
+    display: none;
+    grid-area: 2 / 1 / 2 / 5;
+    width: 100%;
+    border: 1px dashed black;
+  }
+
+  .add-button {
+    grid-column: 4;
+    grid-row: 1;
+    font-size: 24px;
+    width: 25%;
+  }
+
+  @media screen and (max-width: 480px) {
+    .die-id {
+      width: 8em;
+    }
+
+    .size {
+      width: 5em;
+    }
+
+    .type {
+      width: 5em;
+    }
   }
 
 </style>
