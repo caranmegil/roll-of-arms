@@ -1,7 +1,8 @@
 <template>
+    <div @click="toggleMenu" class="menu-overlay"></div>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <div class="menu-button" @click="openMenu" v-if="$store.state.user != null"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
+      <div class="menu-button" @click="toggleMenu" v-if="$store.state.user != null"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
     </header>
     <div id="menu" class="menu-container">
@@ -35,7 +36,6 @@ import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
   signOutOfGoogle,
-  // getEntireCollection,
 } from '@/firebase';
 
 export default {
@@ -48,20 +48,6 @@ export default {
   components: {
   },
   async beforeMount() {
-    const credentials = this.$store.state.credentials;
-
-    if ( credentials.email && credentials.password ) {
-      // if (this.$store.state.dice == null) {
-      //   const dice = await getEntireCollection('dice');
-      //   this.setDice(dice);
-      // }
-      // this.setForcesDice(this.$store.state.dice.filter(die => die.edition === '-').map(die => {
-      //   let newDie = {...die};
-      //   delete newDie.edition;
-      //   return newDie;
-      // }))
-    }
-
     this.isLoaded = true;
   },
   methods: {
@@ -71,35 +57,35 @@ export default {
       menuElem.style.display = 'none';
       this.$router.push('/');
     },
-    openMenu: function() {
+    toggleMenu: function() {
       let menuElem = document.getElementById('menu');
+      let menuOverlay = document.querySelector('.menu-overlay');
+
       if(window.getComputedStyle(menuElem).display === 'none') {
         menuElem.style.display = 'block';
+        menuOverlay.style.display = 'block';
       } else {
         menuElem.style.display = 'none';
+        menuOverlay.style.display = 'none';
       }
     },
     openProfileEdit: function () {
-      let menuElem = document.getElementById('menu');
-      menuElem.style.display = 'none';
+      this.toggleMenu();
       this.$router.push('/profile');
     },
     editCollection: function () {
-      let menuElem = document.getElementById('menu');
-      menuElem.style.display = 'none';
+      this.toggleMenu();
       this.$router.push('/collection');
     },
     openDiceBrowser: function () {
-      let menuElem = document.getElementById('menu');
-      menuElem.style.display = 'none';
+      this.toggleMenu();
       this.$router.push('/dicebrowser');
     },
     logoff: async function () {
       const isSignedOut = await signOutOfGoogle();
 
       if (isSignedOut) {
-        let menuElem = document.getElementById('menu');
-        menuElem.style.display = 'none';
+        this.toggleMenu();
         this.signOut();
         this.$router.push('/signin');
       }
@@ -169,6 +155,18 @@ button {
   top: 5.5em;
   width: 50%;
   grid-auto-flow: row;
+}
+
+.menu-overlay {
+  display: none;
+  background-color: #D3D3D3;
+  position: fixed;
+  top: 0;
+  left: 0;
+  opacity: .5;
+  width: 100%;
+  height: 100%;
+  z-index: 9999998;
 }
 
 .image-icon {

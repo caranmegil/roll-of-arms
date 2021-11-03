@@ -147,17 +147,20 @@ export default {
           if (die.species === 'Dragonkin') {
               newDie.name = die.name.replace('Gold', 'Yellow');
           }
-          if (die.species === 'Item') {
+          if (die.species === 'Equipment') {
+            newDie.species = 'Items';
+          }
+          if (die.species === 'Items') {
               if (die.rarity !== 'Artifact') {
                   newDie.rarity = `${die.rarity} Equipment`
               }
-              newDie.species = 'Item';
+              newDie.species = 'Items';
           }
           if (die.species === 'Medallion') {
-              newDie.species = 'Item';
+              newDie.species = 'Items';
           }
           if (die.species === 'Relic') {
-              newDie.species = 'Item';
+              newDie.species = 'Items';
           }
           if (die.species.endsWith('Terrain')) {
               newDie.species = 'Terrain';

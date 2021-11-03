@@ -236,6 +236,9 @@ export default {
           if (die.species === 'Dragonkin') {
               newDie.name = die.name.replace('Gold', 'Yellow');
           }
+          if (die.species === 'Equipment') {
+            newDie.species = 'Items';
+          }
           if (die.species === 'Item') {
               if (die.rarity !== 'Artifact') {
                   newDie.rarity = `${die.rarity} Equipment`
