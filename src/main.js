@@ -21,7 +21,7 @@ import ProfileView from './components/ProfileView.vue';
 import Auth from './components/Auth.vue';
 import DiceBrowser from './components/DiceBrowser.vue';
 import DiceCollection from './components/DiceCollection.vue';
-
+import MyForces from './components/MyForces.vue';
 const routes = [
     { path: '/', component: Main, meta: { requiresAuth: true } },
     { path: '/signin', component: Login },
@@ -31,7 +31,8 @@ const routes = [
     { path: '/profile/:id', component: ProfileView },
     { path: '/auth', component: Auth },
     { path: '/dicebrowser', component: DiceBrowser, meta: { requiresAuth: true } },
-    { path: '/collection', component: DiceCollection, meta: { requiresAuth: true } },
+    { path: '/my-collection', component: DiceCollection, meta: { requiresAuth: true } },
+    { path: '/my-forces', component: MyForces, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter( {
