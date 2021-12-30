@@ -115,71 +115,6 @@ export default {
     async mounted() {
       this.dice = await getEntireCollection('dice');
       this.myCollection = await getCollection('collections') || [];
-      this.myCollection = this.myCollection.map(die => {
-          let newDie = {...die};
-          delete newDie['faces'];
-          if (die.species === 'Eldarim') {
-              newDie.species = 'Eldarim, White';
-          }
-          if (die.species === 'Item' && die.name.startsWith('Gold')) {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Eldarim, Gold') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-              newDie.species = 'Eldarim, Yellow';
-          }
-          if (die.species === 'Dragon') {
-              if (!newDie.name.includes('/')) {
-                  newDie.type = 'Elemental';
-                  newDie.rarity = 'Elemental';
-              } else if (newDie.name.includes('White')) {
-                  newDie.type = 'White';
-                  newDie.rarity = 'White';
-              } else if (newDie.name.includes('Ivory')) {
-                  newDie.type = 'Ivory Hybrid';
-                  newDie.rarity = 'Ivory Hybrid';
-              } else {
-                  newDie.type = 'Hybrid';
-                  newDie.rarity = 'Hybrid';
-              }
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Dragonkin') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Equipment') {
-            newDie.species = 'Items';
-          }
-          if (die.species === 'Items') {
-              if (die.rarity !== 'Artifact') {
-                  newDie.rarity = `${die.rarity} Equipment`
-              }
-              newDie.species = 'Items';
-          }
-          if (die.species === 'Medallion') {
-              newDie.species = 'Items';
-          }
-          if (die.species === 'Relic') {
-              newDie.species = 'Items';
-          }
-          if (die.species.endsWith('Terrain')) {
-              newDie.species = 'Terrain';
-              const nameSplit = die.name.split(' ');
-              if (nameSplit.length == 2) {
-                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
-              } else {
-                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
-              }
-          }
-          if (newDie.species === 'Terrain') {
-              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
-                  newDie.rarity = 'Advanced Terrain';
-              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
-                  newDie.rarity = 'Basic Terrain';
-              }
-          }
-          return newDie;
-      });
 
       const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
@@ -436,6 +371,10 @@ export default {
     gap: .5em;
   }
 
+  .add-die:nth-child(even) {
+    background-color: #CCC;
+  }
+
   #expansion {
     display: none;
     grid-area: 2 / 1 / 2 / 5;
@@ -447,7 +386,7 @@ export default {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 1fr auto;
     justify-content: center;
     align-content: center;
     justify-items: center;
