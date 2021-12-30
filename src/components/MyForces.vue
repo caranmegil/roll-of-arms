@@ -502,9 +502,10 @@ export default {
     grid-template-columns: 1fr 1fr 1fr 1fr;
     justify-content: center;
     align-content: center;
-    justify-items: center;
+    justify-items: start;
     align-items: center;
     gap: .5em;
+    padding-left: 1.0em;
   }
 
   #expansion {
