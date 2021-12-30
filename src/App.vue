@@ -266,10 +266,6 @@ button {
     padding-top: .75em
 }
 
-.roll-of-arms-body > main > section#content > * {
-    overflow: auto;
-}
-
 .roll-of-arms-body > div#footer {
     border-top: 1px solid #D3D3D3;
     grid-row: 3;

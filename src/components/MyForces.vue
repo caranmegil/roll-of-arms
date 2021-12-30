@@ -390,13 +390,6 @@ export default {
     width: 5em;
   }
 
-  .roll-of-arms-body > main {
-      overflow: none;
-  }
-
-  .roll-of-arms-body > main > section#content {
-      overflow: none;
-  }
   button {
     width: 10em;
   }

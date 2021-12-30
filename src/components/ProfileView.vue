@@ -227,14 +227,6 @@ export default {
 </script>
 
 <style scoped>
-  .roll-of-arms-body > main {
-      overflow: none;
-  }
-
-  .roll-of-arms-body > main > section#content {
-      overflow: none;
-  }
-  
   select {
     border-radius: .25em;
     width: 15em;

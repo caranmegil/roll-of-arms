@@ -227,15 +227,23 @@ export default {
           let row = document.getElementById(die.name);
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
+          let allExpansions = document.querySelectorAll('#expansion');
+
           if (window.getComputedStyle(expansion).display === 'none') {
-            let expansions = document.querySelectorAll('#expansion');
-            [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
             this.amount = die.editions.map(edition => { return {edition, value: 0} });
           } else {
-            expansion.style.display = 'none';
-            actionButton.innerText = 'expand_more';
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
             this.amount = {};
           }
         },
@@ -289,13 +297,6 @@ export default {
 </script>
 
 <style scoped>
-  .roll-of-arms-body > main {
-      overflow: none;
-  }
-
-  .roll-of-arms-body > main > section#content {
-      overflow: none;
-  }
   .dice-browser {
     padding: .5em;
   }
@@ -363,7 +364,7 @@ export default {
   .add-die {
     grid-auto-flow: column;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
     justify-content: center;
     align-content: center;
     justify-items: center;
