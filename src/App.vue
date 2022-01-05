@@ -54,8 +54,7 @@ export default {
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
     goHome: function() {
-      let menuElem = document.getElementById('menu');
-      menuElem.style.display = 'none';
+      this.toggleMenu();
       this.$router.push('/');
     },
     toggleMenu: function() {

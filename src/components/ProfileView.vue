@@ -369,6 +369,10 @@ export default {
   }
 
   @media screen and (max-width: 480px) {
+    .body {
+      height: 40vh;
+    }
+ 
     .die-id {
       width: 8em;
     }

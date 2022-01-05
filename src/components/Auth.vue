@@ -69,9 +69,10 @@ export default {
                 this.hasPasswordMismatch = false;
 
                 if(await confirmPassword(this.$route.query.oobCode, this.password)) {
-                    this.$router.push('/signin');
                     this.hasError = false;
+                    this.$router.push('/');
                 } else {
+                    this.message = 'There was an error while resetting the password!';
                     this.hasError = true;
                 }
             } else {

@@ -442,6 +442,9 @@ export default {
     font-size: 24px;
   }
   @media screen and (max-width: 480px) {
+    #dice > .body {
+      height: 40vh;
+    }
     .die-id {
       width: 8em;
     }

@@ -124,7 +124,7 @@ const createUserInGoogle = async (email, password) => {
 const confirmPassword = async (authCode, password) => {
     try {
         let auth = getAuth();
-        return await confirmPasswordReset(auth, authCode, password);
+        return await confirmPasswordReset(auth, authCode, password).then(() => { return new Promise(resolve => resolve(true)) } );
     } catch (e) {
         console.error(e);
         return false;
