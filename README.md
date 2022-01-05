@@ -20,5 +20,11 @@ yarn build
 yarn lint
 ```
 
+### Deployment
+If you have your firebaseConfig.json set up in src, do:
+```
+yarn deploy
+```
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
