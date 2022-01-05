@@ -115,71 +115,6 @@ export default {
     async mounted() {
       this.dice = await getEntireCollection('dice');
       this.myCollection = await getCollection('collections') || [];
-      this.myCollection = this.myCollection.map(die => {
-          let newDie = {...die};
-          delete newDie['faces'];
-          if (die.species === 'Eldarim') {
-              newDie.species = 'Eldarim, White';
-          }
-          if (die.species === 'Item' && die.name.startsWith('Gold')) {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Eldarim, Gold') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-              newDie.species = 'Eldarim, Yellow';
-          }
-          if (die.species === 'Dragon') {
-              if (!newDie.name.includes('/')) {
-                  newDie.type = 'Elemental';
-                  newDie.rarity = 'Elemental';
-              } else if (newDie.name.includes('White')) {
-                  newDie.type = 'White';
-                  newDie.rarity = 'White';
-              } else if (newDie.name.includes('Ivory')) {
-                  newDie.type = 'Ivory Hybrid';
-                  newDie.rarity = 'Ivory Hybrid';
-              } else {
-                  newDie.type = 'Hybrid';
-                  newDie.rarity = 'Hybrid';
-              }
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Dragonkin') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Equipment') {
-            newDie.species = 'Items';
-          }
-          if (die.species === 'Items') {
-              if (die.rarity !== 'Artifact') {
-                  newDie.rarity = `${die.rarity} Equipment`
-              }
-              newDie.species = 'Items';
-          }
-          if (die.species === 'Medallion') {
-              newDie.species = 'Items';
-          }
-          if (die.species === 'Relic') {
-              newDie.species = 'Items';
-          }
-          if (die.species.endsWith('Terrain')) {
-              newDie.species = 'Terrain';
-              const nameSplit = die.name.split(' ');
-              if (nameSplit.length == 2) {
-                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
-              } else {
-                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
-              }
-          }
-          if (newDie.species === 'Terrain') {
-              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
-                  newDie.rarity = 'Advanced Terrain';
-              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
-                  newDie.rarity = 'Basic Terrain';
-              }
-          }
-          return newDie;
-      });
 
       const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
@@ -292,15 +227,23 @@ export default {
           let row = document.getElementById(die.name);
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
+          let allExpansions = document.querySelectorAll('#expansion');
+
           if (window.getComputedStyle(expansion).display === 'none') {
-            let expansions = document.querySelectorAll('#expansion');
-            [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
             this.amount = die.editions.map(edition => { return {edition, value: 0} });
           } else {
-            expansion.style.display = 'none';
-            actionButton.innerText = 'expand_more';
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
             this.amount = {};
           }
         },
@@ -354,13 +297,6 @@ export default {
 </script>
 
 <style scoped>
-  .roll-of-arms-body > main {
-      overflow: none;
-  }
-
-  .roll-of-arms-body > main > section#content {
-      overflow: none;
-  }
   .dice-browser {
     padding: .5em;
   }
@@ -428,12 +364,17 @@ export default {
   .add-die {
     grid-auto-flow: column;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
     justify-content: center;
     align-content: center;
-    justify-items: center;
+    justify-items: start;
     align-items: center;
     gap: .5em;
+    padding-left: 1.0em;
+  }
+
+  .add-die:nth-child(even) {
+    background-color: #CCC;
   }
 
   #expansion {
@@ -447,7 +388,7 @@ export default {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 1fr auto;
     justify-content: center;
     align-content: center;
     justify-items: center;
@@ -501,6 +442,9 @@ export default {
     font-size: 24px;
   }
   @media screen and (max-width: 480px) {
+    #dice > .body {
+      height: 40vh;
+    }
     .die-id {
       width: 8em;
     }

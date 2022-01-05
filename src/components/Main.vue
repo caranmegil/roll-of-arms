@@ -22,7 +22,7 @@
         <button @click="save">Add to Map</button>
         <button @click="emptyFields">Remove from Map</button>
       </div>
-    <div class="heading">Use the map below to find players in your area and connect on <a href="https://discord.gg/bn2ZAh9Y">Discord</a>!</div>
+    <div class="heading">Use the map below to find players in your area and connect on <a href="https://discord.gg/dragondice" target="_blank">Discord</a>!</div>
     <Map/>
   </div>
 </template>

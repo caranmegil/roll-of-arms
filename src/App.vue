@@ -11,6 +11,7 @@
       <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
+      <!-- <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div> -->
       <div class="separator"></div>
       <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
     </div>
@@ -53,8 +54,7 @@ export default {
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
     goHome: function() {
-      let menuElem = document.getElementById('menu');
-      menuElem.style.display = 'none';
+      this.toggleMenu();
       this.$router.push('/');
     },
     toggleMenu: function() {
@@ -75,7 +75,11 @@ export default {
     },
     editCollection: function () {
       this.toggleMenu();
-      this.$router.push('/collection');
+      this.$router.push('/my-collection');
+    },
+    editForces: function () {
+      this.toggleMenu();
+      this.$router.push('/my-forces');
     },
     openDiceBrowser: function () {
       this.toggleMenu();
@@ -259,10 +263,6 @@ button {
     grid-row: 1;
     grid-column: span 4;
     padding-top: .75em
-}
-
-.roll-of-arms-body > main > section#content > * {
-    overflow: auto;
 }
 
 .roll-of-arms-body > div#footer {
