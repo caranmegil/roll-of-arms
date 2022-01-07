@@ -4,6 +4,12 @@
       <div class="header">
         <h1>My Forces</h1>
         <div class="element">
+            <label for="speciesFilter">Species/Set</label>
+            <select id="speciesFilter" v-model="forceSlot" @change="setMyForce">
+                <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
+            </select>
+        </div>
+        <div class="element">
           <label for="privacy">Make Public</label>
           <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
         </div>
@@ -37,14 +43,14 @@
       </div>
       <div class="dice">
         <div class="body">
-          <div v-for="(die) in myForce.dice" :key="die.name" :id="die.name" class="row">
+          <div v-for="die in myForce.slots[forceSlot]" :key="die.name" :id="die.name" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
               <div class="size">{{die.rarity}}</div>
               <div class="type">{{die.type}}</div>
               <div id="expansion">
-                <span @click="() => decr(die)" class="material-icons material-icons-outlined">remove</span>
-                <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(die)" @change="() => changeAmount(die)"></div>
                 <span @click="() => incr(die)" class="material-icons material-icons-outlined">add</span>
+                <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(die)" @change="() => changeAmount(die)"></div>
+                <span @click="() => decr(die)" class="material-icons material-icons-outlined">remove</span>
               </div>
           </div>
         </div>
@@ -101,7 +107,7 @@ export default {
             ],
             sourceDice: [],
             myForces: [],
-            myForce: {},
+            myForce: {slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}},
             diceGroupedByEdition: {},
             filteredDice: [],
             forceSlot: 'Home',
@@ -112,11 +118,10 @@ export default {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
-      if (this.$route.query.name === undefined) {
+      if (this.$route.query.name !== undefined) {
         this.myForce = this.myForces.filter(force => force.name === that.$route.query.name)[0] || {};
       } else {
-        this.myForce = {};
-        this.myForce.name = this.$route.query.name;
+        this.myForce = {name: this.name, slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}};
       }
 
       this.profile = await getCollection('profiles') || {};
@@ -128,7 +133,7 @@ export default {
         this.myForce.isPublic = false;
       }
 
-      this.forceSlot = this.$store.state.forceSlot;
+      this.forceSlot = this.$store.state.forceSlot || 'Home';
       
       this.timerHandle = setInterval(this.saveAndClear, 5000);
     },
@@ -234,6 +239,10 @@ export default {
           profile.forcesTour = false;
           saveCollection('profiles', profile);
         },
+        setMyForce() {
+          let that = this;
+          this.myForce = this.myForces.filter(force => force.name == that.forceSlot)[0] || {slots: {}};
+        },
     },
 };
 </script>
@@ -291,12 +300,6 @@ export default {
     font-weight: bold;
     align-items: center;
     justify-items: center;
-  }
-
-  .body {
-    width: 100%;
-    overflow: auto;
-    height: 50vh;
   }
 
   .body .row {
