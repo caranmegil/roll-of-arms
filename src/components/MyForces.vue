@@ -44,9 +44,10 @@
       <div class="dice">
         <div class="body">
           <div v-for="die in myForce.slots[forceSlot]" :key="die.name" :id="die.name" class="row">
-              <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
-              <div class="size">{{die.rarity}}</div>
-              <div class="type">{{die.type}}</div>
+              <div @click="() => expand(die)" class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
+              <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
+              <div @click="() => expand(die)" class="type">{{die.type}}</div>
+              <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
               <div id="expansion">
                 <div class="add-die">
                   <span @click="() => decr(die)" class="material-icons material-icons-outlined">remove</span>
@@ -152,6 +153,29 @@ export default {
         },
         incr(die) {
           die.amount++;
+        },
+        expand(die) {
+          let row = document.getElementById(die.name);
+          let actionButton = row.querySelector('#action-button');
+          let expansion = row.querySelector('#expansion');
+          let allExpansions = document.querySelectorAll('#expansion');
+          this.edAmnt = 0;
+
+          if (window.getComputedStyle(expansion).display === 'none') {
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
+            expansion.style.display = 'grid';
+            actionButton.innerText = 'expand_less';
+          } else {
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
+          }
         },
         saveAndClear() {
         //  this.recalcTotals();
@@ -366,9 +390,9 @@ export default {
     padding-left: 1.0em;
   }
 
-  .expansion {
+   #expansion {
     display: none;
-    grid-area: 2 / 1 / 2 / 4;
+    grid-area: 2 / 1 / 2 / 5;
     width: 100%;
     border: 1px dashed black;
   }
