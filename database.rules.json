@@ -16,6 +16,13 @@
         ".write": "auth.uid != null && $user_id === auth.uid"
       }
     },
+    "forces": {
+      ".read": true,
+    	".write": "auth.uid != null && newData.exists() && newData.child(auth.uid).exists()",
+      "$user_id": {
+        ".write": "auth.uid != null && $user_id === auth.uid"
+      }
+    },
     "dice": {
       ".write": false,
       ".read": true
