@@ -4,8 +4,9 @@
       <div class="header">
         <h1>My Forces</h1>
         <div class="element">
-            <label for="speciesFilter">Species/Set</label>
-            <select id="speciesFilter" v-model="forceSlot" @change="setMyForce">
+            <label for="forcesFilter">Forces</label>
+            <select id="forcesFilter" v-model="forceName" @change="setMyForce">
+                <option value="" selected="selected">Select</option>
                 <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
         </div>
@@ -14,15 +15,15 @@
           <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
         </div>
         <div class="element">
-          <label for="name">Name</label>
-          <input type="text" id="name" v-model="myForce.name" @change="saveTheForces"/>
+          <label for="forceName">Force Name</label>
+          <input type="text" id="forceName" v-model="myForce.name" @change="saveTheForces"/>
         </div>
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
               <label for="forceFilter">Area</label>
               <select id="forceFilter" v-model="forceSlot">
-                  <option value="Home" selected="true">Home</option>
+                  <option value="Home" selected="selected">Home</option>
                   <option value="Horde">Horde</option>
                   <option value="Frontier">Frontier</option>
                   <option value="Summoning">Summoning</option>
@@ -113,6 +114,7 @@ export default {
             myForce: {slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}},
             diceGroupedByEdition: {},
             filteredDice: [],
+            forceName: "",
             forceSlot: 'Home',
             timerHandle: null,
         };
@@ -267,7 +269,7 @@ export default {
         },
         setMyForce() {
           let that = this;
-          this.myForce = this.myForces.filter(force => force.name == that.forceSlot)[0] || {slots: {}};
+          this.myForce = this.myForces.filter(force => force.name == that.forceName)[0] || {slots: {}};
         },
     },
 };
@@ -276,6 +278,10 @@ export default {
 <style scoped>
   input {
     width: 5em;
+  }
+
+  input#forceName {
+    width: 15em;
   }
 
   button {
@@ -328,10 +334,16 @@ export default {
     justify-items: center;
   }
 
+  .body {
+    width: 100%;
+    overflow: auto;
+    height: 50vh;
+  }
+
   .body .row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 1fr auto;
     justify-items: center;
     align-items: center;
     gap: .25em;
