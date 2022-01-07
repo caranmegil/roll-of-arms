@@ -48,9 +48,11 @@
               <div class="size">{{die.rarity}}</div>
               <div class="type">{{die.type}}</div>
               <div id="expansion">
-                <span @click="() => incr(die)" class="material-icons material-icons-outlined">add</span>
-                <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(die)" @change="() => changeAmount(die)"></div>
-                <span @click="() => decr(die)" class="material-icons material-icons-outlined">remove</span>
+                <div class="add-die">
+                  <span @click="() => decr(die)" class="material-icons material-icons-outlined">remove</span>
+                  <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(die)" @change="() => changeAmount(die)"></div>
+                  <span @click="() => incr(die)" class="material-icons material-icons-outlined">add</span>
+                </div>
               </div>
           </div>
         </div>
