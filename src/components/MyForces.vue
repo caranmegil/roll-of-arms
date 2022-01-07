@@ -1,33 +1,31 @@
 <template>
-    <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
+    <v-tour name="forcesTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
       <div class="header">
-        <h1>My Collection</h1>
+        <h1>My Forces</h1>
+        <div class="element">
+            <label for="speciesFilter">Species/Set</label>
+            <select id="speciesFilter" v-model="forceSlot" @change="setMyForce">
+                <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
+            </select>
+        </div>
         <div class="element">
           <label for="privacy">Make Public</label>
-          <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
+          <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
+        </div>
+        <div class="element">
+          <label for="name">Name</label>
+          <input type="text" id="name" v-model="myForce.name" @change="saveTheForces"/>
         </div>
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
-              <label for="speciesFilter">Species/Set</label>
-              <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
-                  <option value="">All</option>
-                  <option v-for="option in species" :key="option" :value="option">{{option}}</option>
-              </select>
-          </div>
-          <div class="element">
-              <label for="sizeFilter">Size</label>
-              <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
-                  <option value="" selected="true">All</option>
-                  <option v-for="option in sizes" :key="option" :value="option">{{option}}</option>
-              </select>
-          </div>
-          <div class="element">
-              <label for="typeFilter">Type</label>
-              <select id="typeFilter" v-model="typeFilter" @change="setTypeFilter">
-                  <option value="" selected="true">All</option>
-                  <option v-for="option in types" :key="option" :value="option">{{option}}</option>
+              <label for="forceFilter">Area</label>
+              <select id="forceFilter" v-model="forceSlot">
+                  <option value="Home" selected="true">Home</option>
+                  <option value="Horde">Horde</option>
+                  <option value="Frontier">Frontier</option>
+                  <option value="Summoning">Summoning</option>
               </select>
           </div>
           <div class="element"><label for="totalDice">Total Dice</label><div id="totalDice">{{totalDice}}</div></div>
@@ -45,19 +43,15 @@
       </div>
       <div class="dice">
         <div class="body">
-          <div v-for="(die) in filteredDice" :key="die.name" :id="die.name" class="row">
+          <div v-for="die in myForce.slots[forceSlot]" :key="die.name" :id="die.name" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
               <div class="size">{{die.rarity}}</div>
               <div class="type">{{die.type}}</div>
-                <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
-                <div id="expansion">
-                  <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
-                    <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
-                    <span @click="() => decr(grDie)" class="material-icons material-icons-outlined">remove</span>
-                    <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
-                    <span @click="() => incr(grDie)" class="material-icons material-icons-outlined">add</span>
-                  </div>
-                </div>
+              <div id="expansion">
+                <span @click="() => incr(die)" class="material-icons material-icons-outlined">add</span>
+                <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(die)" @change="() => changeAmount(die)"></div>
+                <span @click="() => decr(die)" class="material-icons material-icons-outlined">remove</span>
+              </div>
           </div>
         </div>
       </div>
@@ -91,128 +85,56 @@ export default {
                 header: {
                   title: 'Filters!',
                 },
-                content: 'Set your species/set and edition filters here.',
+                content: 'Set your area of forces filters here.',
               },
               {
                 target: '#locate',
                 header: {
-                  title: 'Locate Die!',
+                  title: 'Add Die!',
                 },
-                content: 'Press this button to locate dice to add using the dice browser.',
+                content: 'Press this button to locate dice to add using the forces dice browser.',
               },
               {
                 target: '.body',
                 header: {
                   title: 'The Dice!',
                 },
-                content: 'Scroll through this list and locate the die you want and modify your collection.  Changing the amount to 0 removes it.',
+                content: 'Scroll through this list and locate the die you want and modify your forces.  Changing the amount to 0 removes it.',
                 params: {
                   placement: 'auto',
                 },
               },
             ],
             sourceDice: [],
-            dice: [],
+            myForces: [],
+            myForce: {slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}},
             diceGroupedByEdition: {},
             filteredDice: [],
-            speciesFilter: '',
-            species: [],
-            sizes: [],
-            sizeFilter: '',
-            types: [],
-            typeFilter: '',
+            forceSlot: 'Home',
             timerHandle: null,
         };
     },
     async mounted() {
+      let that = this;
       this.sourceDice = await getEntireCollection('dice');
+      this.myForces = await getCollection('forces') || [];
+      if (this.$route.query.name !== undefined) {
+        this.myForce = this.myForces.filter(force => force.name === that.$route.query.name)[0] || {};
+      } else {
+        this.myForce = {name: this.name, slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}};
+      }
+
       this.profile = await getCollection('profiles') || {};
-      if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
-        this.$tours['collectionTour'].start();
+      if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
+        this.$tours['forcesTour'].start();
       }
 
-      if (this.profile.isCollectionPublic === undefined) {
-        this.profile.isCollectionPublic = false;
+      if (this.myForce.isPublic === undefined) {
+        this.myForce.isPublic = false;
       }
 
-      this.dice = await getCollection('collections') || [];
-      this.dice = this.dice.map(die => {
-          let newDie = {...die};
-          delete newDie['faces'];
-          if (die.species === 'Eldarim') {
-              newDie.species = 'Eldarim, White';
-          }
-          if (die.species === 'Item' && die.name.startsWith('Gold')) {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Eldarim, Gold') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-              newDie.species = 'Eldarim, Yellow';
-          }
-          if (die.species === 'Dragon') {
-              if (!newDie.name.includes('/')) {
-                  newDie.type = 'Elemental';
-                  newDie.rarity = 'Elemental';
-              } else if (newDie.name.includes('White')) {
-                  newDie.type = 'White';
-                  newDie.rarity = 'White';
-              } else if (newDie.name.includes('Ivory')) {
-                  newDie.type = 'Ivory Hybrid';
-                  newDie.rarity = 'Ivory Hybrid';
-              } else {
-                  newDie.type = 'Hybrid';
-                  newDie.rarity = 'Hybrid';
-              }
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Dragonkin') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Equipment') {
-            newDie.species = 'Items';
-          }
-          if (die.species === 'Item') {
-              if (die.rarity !== 'Artifact') {
-                  newDie.rarity = `${die.rarity} Equipment`
-              }
-              newDie.species = 'Item';
-          }
-          if (die.species === 'Medallion') {
-              newDie.species = 'Item';
-          }
-          if (die.species === 'Relic') {
-              newDie.species = 'Item';
-          }
-          if (die.species.endsWith('Terrain')) {
-              newDie.species = 'Terrain';
-              const nameSplit = die.name.split(' ');
-              if (nameSplit.length == 2) {
-                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
-              } else {
-                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
-              }
-          }
-          if (newDie.species === 'Terrain') {
-              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
-                  newDie.rarity = 'Advanced Terrain';
-              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
-                  newDie.rarity = 'Basic Terrain';
-              }
-          }
-          return newDie;
-      });
-
-      this.speciesFilter = '';
-      this.sizeFilter = this.$store.state.filters.size;
-      this.typeFilter = this.$store.state.filters.type;
+      this.forceSlot = this.$store.state.forceSlot || 'Home';
       
-      let species = [];
-      this.dice.forEach(die => species.push(die.species));
-
-      species = [...new Set(species)].sort();
-      this.species = species;
-
-      this.setSpeciesFilter();
       this.timerHandle = setInterval(this.saveAndClear, 5000);
     },
     unmounted() {
@@ -220,7 +142,7 @@ export default {
       clearInterval(this.timerHandle);
     },
     methods: {
-        ...mapActions(['setCollectionDie', 'setFilters']),
+        ...mapActions(['setForceSlot', 'setFilters']),
         decr(die) {
           if (die.amount > 0) {
             die.amount--;
@@ -229,25 +151,9 @@ export default {
         incr(die) {
           die.amount++;
         },
-        expand(id) {
-          let row = document.getElementById(id);
-          let actionButton = row.querySelector('#action-button');
-          let expansion = row.querySelector('#expansion');
-          if (window.getComputedStyle(expansion).display === 'none') {
-            let expansions = document.querySelectorAll('#expansion');
-            [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
-            expansion.style.display = 'grid';
-            actionButton.innerText = 'expand_less';
-          } else {
-            expansion.style.display = 'none';
-            actionButton.innerText = 'expand_more';
-          }
-        },
         saveAndClear() {
-          this.dice = this.dice.filter(die => die.amount > 0);
-          this.filteredDice = this.applyFiltersAndSort();
-          this.recalcTotals();
-          saveCollection('collections', this.dice);
+        //  this.recalcTotals();
+          saveCollection('forces', this.myForces);
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
@@ -278,43 +184,9 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter( die => that.speciesFilter === '' || die.species === that.speciesFilter );
 
-          let sizes = [];
-          let types = [];
-          dice.forEach( die => {
-            sizes.push(die.rarity);
-            types.push(die.type);
-          });
+          let dice = this.myForces[this.forceSlot];
 
-          sizes = [...new Set(sizes)];
-          sizes.sort();
-          types = [...new Set(types)];
-          types.sort();
-
-          this.sizes = sizes;
-          this.types = types;
-
-          this.setFilters({species: this.speciesFilter, edition: this.editionFilter, size: this.sizeFilter, type: this.typeFilter});
-
-          dice = dice.filter( die =>
-                              (that.typeFilter === '' || die.type === that.typeFilter)
-                              && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
-                            );
-          dice.sort( (a, b) => {
-            if (that.sortColumn == 0) {
-              return that.sortDirection * a.name.localeCompare(b.name);
-            } else if (that.sortColumn == 1) {
-              return that.sortDirection * a.rarity.localeCompare(b.rarity);
-            } else if (that.sortColumn == 2) {
-              return that.sortDirection * a.type.localeCompare(b.type);
-            } else if (that.sortColumn == 3) {
-              return that.sortDirection * a.edition.localeCompare(b.edition);
-            }
-
-          });
-
-          this.diceGroupedByEdition = {};
           dice.forEach(die => {
             let namesArr = that.diceGroupedByEdition[die.name];
             if (namesArr === undefined) {
@@ -328,18 +200,21 @@ export default {
           return dice;
         },
         getImageID(die) {
-          const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
-          return dice[0].id; 
+          const filteredDie = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition)) [0] || {};
+          return filteredDie.id; 
         },
-        saveTheProfile() {
-          saveCollection('profiles', this.profile);
+        saveTheForces() {
+          saveCollection('forces', this.myForces);
         },
         browseDice() {
-          this.$router.push('/dicebrowser');
+          this.setForceSlot(this.forceSlot);
+          if (this.myForce.name !== undefined) {
+            this.$router.push(`/forcesdicebrowser/?name=${this.myForce.name}`);
+          }
         },
         changeAmount(grDie) {
           if (!isNaN(grDie.amount)) {
-            this.dice.map(die => {
+            this.myForces[this.forceSlot].map(die => {
               let newDie = {...die};
 
               if (die.name === grDie.name && die.edition === grDie.edition) {
@@ -359,27 +234,14 @@ export default {
         recalcTotals() {
             this.totalDice = this.filteredDice.reduce((previousValue, currentValue) => previousValue += currentValue.amount, 0);
         },
-        setCurrentDie(die) {
-          this.setCollectionDie(die);
-        },
         async noMoreTours() {
           let profile = await getCollection('profiles');
-          profile.collectionTour = false;
+          profile.forcesTour = false;
           saveCollection('profiles', profile);
         },
-        setSpeciesFilter: function() {
-            this.sizeFilter = '';
-            this.typeFilter = '';
-            this.filteredDice = this.applyFiltersAndSort();
-            this.recalcTotals();
-        },
-        setSizeFilter: function() {
-            this.filteredDice = this.applyFiltersAndSort();
-            this.recalcTotals();
-        },
-        setTypeFilter: function() {
-            this.filteredDice = this.applyFiltersAndSort();
-            this.recalcTotals();
+        setMyForce() {
+          let that = this;
+          this.myForce = this.myForces.filter(force => force.name == that.forceSlot)[0] || {slots: {}};
         },
     },
 };
@@ -438,12 +300,6 @@ export default {
     font-weight: bold;
     align-items: center;
     justify-items: center;
-  }
-
-  .body {
-    width: 100%;
-    overflow: auto;
-    height: 50vh;
   }
 
   .body .row {
@@ -508,9 +364,9 @@ export default {
     padding-left: 1.0em;
   }
 
-  #expansion {
+  .expansion {
     display: none;
-    grid-area: 2 / 1 / 2 / 5;
+    grid-area: 2 / 1 / 2 / 4;
     width: 100%;
     border: 1px dashed black;
   }

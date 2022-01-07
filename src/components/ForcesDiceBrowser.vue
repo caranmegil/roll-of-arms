@@ -42,12 +42,11 @@
                 <div @click="() => expand(die)" class="type">{{die.type}}</div>
                 <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
-                  <div v-for="edAmnt in amount" :key="die.name + '/' + edAmnt.edition" class="add-die">
-                    <span>{{ (edAmnt.edition === '-') ? 'Standard' : edAmnt.edition}}</span>
-                    <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
-                    <input type="number" v-model="edAmnt.value"/>
-                    <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
-                    <button @click="() => addDie(die, edAmnt)">Add</button>
+                  <div class="add-die">
+                    <span @click="() => decr()" class="material-icons material-icons-outlined">remove</span>
+                    <input type="number" v-model="edAmnt"/>
+                    <span @click="() => incr()" class="material-icons material-icons-outlined">add</span>
+                    <button @click="() => addDie(die)">Add</button>
                   </div>
                 </div>
               </div>
@@ -80,8 +79,8 @@ export default {
             },
             sortColumn: 0,
             sortDirection: 1,
-            myCollection: [],
-            amount: {},
+            myForces: [],
+            myForce: {},
             openedId: null,
             sizes: [],
             sizeFilter: '',
@@ -109,12 +108,18 @@ export default {
             filteredDice: [],
             speciesFilter: '',
             species: [],
+            edAmnt: 0,
             isLoading: true,
         };
     },
     async mounted() {
       this.dice = await getEntireCollection('dice');
-      this.myCollection = await getCollection('collections') || [];
+      this.myForces = await getCollection('forces') || [];
+      this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0] || {slots: {}};
+      if (this.myForce.slots[this.$store.state.forceSlot] === undefined) {
+        this.myForce.slots[this.$store.state.forceSlot] = [];
+      }
+      this.myForces.push(this.myForce);
 
       const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
@@ -135,13 +140,13 @@ export default {
     },
     methods: {
         ...mapActions(['setFilters']),
-        decr(edAmnt) {
-          if (edAmnt.value > 0) {
-            edAmnt.value--;
+        decr() {
+          if (this.edAmnt > 0) {
+            this.edAmnt--;
           }
         },
-        incr(edAmnt) {
-          edAmnt.value++;
+        incr() {
+          this.edAmnt++;
         },
         applyFiltersAndSort() {
           let that = this;
@@ -228,6 +233,7 @@ export default {
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
           let allExpansions = document.querySelectorAll('#expansion');
+          this.edAmnt = 0;
 
           if (window.getComputedStyle(expansion).display === 'none') {
             allExpansions.forEach(expansion => {
@@ -237,37 +243,35 @@ export default {
             });
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
-            this.amount = die.editions.map(edition => { return {edition, value: 0} });
           } else {
             allExpansions.forEach(expansion => {
               let actionButton = expansion.parentNode.querySelector('#action-button');
               expansion.style.display = 'none';
               actionButton.innerText = 'expand_more';
             });
-            this.amount = {};
           }
         },
-        async addDie(die, edAmnt) {
+        async addDie(die) {
           let added = false;
           let newDie = {...die};
           delete newDie.editions;
           delete newDie.id;
-          newDie.edition = edAmnt.edition;
-          newDie.amount = edAmnt.value;
-          this.expand(die, );
-          this.myCollection.forEach( die => {
+          newDie.amount = this.edAmnt;
+          this.expand(die);
+          this.myForce.slots[this.$store.state.forceSlot].forEach( die => {
             if (added) return;
-            if (die.name === newDie.name && die.edition === newDie.edition) {
-              die.amount += edAmnt.value;
+
+            if (die.name === newDie.name) {
+              die.amount += newDie.amount;
               added = true;
             }
           });
 
           if(!added) {
-            this.myCollection.push(newDie);
+            this.myForce.slots[this.$store.state.forceSlot].push(newDie);
           }
-          this.amount = {};
-          await saveCollection('collections', this.myCollection);
+
+          saveCollection('forces', this.myForces)
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');

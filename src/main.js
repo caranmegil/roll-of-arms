@@ -22,6 +22,8 @@ import Auth from './components/Auth.vue';
 import DiceBrowser from './components/DiceBrowser.vue';
 import DiceCollection from './components/DiceCollection.vue';
 import MyForces from './components/MyForces.vue';
+import ForcesDiceBrowser from './components/ForcesDiceBrowser.vue';
+
 const routes = [
     { path: '/', component: Main, meta: { requiresAuth: true } },
     { path: '/signin', component: Login },
@@ -31,6 +33,7 @@ const routes = [
     { path: '/profile/:id', component: ProfileView },
     { path: '/auth', component: Auth },
     { path: '/dicebrowser', component: DiceBrowser, meta: { requiresAuth: true } },
+    { path: '/forcesdicebrowser', component: ForcesDiceBrowser, meta: { requiresAuth: true } },
     { path: '/my-collection', component: DiceCollection, meta: { requiresAuth: true } },
     { path: '/my-forces', component: MyForces, meta: { requiresAuth: true } },
 ];
@@ -65,11 +68,10 @@ const store = createStore({
         return {
             user: JSON.parse(localStorage.getItem('user') || null),
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
-            collectionDie: null,
+            bufferDie: null,
             forceSlot: 'Home',
-            filters: {species: '', edition: '', size: '', type: ''},
+            filters: {species: '', edition: '', size: '', type: '',},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
-            forcesDice: [],
         };
     },
     mutations: {
@@ -81,8 +83,8 @@ const store = createStore({
             state.credentials = credentials;
             localStorage.setItem('credentials', JSON.stringify(credentials))
         },
-        setCollectionDie(state, collectionDie) {
-            state.collectionDie = collectionDie;
+        setBufferDie(state, die) {
+            state.bufferDie = die;
         },
         setFilters(state, filters) {
             state.filters = filters;
@@ -91,19 +93,16 @@ const store = createStore({
             state.dice = dice;
             localStorage.setItem('dice', JSON.stringify(dice));
         },
-        setForcesDice(state, dice) {
-            state.forcesDice = dice;
-        },
         setForceSlot(state, slot) {
             state.forceSlot = slot;
         },
         signOut(state) {
             state.user = null;
             state.credentials = {}
-            state.filters = {species: '', edition: '', size: '', type: ''}
+            state.filters = {species: '', edition: '', size: '', type: '',}
             state.dice = [];
-            state.forcesDice = [];
             state.forceSlot = 'Home';
+            state.bufferDie = null;
             localStorage.setItem('credentials', JSON.stringify({}));
             localStorage.setItem('dice', JSON.stringify(null));
             localStorage.setItem('user', JSON.stringify(null));
@@ -116,17 +115,17 @@ const store = createStore({
         setCredentials({ commit }, credentials) {
             commit('setCredentials', credentials);
         },
-        setCollectionDie({ commit }, collectionDie) {
-            commit('setCollectionDie', collectionDie);
+        setBufferDie({ commit }, die) {
+            commit('setBufferDie', die);
         },
         setFilters({ commit }, filters) {
             commit('setFilters', filters);
         },
+        setAreaFilters({ commit }, filters) {
+            commit('setFilters', filters);
+        },
         setDice({ commit }, dice) {
             commit('setDice', dice);
-        },
-        setForcesDice({ commit }, dice) {
-            commit('setForcesDice', dice);
         },
         setForceSlot({ commit }, slot) {
             commit('setForceSlot', slot);
