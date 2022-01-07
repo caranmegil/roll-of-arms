@@ -6,6 +6,7 @@
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
     </header>
     <div id="menu" class="menu-container">
+      <div @click="closeMenu" class="menu-item"><span class="material-icons material-icons-outlined">close</span></div>
       <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">public</span> Player Map</div>
       <div class="separator"></div>
       <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
@@ -53,6 +54,9 @@ export default {
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
+    closeMenu: function() {
+      this.toggleMenu();
+    },
     goHome: function() {
       this.toggleMenu();
       this.$router.push('/');
@@ -114,7 +118,6 @@ body {
       height: 24px;
     }
 
-
   .image-icon {
     width: 24px;
     height: 24px;
@@ -151,13 +154,13 @@ button {
 
 .menu-container {
   background-color: ivory;
-  border: 3px solid #D3D3D3;
   display: none;
   position: fixed;
   z-index: 9999999;
-  left: .75em;
-  top: 5.5em;
-  width: 50%;
+  left: 0;
+  top: 0em;
+  width: 20em;
+  height: 100%;
   grid-auto-flow: row;
 }
 
