@@ -2,22 +2,15 @@
     <v-tour name="forcesTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
       <div class="header">
-        <h1>My Forces</h1>
+        <h1>My Force</h1>
         <div class="element">
-            <label for="forcesFilter">Forces</label>
-            <select id="forcesFilter" v-model="forceName" @change="setMyForce">
-                <option value="" selected="selected">Add New...</option>
-                <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
-            </select>
+          <label for="forceName">Force Name</label>
+          <input type="text" id="forceName" v-model="myForce.name" @change="saveTheForces"/>
+          <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button>
         </div>
         <div class="element">
           <label for="privacy">Make Public</label>
           <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
-        </div>
-        <div class="element">
-          <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button>
-          <label for="forceName">Force Name</label>
-          <input type="text" id="forceName" v-model="myForce.name" @change="saveTheForces"/>
         </div>
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
@@ -73,7 +66,7 @@ import {
 } from '@/firebase';
 
 export default {
-    name: 'DiceBrowser',
+    name: 'MyForces',
     data() {
         return {
             totalDice: '0 / 0',
@@ -124,8 +117,10 @@ export default {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
-      if (this.$route.query.name !== undefined) {
-        this.myForce = this.myForces.filter(force => force.name === that.$route.query.name)[0] || {};
+      this.forceName = this.$route.query.name;
+
+      if (this.forceName !== undefined) {
+        this.myForce = this.myForces.filter(force => force.name === that.forceName)[0] || {};
       } else {
         this.myForce = {name: this.name, slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}};
       }
@@ -282,11 +277,6 @@ export default {
           profile.forcesTour = false;
           saveCollection('profiles', profile);
         },
-        setMyForce() {
-          let that = this;
-          this.myForce = this.myForces.filter(force => force.name == that.forceName)[0] || {slots: {}};
-          this.recalcTotals();
-        },
         setForcesSlot() {
           this.recalcTotals();
         },
@@ -303,13 +293,12 @@ export default {
     width: 15em;
   }
 
+  button#export {
+    width: 32px;
+  }
 
   button {
     width: 10em;
-  }
-
-  button#export {
-    width: 32px;
   }
 
   .collections {

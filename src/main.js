@@ -22,6 +22,7 @@ import Auth from './components/Auth.vue';
 import DiceBrowser from './components/DiceBrowser.vue';
 import DiceCollection from './components/DiceCollection.vue';
 import MyForces from './components/MyForces.vue';
+import MyForcesSelector from './components/MyForcesSelector.vue';
 import ForcesDiceBrowser from './components/ForcesDiceBrowser.vue';
 
 const routes = [
@@ -35,6 +36,7 @@ const routes = [
     { path: '/dicebrowser', component: DiceBrowser, meta: { requiresAuth: true } },
     { path: '/forcesdicebrowser', component: ForcesDiceBrowser, meta: { requiresAuth: true } },
     { path: '/my-collection', component: DiceCollection, meta: { requiresAuth: true } },
+    { path: '/my-forces-selector', component: MyForcesSelector, meta: { requiresAuth: true } },
     { path: '/my-forces', component: MyForces, meta: { requiresAuth: true } },
 ];
 
