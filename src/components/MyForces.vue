@@ -263,8 +263,34 @@ export default {
           }
           return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
         },
+        weightDie(die) {
+          let pointValue = 0;
+
+          if (die.species === 'Items') {
+            switch(die.type) {
+              case 'Relic':
+                pointValue = 4;
+                break;
+              case 'Medallion':
+                pointValue = 3;
+                break;
+              default:
+                if (die.rarity === 'Large') {
+                  pointValue = 2;
+                } else if (die.rarity == 'Small') {
+                  pointValue = 1;
+                }
+                break;
+            }
+          } else if (die.species === 'Dragon' || die.species === 'Dragonkin') {
+            pointValue = 0;
+          }
+
+          return pointValue;
+        } ,       
         calcSlotTotal(slot) {
-          return slot.reduce( (prev, current) => prev + current.amount, 0);
+          let that = this;
+          return slot.reduce( (prev, current) => prev + that.weightDie(current) * current.amount, 0);
         },
         recalcTotals() {
           let that = this;
