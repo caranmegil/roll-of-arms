@@ -2,13 +2,10 @@
     <div class="collections">
       <div class="header">
         <h1>My Forces</h1>
-        <div class="element">
-            <label for="forcesFilter">Forces</label>
-            <select id="forcesFilter" v-model="forceName">
+        <div class="element-horizontal">
+            <select id="forcesFilter" v-model="forceName" size="5">
                 <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
-        </div>
-        <div>
           <button id="loadForceBtn" @click="() => setMyForce(forceName)">Open</button>
         </div>
         <div>
@@ -69,6 +66,7 @@ export default {
 
   button {
     width: 10em;
+    height: 3em;
   }
 
   .collections {
@@ -94,6 +92,21 @@ export default {
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
     padding-bottom: .5em;
+  }
+
+  .element-horizontal {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    padding-bottom: .5em;
+  }
+
+  .element-horizontal > button {
+    font-weight: bold;
+    justify-self: center;
+    align-self: center;
+    padding: .1em;
   }
 
   .element > label {
