@@ -4,7 +4,7 @@
         <h1>My Forces</h1>
         <div class="element">
             <label for="forcesFilter">Forces</label>
-            <select id="forcesFilter" v-model="forceName" @change="setMyForce">
+            <select id="forcesFilter" v-model="forceName">
                 <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
         </div>

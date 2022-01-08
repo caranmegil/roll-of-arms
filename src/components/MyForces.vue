@@ -39,7 +39,7 @@
       <div class="dice">
         <div class="body">
           <div v-for="die in myForce.slots[forceSlot]" :key="die.name" :id="die.name" class="row">
-              <div @click="() => expand(die)" class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
+              <div @click="() => expand(die)" class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{die.amount}})</div></div>
               <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
               <div @click="() => expand(die)" class="type">{{die.type}}</div>
               <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
@@ -106,7 +106,6 @@ export default {
             sourceDice: [],
             myForces: [],
             myForce: {slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}},
-            diceGroupedByEdition: {},
             filteredDice: [],
             forceName: "",
             forceSlot: 'Home',
@@ -257,17 +256,11 @@ export default {
             });
           }
         },
-        recalcSubTotals(die) {
-          if (this.diceGroupedByEdition[die.name] === undefined) {
-            return 0;
-          }
-          return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
-        },
         weightDie(die) {
           let pointValue = 0;
 
           if (die.species === 'Items') {
-            switch(die.type) {
+            switch (die.type) {
               case 'Relic':
                 pointValue = 4;
                 break;
@@ -282,8 +275,23 @@ export default {
                 }
                 break;
             }
-          } else if (die.species === 'Dragon' || die.species === 'Dragonkin') {
+          } else if (die.species === 'Dragon' || die.species === 'Dragonkin' || die.species === 'Terrain') {
             pointValue = 0;
+          } else {
+            switch (die.rarity) {
+              case 'Small':
+                pointValue = 1;
+                break;
+              case 'Medium':
+                pointValue = 2;
+                break;
+              case 'Large':
+                pointValue = 3;
+                break;
+              default:
+                pointValue = 4;
+                break;
+            }
           }
 
           return pointValue;
