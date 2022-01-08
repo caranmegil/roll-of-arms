@@ -58,7 +58,8 @@
 
 <script>
 import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';import { mapActions } from 'vuex';
+import 'vue-loading-overlay/dist/vue-loading.css';
+import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
   getCollection,
