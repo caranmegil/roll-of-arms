@@ -1,8 +1,8 @@
 <template>
     <v-tour name="diceBrowserTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="dice-browser">
-      <div id="dice">
           <Loading v-model:active="isLoading"/>
+      <div id="dice">
           <div class="header">
               <h1>Dice Browser</h1>
               <span id="filters">
@@ -28,6 +28,10 @@
                     </select>
                 </div>
               </span>
+
+              <div class="anchor-element">
+                <a @click="returnToModifier">Return to My Force</a>
+              </div>
 
               <div class="table-header">
                   <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
@@ -59,6 +63,7 @@
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import { mapActions } from 'vuex';
+import { resetSlots } from '@/utils';
 import 'es6-promise/auto';
 import {
   getCollection,
@@ -117,13 +122,8 @@ export default {
       this.dice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
       this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0] || {slots: {}};
-      if (this.myForce.name === undefined) {
-        this.myForces.push(this.myForce);
-      }
 
-      if (this.myForce.slots[this.$store.state.forceSlot] === undefined) {
-        this.myForce.slots[this.$store.state.forceSlot] = [];
-      }
+      resetSlots(this.myForce);
 
       const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
@@ -300,6 +300,9 @@ export default {
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
+        returnToModifier: function() {
+          this.$router.push(`/my-forces?name=${encodeURI(this.$route.query.name)}`)
+        }
     },
 };
 </script>
@@ -312,6 +315,13 @@ export default {
   #dice .header h1 {
     align-self: center;
     justify-self: center;    
+  }
+
+  #dice .header .anchor-element {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    grid-auto-flow: column;
   }
 
   #dice .header .element {

@@ -61,6 +61,7 @@
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import { mapActions } from 'vuex';
+import { resetSlots } from '@/utils';
 import 'es6-promise/auto';
 import {
   getCollection,
@@ -126,30 +127,10 @@ export default {
       this.forceName = this.$route.query.name;
 
       if (this.forceName !== undefined) {
-        this.myForce = this.myForces.filter(force => force.name === that.forceName)[0] || {};
-      } else {
-        this.myForce = {name: this.name, slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}};
+        this.myForce = this.myForces.filter(force => force.name === that.forceName)[0];
       }
 
-      if (!this.myForce.slots) {
-        this.myForce.slots = {};
-      }
-
-      if (!this.myForce.slots['Home']) {
-        this.myForce.slots['Home'] = [];
-      }
-
-      if (!this.myForce.slots['Horde']) {
-        this.myForce.slots['Horde'] = [];
-      }
-
-      if (!this.myForce.slots['Frontier']) {
-        this.myForce.slots['Frontier'] = [];
-      }
-
-      if (!this.myForce.slots['Summoning']) {
-        this.myForce.slots['Summoning'] = [];
-      }
+      resetSlots(this.myForce);
 
       this.profile = await getCollection('profiles') || {};
       if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
@@ -208,7 +189,7 @@ export default {
           if (this.myForce !== undefined && this.myForce.name !== undefined) {
             const a = document.createElement('a');
             a.href = URL.createObjectURL( new Blob([JSON.stringify(this.myForce)], { type: 'text/json' }) );
-            a.download = `${this.myForce.name}.json`;
+            a.download = `${encodeURI(this.myForce.name)}.json`;
             a.click();
           }
         },
@@ -272,7 +253,7 @@ export default {
         browseDice() {
           this.setForceSlot(this.forceSlot);
           if (this.myForce.name !== undefined && this.myForce.name !== '') {
-            this.$router.push(`/forcesdicebrowser/?name=${this.myForce.name}`);
+            this.$router.push(`/forcesdicebrowser/?name=${encodeURI(this.myForce.name)}`);
           }
         },
         changeAmount(grDie) {
