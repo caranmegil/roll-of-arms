@@ -9,13 +9,13 @@
             </select>
         </div>
         <div>
-          <button id="loadForceBtn" @click="setMyForce(forceName)">Open</button>
+          <button id="loadForceBtn" @click="() => setMyForce(forceName)">Open</button>
         </div>
         <div>
-          <input type="text" id="newForceName"/>
+          <input type="text" v-model="newForceName" id="newForceName"/>
         </div>
         <div>
-          <button id="newForceBtn" @click="setMyForce(newForceName)">Create</button>
+          <button id="newForceBtn" @click="() => setMyForce(newForceName)">Create</button>
         </div>
       </div>
     </div>
@@ -25,6 +25,7 @@
 import 'es6-promise/auto';
 import {
   getCollection,
+  saveCollection,
 } from '@/firebase';
 
 export default {
@@ -41,8 +42,16 @@ export default {
     },
     methods: {
         setMyForce(name) {
-          this.myForce = this.myForces.filter(force => force.name == name)[0] || {name, slots: {}};
-          this.$router.push(`/my-forces?name=${name}`);
+          this.myForce = this.myForces.filter(force => force.name == name)[0];
+
+          if (this.myForce === undefined) {
+            this.myForces.push({name, slots: {}});
+            this.newForceName = '';
+          }
+          if (name !== undefined && name.trim() !== '') {
+            saveCollection('forces', this.myForces);
+            this.$router.push(`/my-forces?name=${encodeURI(name)}`);
+          }
         },
     },
 };

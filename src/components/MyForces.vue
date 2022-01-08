@@ -1,6 +1,7 @@
 <template>
     <v-tour name="forcesTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
+      <Loading v-model:active="isLoading"/>
       <div class="header">
         <h1>My Force</h1>
         <div class="element">
@@ -57,6 +58,8 @@
 </template>
 
 <script>
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
@@ -67,6 +70,9 @@ import {
 
 export default {
     name: 'MyForces',
+    components: {
+      Loading,
+    },
     data() {
         return {
             totalDice: '0 / 0',
@@ -110,6 +116,7 @@ export default {
             forceName: "",
             forceSlot: 'Home',
             timerHandle: null,
+            isLoading: true,
         };
     },
     async mounted() {
@@ -124,6 +131,26 @@ export default {
         this.myForce = {name: this.name, slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}};
       }
 
+      if (!this.myForce.slots) {
+        this.myForce.slots = {};
+      }
+
+      if (!this.myForce.slots['Home']) {
+        this.myForce.slots['Home'] = [];
+      }
+
+      if (!this.myForce.slots['Horde']) {
+        this.myForce.slots['Horde'] = [];
+      }
+
+      if (!this.myForce.slots['Frontier']) {
+        this.myForce.slots['Frontier'] = [];
+      }
+
+      if (!this.myForce.slots['Summoning']) {
+        this.myForce.slots['Summoning'] = [];
+      }
+
       this.profile = await getCollection('profiles') || {};
       if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
         this.$tours['forcesTour'].start();
@@ -134,8 +161,11 @@ export default {
       }
 
       this.forceSlot = this.$store.state.forceSlot || 'Home';
+
+      this.recalcTotals();
       
       this.timerHandle = setInterval(this.saveAndClear, 5000);
+      this.isLoading = false;
     },
     unmounted() {
       this.saveAndClear();
@@ -235,7 +265,9 @@ export default {
           return filteredDie.id; 
         },
         saveTheForces() {
-          saveCollection('forces', this.myForces);
+          if (this.myForce.name !== undefined && this.myForce.trim() !== '') {
+            saveCollection('forces', this.myForces);
+          }
         },
         browseDice() {
           this.setForceSlot(this.forceSlot);
@@ -295,10 +327,16 @@ export default {
           }
 
           return pointValue;
-        } ,       
+        },
+        calcMediumEquipment(slot) {
+          // const equipment = slot.filter( die => die.)
+          if (slot) return 0;
+        },
         calcSlotTotal(slot) {
           let that = this;
-          return slot.reduce( (prev, current) => prev + that.weightDie(current) * current.amount, 0);
+          let totals = slot.reduce( (prev, current) => prev + that.weightDie(current) * current.amount, 0);
+          totals += this.calcMediumEquipment(slot);
+          return totals;
         },
         recalcTotals() {
           let that = this;
