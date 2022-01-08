@@ -182,11 +182,10 @@ export default {
         },
         exportCurrentForce() {
           if (this.myForce !== undefined && this.myForce.name !== undefined) {
-            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.myForce));
-            var dlAnchorElem = document.getElementById('downloadAnchorElem');
-            dlAnchorElem.setAttribute("href",     dataStr     );
-            dlAnchorElem.setAttribute("download", "scene.json");
-            dlAnchorElem.click();
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL( new Blob([JSON.stringify(this.myForce)], { type: 'text/json' }) );
+            a.download = `${this.myForce.name}.json`;
+            a.click();
           }
         },
         saveAndClear() {
