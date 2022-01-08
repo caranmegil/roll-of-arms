@@ -6,7 +6,7 @@
         <div class="element">
             <label for="forcesFilter">Forces</label>
             <select id="forcesFilter" v-model="forceName" @change="setMyForce">
-                <option value="" selected="selected">Select</option>
+                <option value="" selected="selected">Add New...</option>
                 <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
         </div>
@@ -15,14 +15,15 @@
           <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
         </div>
         <div class="element">
+          <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button>
           <label for="forceName">Force Name</label>
           <input type="text" id="forceName" v-model="myForce.name" @change="saveTheForces"/>
         </div>
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
-              <label for="forceFilter">Area</label>
-              <select id="forceFilter" v-model="forceSlot">
+              <label for="forceFilter">Location</label>
+              <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
                   <option value="Home" selected="selected">Home</option>
                   <option value="Horde">Horde</option>
                   <option value="Frontier">Frontier</option>
@@ -75,7 +76,7 @@ export default {
     name: 'DiceBrowser',
     data() {
         return {
-            totalDice: 0,
+            totalDice: '0 / 0',
             sortColumn: 0,
             sortDirection: 1,
             profile: {},
@@ -179,8 +180,17 @@ export default {
             });
           }
         },
+        exportCurrentForce() {
+          if (this.myForce !== undefined && this.myForce.name !== undefined) {
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.myForce));
+            var dlAnchorElem = document.getElementById('downloadAnchorElem');
+            dlAnchorElem.setAttribute("href",     dataStr     );
+            dlAnchorElem.setAttribute("download", "scene.json");
+            dlAnchorElem.click();
+          }
+        },
         saveAndClear() {
-        //  this.recalcTotals();
+          this.recalcTotals();
           saveCollection('forces', this.myForces);
         },
         changeNameDirection() {
@@ -236,7 +246,7 @@ export default {
         },
         browseDice() {
           this.setForceSlot(this.forceSlot);
-          if (this.myForce.name !== undefined) {
+          if (this.myForce.name !== undefined && this.myForce.name !== '') {
             this.$router.push(`/forcesdicebrowser/?name=${this.myForce.name}`);
           }
         },
@@ -259,8 +269,14 @@ export default {
           }
           return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
         },
+        calcSlotTotal(slot) {
+          return slot.reduce( (prev, current) => prev + current.amount, 0);
+        },
         recalcTotals() {
-            this.totalDice = this.filteredDice.reduce((previousValue, currentValue) => previousValue += currentValue.amount, 0);
+          let that = this;
+          const forceTotal = Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0);
+          const slotTotal = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot]) : 0;
+          this.totalDice = `${slotTotal} / ${forceTotal}`;
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
@@ -270,6 +286,10 @@ export default {
         setMyForce() {
           let that = this;
           this.myForce = this.myForces.filter(force => force.name == that.forceName)[0] || {slots: {}};
+          this.recalcTotals();
+        },
+        setForcesSlot() {
+          this.recalcTotals();
         },
     },
 };
@@ -284,9 +304,15 @@ export default {
     width: 15em;
   }
 
+
   button {
     width: 10em;
   }
+
+  button#export {
+    width: 32px;
+  }
+
   .collections {
     width: 100%;
     display: grid;

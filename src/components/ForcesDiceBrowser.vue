@@ -116,10 +116,13 @@ export default {
       this.dice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
       this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0] || {slots: {}};
+      if (this.myForce.name === undefined) {
+        this.myForces.push(this.myForce);
+      }
+
       if (this.myForce.slots[this.$store.state.forceSlot] === undefined) {
         this.myForce.slots[this.$store.state.forceSlot] = [];
       }
-      this.myForces.push(this.myForce);
 
       const profile = await getCollection('profiles') || {};
       if (profile.diceBrowserTour || profile.diceBrowserTour === undefined) {
