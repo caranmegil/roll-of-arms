@@ -83,7 +83,7 @@ export default {
     },
     editForces: function () {
       this.toggleMenu();
-      this.$router.push('/my-forces');
+      this.$router.push('/my-forces-selector');
     },
     openDiceBrowser: function () {
       this.toggleMenu();

@@ -66,7 +66,7 @@ import {
 } from '@/firebase';
 
 export default {
-    name: 'DiceBrowser',
+    name: 'ForcesDiceBrowser',
     components: {
       Loading,
     },
