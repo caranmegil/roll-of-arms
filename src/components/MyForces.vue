@@ -16,7 +16,7 @@
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
-              <label for="forceFilter">Area/Location</label>
+              <label for="forceFilter">Dice Group</label>
               <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
                   <option value="Home" selected="selected">Home</option>
                   <option value="Home Terrain">Home Terrain</option>
