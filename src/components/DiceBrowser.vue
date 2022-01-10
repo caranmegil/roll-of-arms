@@ -49,7 +49,7 @@
                   <div v-for="edAmnt in amount" :key="die.name + '/' + edAmnt.edition" class="add-die">
                     <span>{{ (edAmnt.edition === '-') ? 'Standard' : edAmnt.edition}}</span>
                     <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
-                    <input type="number" v-model="edAmnt.value"/>
+                    <input type="number" min="0" v-model="edAmnt.value"/>
                     <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
                     <button @click="() => addDie(die, edAmnt)">Add</button>
                   </div>
@@ -140,13 +140,22 @@ export default {
     },
     methods: {
         ...mapActions(['setFilters']),
+        capAmount(edAmnt) {
+          if (edAmnt.value < 0) {
+            edAmnt.value = 0;
+          }
+        },
         decr(edAmnt) {
           if (edAmnt.value > 0) {
             edAmnt.value--;
           }
+
+          this.capAmount(edAmnt);
         },
         incr(edAmnt) {
           edAmnt.value++;
+
+          this.capAmount(edAmnt);
         },
         applyFiltersAndSort() {
           let that = this;
@@ -257,22 +266,25 @@ export default {
           let newDie = {...die};
           delete newDie.editions;
           delete newDie.id;
-          newDie.edition = edAmnt.edition;
-          newDie.amount = edAmnt.value;
-          this.expand(die, );
-          this.myCollection.forEach( die => {
-            if (added) return;
-            if (die.name === newDie.name && die.edition === newDie.edition) {
-              die.amount += edAmnt.value;
-              added = true;
-            }
-          });
+          this.capAmount(edAmnt);
+          if(edAmnt.value > 0) {
+            newDie.edition = edAmnt.edition;
+            newDie.amount = edAmnt.value;
+            this.expand(die, );
+            this.myCollection.forEach( die => {
+              if (added) return;
+              if (die.name === newDie.name && die.edition === newDie.edition) {
+                die.amount += edAmnt.value;
+                added = true;
+              }
+            });
 
-          if(!added) {
-            this.myCollection.push(newDie);
+            if(!added) {
+              this.myCollection.push(newDie);
+            }
+            this.amount = {};
+            await saveCollection('collections', this.myCollection);
           }
-          this.amount = {};
-          await saveCollection('collections', this.myCollection);
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');

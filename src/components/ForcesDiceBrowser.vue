@@ -4,7 +4,7 @@
           <Loading v-model:active="isLoading"/>
       <div id="dice">
           <div class="header">
-              <h1>Dice Browser</h1>
+              <h1>Dice Browser - {{this.$store.state.forceSlot}}</h1>
               <span id="filters">
                 <div class="element">
                     <label for="speciesFilter">Species/Set</label>
@@ -30,7 +30,7 @@
               </span>
 
               <div class="anchor-element">
-                <a @click="returnToModifier">Return to My Force</a>
+                <a @click="returnToModifier">Return to {{this.$route.query.name}}</a>
               </div>
 
               <div class="table-header">
@@ -48,7 +48,7 @@
                 <div id="expansion">
                   <div class="add-die">
                     <span @click="() => decr()" class="material-icons material-icons-outlined">remove</span>
-                    <input type="number" v-model="edAmnt"/>
+                    <input type="number" v-model="dieAmnt" @change="capAmount"/>
                     <span @click="() => incr()" class="material-icons material-icons-outlined">add</span>
                     <button @click="() => addDie(die)">Add</button>
                   </div>
@@ -114,7 +114,7 @@ export default {
             filteredDice: [],
             speciesFilter: '',
             species: [],
-            edAmnt: 0,
+            dieAmnt: 0,
             isLoading: true,
         };
     },
@@ -136,8 +136,12 @@ export default {
 
       if (this.$store.state.forceSlot === 'Summoning') {
           this.dice = this.dice.filter ( die => ['Dragons', 'Dragonkin'].includes(die.species) || die.rarity === 'Minor Terrain');
-      } else if (this.$store.state.forceSlot !== 'Summoning') {
-          this.dice = this.dice.filter ( die => !(['Dragons', 'Dragonkin'].includes(die.species) || die.rarity === 'Minor Terrain'));
+      } else if (this.$store.state.forceSlot === 'Home Terrain') {
+          this.dice = this.dice.filter ( die => die.rarity === 'Basic Terrain');
+      } else if (this.$store.state.forceSlot === 'Frontier Terrain') {
+          this.dice = this.dice.filter ( die => ['Advanced Terrain', 'Basic Terrain'].includes(die.rarity));
+      } else {
+          this.dice = this.dice.filter ( die => !(['Dragons', 'Dragonkin', 'Terrain'].includes(die.species)));
       }
 
       this.dice.forEach(die => species.push(die.species));
@@ -149,13 +153,26 @@ export default {
     },
     methods: {
         ...mapActions(['setFilters']),
-        decr() {
-          if (this.edAmnt > 0) {
-            this.edAmnt--;
+        capAmount() {
+          if (this.$store.state.forceSlot.includes('Terrain')) {
+            if (this.dieAmnt > 1) {
+              this.dieAmnt = 1;
+            }
+          }
+          if (this.dieAmnt < 0) {
+            this.dieAmnt = 0;
           }
         },
+        decr() {
+          if (this.dieAmnt > 0) {
+            this.dieAmnt--;
+          }
+
+          this.capAmount();
+        },
         incr() {
-          this.edAmnt++;
+          this.dieAmnt++;
+          this.capAmount();
         },
         applyFiltersAndSort() {
           let that = this;
@@ -242,7 +259,7 @@ export default {
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
           let allExpansions = document.querySelectorAll('#expansion');
-          this.edAmnt = 0;
+          this.dieAmnt = 0;
 
           if (window.getComputedStyle(expansion).display === 'none') {
             allExpansions.forEach(expansion => {
@@ -265,16 +282,21 @@ export default {
           let newDie = {...die};
           delete newDie.editions;
           delete newDie.id;
-          newDie.amount = this.edAmnt;
+          newDie.amount = this.dieAmnt;
           this.expand(die);
-          this.myForce.slots[this.$store.state.forceSlot].forEach( die => {
-            if (added) return;
+          if (newDie.rarity.includes('Terrain')) {
+            this.myForce.slots[this.$store.state.forceSlot] = [newDie];
+            added = true;
+          } else {
+            this.myForce.slots[this.$store.state.forceSlot].forEach( die => {
+              if (added) return;
 
-            if (die.name === newDie.name) {
-              die.amount += newDie.amount;
-              added = true;
-            }
-          });
+              if (die.name === newDie.name) {
+                die.amount += newDie.amount;
+                added = true;
+              }
+            });
+          }
 
           if(!added) {
             this.myForce.slots[this.$store.state.forceSlot].push(newDie);
