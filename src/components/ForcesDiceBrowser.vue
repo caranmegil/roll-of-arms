@@ -135,6 +135,14 @@ export default {
       this.typeFilter = this.$store.state.filters.type;
       let species = [];
 
+      if (this.$store.state.forceSlot === 'Summoning') {
+          this.dice = this.dice.filter ( die => ['Dragons', 'Dragonkin'].includes(die.species) || die.rarity === 'Minor Terrain');
+      } else if (this.$store.state.forceSlot !== 'Summoning') {
+          this.dice = this.dice.filter ( die => !(['Dragons', 'Dragonkin'].includes(die.species) || die.rarity === 'Minor Terrain'));
+      }
+
+      console.log(this.dice)
+
       this.dice.forEach(die => species.push(die.species));
       species = [...new Set(species)];
       species.sort();
