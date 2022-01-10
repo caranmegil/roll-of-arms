@@ -130,7 +130,6 @@ export default {
         this.$tours['diceBrowserTour'].start();
       }
 
-      this.speciesFilter = this.$store.state.filters.species;
       this.sizeFilter = this.$store.state.filters.size;
       this.typeFilter = this.$store.state.filters.type;
       let species = [];
@@ -140,8 +139,6 @@ export default {
       } else if (this.$store.state.forceSlot !== 'Summoning') {
           this.dice = this.dice.filter ( die => !(['Dragons', 'Dragonkin'].includes(die.species) || die.rarity === 'Minor Terrain'));
       }
-
-      console.log(this.dice)
 
       this.dice.forEach(die => species.push(die.species));
       species = [...new Set(species)];
@@ -309,6 +306,7 @@ export default {
             this.isLoading=false;
         },
         returnToModifier: function() {
+          this.setFilters({species: '', edition: '', size: '', type: ''});
           this.$router.push(`/my-forces?name=${encodeURI(this.$route.query.name)}`)
         }
     },

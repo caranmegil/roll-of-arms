@@ -269,61 +269,95 @@ export default {
             });
           }
         },
-        weightDie(die) {
+        weightDie(die, isSummoning) {
           let pointValue = 0;
 
-          if (die.species === 'Items') {
-            switch (die.type) {
-              case 'Relic':
-                pointValue = 4;
-                break;
-              case 'Medallion':
-                pointValue = 3;
-                break;
-              default:
-                if (die.rarity === 'Large') {
-                  pointValue = 2;
-                } else if (die.rarity == 'Small') {
+          if (isSummoning) {
+            if (die.species === 'Dragonkin') {
+              switch (die.rarity) {
+                case 'Small':
                   pointValue = 1;
-                }
-                break;
+                  break;
+                case 'Medium':
+                  pointValue = 2;
+                  break;
+                case 'Large':
+                  pointValue = 3;
+                  break;
+                default:
+                  pointValue = 4;
+                  break;
+              }
+            } else {
+              pointValue = 1;
             }
-          } else if (die.species === 'Dragons' || die.species === 'Dragonkin' || die.species === 'Terrain') {
-            pointValue = 0;
           } else {
-            switch (die.rarity) {
-              case 'Small':
-                pointValue = 1;
-                break;
-              case 'Medium':
-                pointValue = 2;
-                break;
-              case 'Large':
-                pointValue = 3;
-                break;
-              default:
-                pointValue = 4;
-                break;
+            if (die.species === 'Items') {
+              switch (die.type) {
+                case 'Relic':
+                  pointValue = 4;
+                  break;
+                case 'Medallion':
+                  pointValue = 3;
+                  break;
+                default:
+                  if (die.rarity === 'Large Equipment') {
+                    pointValue = 2;
+                  } else if (die.rarity == 'Small Equipment') {
+                    pointValue = 1;
+                  }
+                  break;
+              }
+            } else if (die.species === 'Dragons' || die.species === 'Dragonkin' || die.species === 'Terrain') {
+              pointValue = 0;
+            } else {
+              switch (die.rarity) {
+                case 'Small':
+                  pointValue = 1;
+                  break;
+                case 'Medium':
+                  pointValue = 2;
+                  break;
+                case 'Large':
+                  pointValue = 3;
+                  break;
+                default:
+                  pointValue = 4;
+                  break;
+              }
             }
           }
 
           return pointValue;
         },
-        calcMediumEquipment(slot) {
-          // const equipment = slot.filter( die => die.)
-          if (slot) return 0;
+        flattenForce() {
+          let dice = []
+          Object.keys(this.myForce.slots).forEach( slotName => slotName !== 'Summoning' ? dice = [...dice, ...this.myForce.slots[slotName]] : dice);
+          return dice;
         },
-        calcSlotTotal(slot) {
+        calcMediumEquipment() {
+          let dice = this.flattenForce();
+          const totalMediumEquipment = dice.filter(die => die.species === 'Items' && die.rarity === 'Medium Equipment').reduce( (total, die) => total + die.amount, 0);
+
+          return Math.floor(totalMediumEquipment / 2) * 3 + ( (totalMediumEquipment % 2) * 2);
+        },
+        calcSlotTotal(slot, isSummoning) {
           let that = this;
-          let totals = slot.reduce( (prev, current) => prev + that.weightDie(current) * current.amount, 0);
-          totals += this.calcMediumEquipment(slot);
+          let totals = slot.reduce( (prev, current) => prev + that.weightDie(current, isSummoning) * current.amount, 0);
           return totals;
         },
         recalcTotals() {
           let that = this;
-          const forceTotal = Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0);
-          const slotTotal = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot]) : 0;
-          this.totalPoints = `${slotTotal} / ${forceTotal}`;
+          if (this.forceSlot === 'Summoning') {
+            const totalDKPoints = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragonkin'), true) : 0;
+            const totalDragons = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragons'), true) : 0;
+            const totalMTs = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.rarity === 'Minor Terrain'), true) : 0;
+            this.totalPoints = `Dragons ${totalDragons} / Kin: ${totalDKPoints} / Minors: ${totalMTs}`;
+          } else {
+            const forceTotal = Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0) + this.calcMediumEquipment();
+            const slotTotal = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot], false) : 0;
+            this.totalPoints = `${slotTotal} / ${forceTotal}`;
+          }
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
