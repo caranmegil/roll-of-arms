@@ -19,8 +19,10 @@
               <label for="forceFilter">Area/Location</label>
               <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
                   <option value="Home" selected="selected">Home</option>
+                  <option value="Home Terrain">Home Terrain</option>
                   <option value="Horde">Horde</option>
                   <option value="Campaign">Campaign</option>
+                  <option value="Frontier Terrain">Frontier Terrain</option>
                   <option value="Summoning">Summoning</option>
               </select>
           </div>

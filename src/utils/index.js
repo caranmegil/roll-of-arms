@@ -20,4 +20,14 @@ export const resetSlots = (myForce) => {
     if (!myForce.slots['Summoning']) {
         myForce.slots['Summoning'] = [];
     }
+
+    if (!myForce.slots['Home Terrain']) {
+        myForce.slots['Home Terrain'] = [];
+    }
+
+    if (!myForce.slots['Frontier Terrain']) {
+        myForce.slots['Frontier Terrain'] = [];
+    }
+
+    return myForce;
 }
