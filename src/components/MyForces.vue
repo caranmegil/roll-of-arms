@@ -16,15 +16,15 @@
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
-              <label for="forceFilter">Location</label>
+              <label for="forceFilter">Area/Location</label>
               <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
                   <option value="Home" selected="selected">Home</option>
                   <option value="Horde">Horde</option>
-                  <option value="Frontier">Frontier</option>
+                  <option value="Campaign">Campaign</option>
                   <option value="Summoning">Summoning</option>
               </select>
           </div>
-          <div class="element"><label for="totalDice">Total Dice</label><div id="totalDice">{{totalDice}}</div></div>
+          <div class="element"><label for="totalPoints">Total Points</label><div id="totalPoints">{{totalPoints}}</div></div>
         </span>
 
         <div class="separator"></div>
@@ -76,7 +76,7 @@ export default {
     },
     data() {
         return {
-            totalDice: '0 / 0',
+            totalPoints: '0 / 0',
             sortColumn: 0,
             sortDirection: 1,
             profile: {},
@@ -112,7 +112,7 @@ export default {
             ],
             sourceDice: [],
             myForces: [],
-            myForce: {slots: {'Home': [], 'Horde': [], 'Frontier': [], 'Summoning': []}},
+            myForce: {slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
             filteredDice: [],
             forceName: "",
             forceSlot: 'Home',
@@ -288,7 +288,7 @@ export default {
                 }
                 break;
             }
-          } else if (die.species === 'Dragon' || die.species === 'Dragonkin' || die.species === 'Terrain') {
+          } else if (die.species === 'Dragons' || die.species === 'Dragonkin' || die.species === 'Terrain') {
             pointValue = 0;
           } else {
             switch (die.rarity) {
@@ -323,7 +323,7 @@ export default {
           let that = this;
           const forceTotal = Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0);
           const slotTotal = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot]) : 0;
-          this.totalDice = `${slotTotal} / ${forceTotal}`;
+          this.totalPoints = `${slotTotal} / ${forceTotal}`;
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');

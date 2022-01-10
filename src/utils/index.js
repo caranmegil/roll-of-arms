@@ -13,8 +13,8 @@ export const resetSlots = (myForce) => {
         myForce.slots['Horde'] = [];
     }
 
-    if (!myForce.slots['Frontier']) {
-        myForce.slots['Frontier'] = [];
+    if (!myForce.slots['Campaign']) {
+        myForce.slots['Campaign'] = [];
     }
 
     if (!myForce.slots['Summoning']) {
