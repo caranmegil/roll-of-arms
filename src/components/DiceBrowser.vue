@@ -51,8 +51,8 @@
                     <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
                     <input type="number" min="0" v-model="edAmnt.value"/>
                     <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
-                    <button @click="() => addDie(die, edAmnt)">Add</button>
                   </div>
+                  <button @click="() => addDie(die)">Add</button>
                 </div>
               </div>
           </div>
@@ -261,30 +261,33 @@ export default {
             this.amount = {};
           }
         },
-        async addDie(die, edAmnt) {
+        addDie(die) {
           let added = false;
-          let newDie = {...die};
-          delete newDie.editions;
-          delete newDie.id;
-          this.capAmount(edAmnt);
-          if(edAmnt.value > 0) {
-            newDie.edition = edAmnt.edition;
-            newDie.amount = edAmnt.value;
-            this.expand(die, );
-            this.myCollection.forEach( die => {
-              if (added) return;
-              if (die.name === newDie.name && die.edition === newDie.edition) {
-                die.amount += edAmnt.value;
-                added = true;
-              }
-            });
+          let that = this;
+          this.amount.forEach( async edAmnt => {
+            let newDie = {...die};
+            delete newDie.editions;
+            delete newDie.id;
+            this.capAmount(edAmnt);
+            if(edAmnt.value > 0) {
+              newDie.edition = edAmnt.edition;
+              newDie.amount = edAmnt.value;
+              that.expand(die);
+              that.myCollection.forEach( die => {
+                if (added) return;
+                if (die.name === newDie.name && die.edition === newDie.edition) {
+                  die.amount += edAmnt.value;
+                  added = true;
+                }
+              });
 
-            if(!added) {
-              this.myCollection.push(newDie);
+              if(!added) {
+                that.myCollection.push(newDie);
+                await saveCollection('collections', that.myCollection);
+              }
             }
-            this.amount = {};
-            await saveCollection('collections', this.myCollection);
-          }
+          });
+          this.amount = {};
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
@@ -331,7 +334,6 @@ export default {
     display: grid;
     grid-auto-flow: column;
   }
-
   #dice .header .element {
     align-self: center;
     justify-self: center;
