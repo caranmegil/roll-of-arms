@@ -268,6 +268,8 @@ export default {
             namesArr.push(die);
           });
 
+          dice = Object.keys(this.diceGroupedByEdition).map(name => this.diceGroupedByEdition[name][0]);
+
           return dice;
         },
         getImageID(die) {
