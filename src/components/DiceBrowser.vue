@@ -29,6 +29,10 @@
                 </div>
               </span>
 
+              <div class="anchor-element">
+                <a @click="returnToModifier">Return to My Collection</a>
+              </div>
+
               <div class="table-header">
                   <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
                   <div class="column-header size" @click="changeSizeDirection">Size  <span v-if="sortColumn != 1" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
@@ -47,8 +51,8 @@
                     <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
                     <input type="number" v-model="edAmnt.value"/>
                     <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
-                    <button @click="() => addDie(die, edAmnt)">Add</button>
                   </div>
+                  <button @click="() => addDie(die)">Add</button>
                 </div>
               </div>
           </div>
@@ -135,13 +139,20 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
+        capAmount(edAmnt) {
+          if (edAmnt.value < 0) {
+            edAmnt.value = 0;
+          }
+        },
         decr(edAmnt) {
           if (edAmnt.value > 0) {
             edAmnt.value--;
           }
+          this.capAmount(edAmnt);
         },
         incr(edAmnt) {
           edAmnt.value++;
+          this.capAmount(edAmnt);
         },
         applyFiltersAndSort() {
           let that = this;
@@ -247,27 +258,33 @@ export default {
             this.amount = {};
           }
         },
-        async addDie(die, edAmnt) {
+        addDie(die) {
           let added = false;
-          let newDie = {...die};
-          delete newDie.editions;
-          delete newDie.id;
-          newDie.edition = edAmnt.edition;
-          newDie.amount = edAmnt.value;
-          this.expand(die, );
-          this.myCollection.forEach( die => {
-            if (added) return;
-            if (die.name === newDie.name && die.edition === newDie.edition) {
-              die.amount += edAmnt.value;
-              added = true;
+          let that = this;
+          this.amount.forEach( async edAmnt => {
+            let newDie = {...die};
+            delete newDie.editions;
+            delete newDie.id;
+            this.capAmount(edAmnt);
+            if(edAmnt.value > 0) {
+              newDie.edition = edAmnt.edition;
+              newDie.amount = edAmnt.value;
+              that.expand(die);
+              that.myCollection.forEach( die => {
+                if (added) return;
+                if (die.name === newDie.name && die.edition === newDie.edition) {
+                  die.amount += edAmnt.value;
+                  added = true;
+                }
+              });
+
+              if(!added) {
+                that.myCollection.push(newDie);
+                await saveCollection('collections', that.myCollection);
+              }
             }
           });
-
-          if(!added) {
-            this.myCollection.push(newDie);
-          }
           this.amount = {};
-          await saveCollection('collections', this.myCollection);
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
@@ -292,6 +309,9 @@ export default {
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
+        returnToModifier: function() {
+          this.$router.push('/my-collection');
+        },
     },
 };
 </script>
@@ -305,7 +325,12 @@ export default {
     align-self: center;
     justify-self: center;    
   }
-
+  #dice .header .anchor-element {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    grid-auto-flow: column;
+  }
   #dice .header .element {
     align-self: center;
     justify-self: center;

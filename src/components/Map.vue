@@ -18,14 +18,16 @@ export default {
         }
     },
     async mounted() {
-        this.map = L.map('map', { preferCanvas: false });
+        this.map = L.map('map', {maxZoom: 16, minZoom: 2}).fitWorld().setMaxBounds([[-90,-180],[90,180]]);
         let that = this;
         this.profile = await getCollection('profiles') || null;
 
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
             id: 'mapbox/streets-v11',
-            tileSize: 256,
+            tileSize: 512,
+            zoomOffset: -1,
+            worldCopyJump: true,
             accessToken: 'pk.eyJ1IjoiY2FyYW5tZWdpbCIsImEiOiJja3VhazE5dXEwaGl0MndxcGdhY3pyd2ZoIn0.-ViWEiOeeUvL2Tnj4gH2Hg',
         }).addTo(this.map);
 
