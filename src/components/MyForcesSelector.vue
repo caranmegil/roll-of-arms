@@ -1,7 +1,6 @@
 <template>
     <div class="collections">
       <div class="header">
-      <div @click="$emit('onClose')" class="menu-item"><span class="material-icons material-icons-outlined">close</span></div>
         <div class="element-horizontal">
             <select id="forcesFilter" v-model="forceName" size="5" @click="$emit('onForceChanged', forceName)">
                 <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
@@ -20,7 +19,7 @@ import {
 
 export default {
     name: 'MyForcesSelector',
-    emits: ['onForceChanged', 'onClose'],
+    emits: ['onForceChanged'],
     data() {
         return {
           forceName: '',
