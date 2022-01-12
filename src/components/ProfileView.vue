@@ -40,7 +40,7 @@
           </div>
             <div v-if="profile.isCollectionPublic" class="body">
                 <div v-for="die in filteredDice" :key="die.name" :id="die.name" class="row">
-                    <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}}</div></div>
+                    <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
                     <div class="size">{{die.rarity}}</div>
                     <div class="type">{{die.type}}</div>
                     <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
@@ -163,7 +163,15 @@ export default {
         namesArr.push(die);
       });
 
+      dice = Object.keys(this.diceGroupedByEdition).map(name => this.diceGroupedByEdition[name][0]);
+
       return dice;
+    },
+    recalcSubTotals(die) {
+      if (this.diceGroupedByEdition[die.name] === undefined) {
+        return 0;
+      }
+      return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
     },
     expand(id) {
       let row = document.getElementById(id);
