@@ -121,7 +121,6 @@ export default {
     async mounted() {
       this.dice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
-            console.log(this.myForces);
 
       this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0];
 
@@ -305,7 +304,6 @@ export default {
           }
 
           saveCollection('forces', this.myForces);
-          this.myForces = getCollection('forces');
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
