@@ -26,7 +26,7 @@ export default {
           myForces: [],
         };
     },
-    async mounted() {
+    async created() {
       this.myForces = await getCollection('forces') || [];
     },
 };
