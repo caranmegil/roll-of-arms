@@ -121,7 +121,7 @@ export default {
     async mounted() {
       this.dice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
-      this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0] || {slots: {}};
+      this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0];
 
       resetSlots(this.myForce);
 

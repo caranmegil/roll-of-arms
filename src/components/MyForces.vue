@@ -234,7 +234,6 @@ export default {
         },
         saveAndClear() {
           this.recalcTotals();
-          console.log(this.myForces);
           saveCollection('forces', this.myForces);
         },
         changeNameDirection() {
@@ -293,6 +292,7 @@ export default {
         browseDice() {
           this.setForceSlot(this.forceSlot);
           if (this.myForce.name !== undefined && this.myForce.name !== '') {
+            clearInterval(this.timerHandle);
             this.$router.push(`/forcesdicebrowser/?name=${encodeURI(this.myForce.name)}`);
           }
         },
