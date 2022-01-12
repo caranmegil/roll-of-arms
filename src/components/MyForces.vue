@@ -3,9 +3,9 @@
     <div class="collections">
       <Loading v-model:active="isLoading"/>
       <div class="header">
-        <div @click="() => expandForcesSelector(die)" class="open-forces-selector"><h1>My Force <span id="force-action-button" class="material-icons material-icons-outlined">expand_more</span></h1></div>
+        <div @click="() => expandForcesSelector()" class="open-forces-selector"><h1>My Force <span id="force-action-button" class="material-icons material-icons-outlined">expand_more</span></h1></div>
         <div id="force-selector-expansion">
-          <MyForcesSelector @onClose="() => expandForcesSelector()" @onForceChanged="(forceName) => loadForce(forceName)"/>
+          <MyForcesSelector @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
         </div>
         <div class="element">
           <label for="forceName">Force Name</label>
@@ -65,6 +65,7 @@
 
 <script>
 import Loading from 'vue-loading-overlay';
+import Tether from 'tether';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import { mapActions } from 'vuex';
 import { resetSlots } from '@/utils';
@@ -131,6 +132,16 @@ export default {
     async mounted() {
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
+      new Tether( {
+        element: '#force-selector-expansion',
+        target: '.open-forces-selector',
+        attachment: 'top left',
+        targetAttachment: 'bottom left',
+        constraints: [{
+          to: 'window',
+          attachment: 'together'
+        }],
+      });
       this.loadForce();
 
     },
@@ -149,6 +160,7 @@ export default {
             this.myForce = this.myForces.filter(force => force.name === that.forceName)[0];
           } else {
             this.myForce = {name: `Force #${this.myForces.length+1}`}
+            this.myForces.push(this.myForce);
           }
 
           resetSlots(this.myForce);
@@ -168,7 +180,6 @@ export default {
           
           this.timerHandle = setInterval(this.saveAndClear, 5000);
           this.isLoading = false;
-          this.expandForcesSelector();
         },
         decr(die) {
           if (die.amount > 0) {
@@ -223,6 +234,7 @@ export default {
         },
         saveAndClear() {
           this.recalcTotals();
+          console.log(this.myForces);
           saveCollection('forces', this.myForces);
         },
         changeNameDirection() {
@@ -274,7 +286,7 @@ export default {
           return filteredDie.id; 
         },
         saveTheForces() {
-          if (this.myForce.name !== undefined && this.myForce.trim() !== '') {
+          if (this.myForce.name && this.myForce.trim() !== '') {
             saveCollection('forces', this.myForces);
           }
         },
@@ -531,13 +543,20 @@ export default {
     padding-left: 1.0em;
   }
 
+  .open-forces-selector {
+    width: 100%;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 2fr 1fr;
+  }
+
   #force-selector-expansion {
     display: none;
     z-index: 2;
     position: fixed;
     background-color: ivory;
     width: 100%;
-    height: 100%;
+    padding: .5em;
   }
 
   .menu-overlay {
