@@ -20,10 +20,10 @@
           <div class="element">
               <label for="forceFilter">Dice Group</label>
               <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
-                  <option value="Home" selected="selected">Home</option>
+                  <option value="Home" selected="selected">Home Army</option>
                   <option value="Home Terrain">Home Terrain</option>
-                  <option value="Horde">Horde</option>
-                  <option value="Campaign">Campaign</option>
+                  <option value="Horde">Horde Army</option>
+                  <option value="Campaign">Campaign Army</option>
                   <option value="Frontier Terrain">Frontier Terrain</option>
                   <option value="Summoning">Summoning Pool</option>
               </select>
