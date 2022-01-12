@@ -269,7 +269,6 @@ export default {
             if(edAmnt.value > 0) {
               newDie.edition = edAmnt.edition;
               newDie.amount = edAmnt.value;
-              that.expand(die);
               that.myCollection.forEach( die => {
                 if (added) return;
                 if (die.name === newDie.name && die.edition === newDie.edition) {
@@ -284,6 +283,7 @@ export default {
               }
             }
           });
+          that.expand(die);
           this.amount = {};
         },
         async noMoreTours() {
