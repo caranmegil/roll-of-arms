@@ -1,18 +1,12 @@
 <template>
     <div class="collections">
       <div class="header">
-        <h1>My Forces</h1>
+      <div @click="$emit('onClose')" class="menu-item"><span class="material-icons material-icons-outlined">close</span></div>
         <div class="element-horizontal">
-            <select id="forcesFilter" v-model="forceName" size="5">
+            <select id="forcesFilter" v-model="forceName" size="5" @click="$emit('onForceChanged', forceName)">
                 <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
-          <button id="loadForceBtn" @click="() => setMyForce(forceName)">Open</button>
-        </div>
-        <div>
-          <input type="text" v-model="newForceName" id="newForceName"/>
-        </div>
-        <div>
-          <button id="newForceBtn" @click="() => setMyForce(newForceName)">Create</button>
+          <button id="newForceBtn" @click="$emit('onForceChanged')">Create</button>
         </div>
       </div>
     </div>
@@ -22,39 +16,28 @@
 import 'es6-promise/auto';
 import {
   getCollection,
-  saveCollection,
 } from '@/firebase';
 
 export default {
     name: 'MyForcesSelector',
+    emits: ['onForceChanged', 'onClose'],
     data() {
         return {
           forceName: '',
-          newForceName: '',
           myForces: [],
         };
     },
     async mounted() {
       this.myForces = await getCollection('forces') || [];
     },
-    methods: {
-        setMyForce(name) {
-          this.myForce = this.myForces.filter(force => force.name == name)[0];
-
-          if (this.myForce === undefined) {
-            this.myForces.push({name, slots: {}});
-            this.newForceName = '';
-          }
-          if (name !== undefined && name.trim() !== '') {
-            saveCollection('forces', this.myForces);
-            this.$router.push(`/my-forces?name=${encodeURI(name)}`);
-          }
-        },
-    },
 };
 </script>
 
 <style scoped>
+  .menu-item {
+    width: 100%;
+    align-content: left;
+  }
   input {
     width: 5em;
   }
