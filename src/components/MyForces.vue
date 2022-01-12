@@ -154,9 +154,11 @@ export default {
         async loadForce(name) {
           if (name !== undefined) {
             this.myForce = this.myForces.filter(force => force.name === name)[0];
-          } else {
+          } else if (this.myForces.length == 0) {
             this.myForce = {name: `Force #${this.myForces.length+1}`}
             this.myForces.push(this.myForce);
+          } else {
+            this.myForce = this.myForces[0];
           }
 
           resetSlots(this.myForce);
