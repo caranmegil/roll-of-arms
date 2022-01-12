@@ -121,6 +121,8 @@ export default {
     async mounted() {
       this.dice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
+            console.log(this.myForces);
+
       this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0];
 
       resetSlots(this.myForce);
@@ -302,7 +304,8 @@ export default {
             this.myForce.slots[this.$store.state.forceSlot].push(newDie);
           }
 
-          saveCollection('forces', this.myForces)
+          saveCollection('forces', this.myForces);
+          this.myForces = getCollection('forces');
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
@@ -329,7 +332,7 @@ export default {
         },
         returnToModifier: function() {
           this.setFilters({species: '', edition: '', size: '', type: ''});
-          this.$router.push(`/my-forces?name=${encodeURI(this.$route.query.name)}`)
+          this.$router.push(`/my-forces?name=${encodeURI(this.myForce.name).replace(/#/g, '%23')}`)
         }
     },
 };

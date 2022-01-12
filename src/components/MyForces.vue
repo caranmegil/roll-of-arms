@@ -142,7 +142,7 @@ export default {
           attachment: 'together'
         }],
       });
-      this.loadForce();
+      this.loadForce(this.$route.query.name);
 
     },
     unmounted() {
@@ -152,12 +152,8 @@ export default {
     methods: {
         ...mapActions(['setForceSlot', 'setFilters']),
         async loadForce(name) {
-          let that = this;
-              
-          this.forceName = name;
-
-          if (this.forceName !== undefined) {
-            this.myForce = this.myForces.filter(force => force.name === that.forceName)[0];
+          if (name !== undefined) {
+            this.myForce = this.myForces.filter(force => force.name === name)[0];
           } else {
             this.myForce = {name: `Force #${this.myForces.length+1}`}
             this.myForces.push(this.myForce);
@@ -233,6 +229,7 @@ export default {
           }
         },
         saveAndClear() {
+          resetSlots(this.myForce);
           this.recalcTotals();
           saveCollection('forces', this.myForces);
         },
@@ -293,7 +290,7 @@ export default {
           this.setForceSlot(this.forceSlot);
           if (this.myForce.name !== undefined && this.myForce.name !== '') {
             clearInterval(this.timerHandle);
-            this.$router.push(`/forcesdicebrowser/?name=${encodeURI(this.myForce.name)}`);
+            this.$router.push(`/forcesdicebrowser/?name=${encodeURI(this.myForce.name).replace(/#/g, '%23')}`);
           }
         },
         changeAmount(grDie) {
