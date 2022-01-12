@@ -3,17 +3,19 @@
     <div class="collections">
       <Loading v-model:active="isLoading"/>
       <div class="header">
-        <h1>My Force</h1>
+        <div @click="() => expandForcesSelector(die)" class="open-forces-selector"><h1>My Force <span id="force-action-button" class="material-icons material-icons-outlined">expand_more</span></h1></div>
+        <div id="force-selector-expansion">
+          <MyForcesSelector @onClose="() => expandForcesSelector()" @onForceChanged="(forceName) => loadForce(forceName)"/>
+        </div>
         <div class="element">
           <label for="forceName">Force Name</label>
           <input type="text" id="forceName" v-model="myForce.name" @change="saveTheForces"/>
-          <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button>
+          <!-- <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button> -->
         </div>
         <div class="element">
           <label for="privacy">Make Public</label>
           <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
         </div>
-        <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
               <label for="forceFilter">Dice Group</label>
@@ -23,11 +25,13 @@
                   <option value="Horde">Horde</option>
                   <option value="Campaign">Campaign</option>
                   <option value="Frontier Terrain">Frontier Terrain</option>
-                  <option value="Summoning">Summoning</option>
+                  <option value="Summoning">Summoning Pool</option>
               </select>
           </div>
           <div class="element"><label for="totalPoints">Total Points</label><div id="totalPoints">{{totalPoints}}</div></div>
         </span>
+
+        <button id="locate" @click="browseDice">Add Dice</button>
 
         <div class="separator"></div>
         <span class="dice">
@@ -65,6 +69,7 @@ import 'vue-loading-overlay/dist/vue-loading.css';
 import { mapActions } from 'vuex';
 import { resetSlots } from '@/utils';
 import 'es6-promise/auto';
+import MyForcesSelector from '@/components/MyForcesSelector.vue';
 import {
   getCollection,
   saveCollection,
@@ -75,6 +80,7 @@ export default {
     name: 'MyForces',
     components: {
       Loading,
+      MyForcesSelector,
     },
     data() {
         return {
@@ -123,32 +129,10 @@ export default {
         };
     },
     async mounted() {
-      let that = this;
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
-      this.forceName = this.$route.query.name;
+      this.loadForce();
 
-      if (this.forceName !== undefined) {
-        this.myForce = this.myForces.filter(force => force.name === that.forceName)[0];
-      }
-
-      resetSlots(this.myForce);
-
-      this.profile = await getCollection('profiles') || {};
-      if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
-        this.$tours['forcesTour'].start();
-      }
-
-      if (this.myForce.isPublic === undefined) {
-        this.myForce.isPublic = false;
-      }
-
-      this.forceSlot = this.$store.state.forceSlot || 'Home';
-
-      this.recalcTotals();
-      
-      this.timerHandle = setInterval(this.saveAndClear, 5000);
-      this.isLoading = false;
     },
     unmounted() {
       this.saveAndClear();
@@ -156,6 +140,36 @@ export default {
     },
     methods: {
         ...mapActions(['setForceSlot', 'setFilters']),
+        async loadForce(name) {
+          let that = this;
+              
+          this.forceName = name;
+
+          if (this.forceName !== undefined) {
+            this.myForce = this.myForces.filter(force => force.name === that.forceName)[0];
+          } else {
+            this.myForce = {name: `Force #${this.myForces.length+1}`}
+          }
+
+          resetSlots(this.myForce);
+
+          this.profile = await getCollection('profiles') || {};
+          if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
+            this.$tours['forcesTour'].start();
+          }
+
+          if (this.myForce.isPublic === undefined) {
+            this.myForce.isPublic = false;
+          }
+
+          this.forceSlot = this.$store.state.forceSlot || 'Home';
+
+          this.recalcTotals();
+          
+          this.timerHandle = setInterval(this.saveAndClear, 5000);
+          this.isLoading = false;
+          this.expandForcesSelector();
+        },
         decr(die) {
           if (die.amount > 0) {
             die.amount--;
@@ -163,6 +177,18 @@ export default {
         },
         incr(die) {
           die.amount++;
+        },
+        expandForcesSelector() {
+          let actionButton = document.getElementById('force-action-button');
+          let expansion = document.getElementById('force-selector-expansion');
+
+          if (window.getComputedStyle(expansion).display === 'none') {
+            expansion.style.display = 'block';
+            actionButton.innerText = 'expand_less';
+          } else {
+            expansion.style.display = 'none';
+            actionButton.innerText = 'expand_more';
+          }
         },
         expand(die) {
           let row = document.getElementById(die.name);
@@ -505,7 +531,28 @@ export default {
     padding-left: 1.0em;
   }
 
-   #expansion {
+  #force-selector-expansion {
+    display: none;
+    z-index: 2;
+    position: fixed;
+    background-color: ivory;
+    width: 100%;
+    height: 100%;
+  }
+
+  .menu-overlay {
+    display: none;
+    background-color: #D3D3D3;
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: .5;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  #expansion {
     display: none;
     grid-area: 2 / 1 / 2 / 5;
     width: 100%;
