@@ -8,7 +8,7 @@ export const resetSlots = (myForce) => {
     if (!myForce.slots['Home']) {
         myForce.slots['Home'] = [];
     } else {
-        //myForce.slots['Home'] = myForce.slots['Home'].filter(die => die.amount > 0);
+        myForce.slots['Home'] = myForce.slots['Home'].filter(die => die.amount > 0);
     }
 
     if (!myForce.slots['Horde']) {
