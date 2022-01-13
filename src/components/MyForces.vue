@@ -190,7 +190,6 @@ export default {
           if (name !== undefined) {
             this.myForce = myForces.filter(force => force.name === name)[0];
           } else if (myForces.length > 0) {
-            console.log('flag 1')
             this.myForce = myForces[0];
           }
 
@@ -325,6 +324,7 @@ export default {
           if (this.forceName && this.forceName.trim() !== '') {
             this.myForce.name = this.forceName;
             await saveCollection('forces', this.getMyForces());
+            this.loadForce();
           }
         },
         browseDice() {
