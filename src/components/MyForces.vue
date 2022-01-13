@@ -122,7 +122,7 @@ export default {
               },
             ],
             sourceDice: [],
-            myForce: {},
+            myForce: {slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
             filteredDice: [],
             forceName: "",
             forceSlot: 'Home',
@@ -183,6 +183,8 @@ export default {
           if (this.myForce.isPublic === undefined) {
             this.myForce.isPublic = false;
           }
+
+          this.forceName = this.myForce.name;
 
           this.forceSlot = this.$store.state.forceSlot || 'Home';
 
