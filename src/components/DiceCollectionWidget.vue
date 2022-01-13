@@ -59,12 +59,12 @@
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
-  getCollection,
+  getCollectionByField,
 } from '@/firebase';
 
 export default {
     name: 'DiceCollectionWidget',
-    props: ['sourceDice', 'profile'],
+    props: ['sourceDice', 'profile', 'uid'],
     data() {
         return {
             totalDice: 0,
@@ -87,7 +87,7 @@ export default {
         this.$tours['collectionTour'].start();
       }
 
-      this.dice = await getCollection('collections') || [];
+      this.dice = await getCollectionByField('collections', this.uid) || [];
 
       this.speciesFilter = '';
       this.sizeFilter = this.$store.state.filters.size;

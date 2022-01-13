@@ -41,7 +41,7 @@
 
 <script>
 import {
-  getCollection,
+  getCollectionByField,
 } from '@/firebase';
 import {
   resetSlots
@@ -50,7 +50,7 @@ import 'es6-promise/auto';
 
 export default {
   name: 'ProfileForces',
-  props: ['sourceDice',],
+  props: ['sourceDice', 'uid'],
   data() {
     return {
         totalPoints: '0 / 0',
@@ -283,7 +283,7 @@ export default {
     },
   },
   async mounted() {
-    this.publicForces = (await getCollection('forces') || []).filter(force => force.isPublic);
+    this.publicForces = (await getCollectionByField('forces', this.uid) || []).filter(force => force.isPublic);
     this.myForce = this.publicForces[0];
   },
 }
