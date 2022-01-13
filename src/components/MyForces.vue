@@ -5,7 +5,7 @@
       <div class="header">
       <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
       <div id="force-selector-expansion">
-        <MyForcesSelector :my-forces="myForces" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+        <MyForcesSelector :my-forces="$store.state.myForces" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
       </div>
         <div class="element">
           <label for="forceName">Force Name</label>
@@ -74,8 +74,9 @@ import 'es6-promise/auto';
 import MyForcesSelector from '@/components/MyForcesSelector.vue';
 import {
   getCollection,
-  updateCollection,
+  saveCollection,
   getEntireCollection,
+  getCollectionOn,
 } from '@/firebase';
 
 export default {
@@ -121,8 +122,7 @@ export default {
               },
             ],
             sourceDice: [],
-            myForces: [],
-            myForce: {slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
+            myForce: {},
             filteredDice: [],
             forceName: "",
             forceSlot: 'Home',
@@ -134,11 +134,13 @@ export default {
     async mounted() {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
-      this.myForces = await getCollection('forces') || [];
-      console.log(this.myForces);
       this.timerHandle = setInterval(this.saveAndClear, 5000);
+      getCollectionOn('forces', (forces) => {
+        console.log(forces);
+        that.setMyForces(forces)
+        that.loadForce(this.$route.query.name);
+      });
       this.isLoading = false;
-      this.loadForce(this.$route.query.name);
       this.tether = new Tether( {
         element: '#force-selector-expansion',
         target: '.open-forces-selector',
@@ -155,22 +157,20 @@ export default {
       clearInterval(this.timerHandle);
     },
     methods: {
-        ...mapActions(['setForceSlot', 'setFilters']),
+        ...mapActions(['setForceSlot', 'setFilters', 'setMyForces']),
         async deleteCurrentForce() {
           let that = this;
-          this.myForces = this.myForces.filter( force => force.name !== that.myForce.name);
-
-          await updateCollection('forces', this.myForces);
+          await saveCollection('forces', this.$store.state.myForces.filter( force => force.name !== that.myForce.name));
           this.loadForce();
         },
         async loadForce(name) {
           if (name === null) {
-            this.myForce = {name: `Force #${this.myForces.length+1}`}
-            this.myForces.push(this.myForce);
+            this.myForce = {name: `Force #${this.$store.state.myForces.length+1}`}
+            this.$store.state.myForces.push(this.myForce);
           } else if (name !== undefined) {
-            this.myForce = this.myForces.filter(force => force.name === name)[0];
+            this.myForce = this.$store.state.myForces.filter(force => force.name === name)[0];
           } else {
-            this.myForce = this.myForces[0];
+            this.myForce = this.$store.state.myForces[0];
           }
 
           resetSlots(this.myForce);
@@ -243,7 +243,7 @@ export default {
         async saveAndClear() {
           resetSlots(this.myForce);
           this.recalcTotals();
-          await updateCollection('forces', this.myForces);
+          await saveCollection('forces', this.$store.state.myForces);
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
@@ -275,7 +275,7 @@ export default {
         applyFiltersAndSort() {
           let that = this;
 
-          let dice = this.myForces[this.forceSlot];
+          let dice = this.$store.state.myForces[this.forceSlot];
 
           dice.forEach(die => {
             let namesArr = that.diceGroupedByEdition[die.name];
@@ -295,7 +295,7 @@ export default {
         },
         async saveTheForces() {
           if (this.myForce.name && this.myForce.name.trim() !== '') {
-            await updateCollection('forces', this.myForces);
+            await saveCollection('forces', this.$store.state.myForces);
           }
         },
         browseDice() {
@@ -307,7 +307,7 @@ export default {
         },
         changeAmount(grDie) {
           if (!isNaN(grDie.amount)) {
-            this.myForces[this.forceSlot].map(die => {
+            this.$store.state.myForces[this.forceSlot].map(die => {
               let newDie = {...die};
 
               if (die.name === grDie.name && die.edition === grDie.edition) {
@@ -411,7 +411,7 @@ export default {
         async noMoreTours() {
           let profile = await getCollection('profiles');
           profile.forcesTour = false;
-          updateCollection('profiles', profile);
+          saveCollection('profiles', profile);
         },
         setForcesSlot() {
           this.recalcTotals();

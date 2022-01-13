@@ -72,6 +72,7 @@ const store = createStore({
             forceSlot: 'Home',
             filters: {species: '', edition: '', size: '', type: '',},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
+            myForces: [],
         };
     },
     mutations: {
@@ -96,6 +97,9 @@ const store = createStore({
         setForceSlot(state, slot) {
             state.forceSlot = slot;
         },
+        setMyForces(state, myForces) {
+            state.myForces = myForces;
+        },
         signOut(state) {
             state.user = null;
             state.credentials = {}
@@ -103,6 +107,7 @@ const store = createStore({
             state.dice = [];
             state.forceSlot = 'Home';
             state.bufferDie = null;
+            state.myForces = [];
             localStorage.setItem('credentials', JSON.stringify({}));
             localStorage.setItem('dice', JSON.stringify(null));
             localStorage.setItem('user', JSON.stringify(null));
@@ -129,6 +134,9 @@ const store = createStore({
         },
         setForceSlot({ commit }, slot) {
             commit('setForceSlot', slot);
+        },
+        setMyForces( { commit }, myForces) {
+            commit('setMyForces', myForces);
         },
         signOut({ commit }) {
             commit('signOut');
