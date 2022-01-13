@@ -76,6 +76,11 @@ const store = createStore({
             myForces: [],
         };
     },
+    getters: {
+        getMyForces(state) {
+            return state.myForces;
+        },
+    },
     mutations: {
         setUser(state, user) {
             localStorage.setItem('user', JSON.stringify(user));
