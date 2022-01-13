@@ -3,7 +3,7 @@
       <div class="header">
         <div class="element-horizontal">
             <select id="forcesFilter" v-model="forceName" size="5" @change="$emit('onForceChanged', this.forceName)">
-                <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
+                <option v-for="name in (myForces || []).map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
         </div>
         <div class="element-horizontal">

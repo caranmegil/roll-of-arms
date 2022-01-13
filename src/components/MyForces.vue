@@ -5,7 +5,7 @@
       <div class="header">
       <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
       <div id="force-selector-expansion">
-        <MyForcesSelector :my-forces="$store.state.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+        <MyForcesSelector :my-forces="myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
       </div>
         <div class="element">
           <label for="forceName">Force Name</label>
@@ -125,7 +125,8 @@ export default {
               },
             ],
             sourceDice: [],
-            myForce: {slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
+            myForce: {name: '', slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
+            myForces: [],
             filteredDice: [],
             forceSlot: 'Home',
             forceName: '',
@@ -137,7 +138,8 @@ export default {
     async mounted() {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
-      this.setMyForces(await getCollection('forces'));
+      this.setMyForces(await getCollection('forces') || []);
+      this.loadForce();
       this.isLoading = false;
       this.timerHandle = setInterval(this.saveAndClear, 5000);
       getCollectionOn('forces', (forces) => {
@@ -164,22 +166,29 @@ export default {
         ...mapGetters(['getMyForces']),
         async deleteCurrentForce() {
           let that = this;
-          await saveCollection('forces', this.getMyForces().filter( force => force.name !== that.myForce.name));
-          this.loadForce();
+          const newMyForces = this.getMyForces().filter( force => force.name !== that.myForce.name);
+          this.setMyForces(newMyForces);
+          await saveCollection('forces', newMyForces);
+          if (newMyForces.length == 0) {
+            this.onNewForce();
+          } else {
+            this.loadForce();
+          }
         },
         onNewForce() {
+          this.isLoading = true;
           let myForces = this.getMyForces();
 
-          this.myForce = {name: `Force #${myForces.length+1}`}
+          this.myForce = {isPublic: false, name: `Force #${myForces.length+1}`}
           myForces.push(this.myForce);
           this.setMyForces(myForces);
+          this.myForces = myForces;
           this.loadForce(this.myForce.name);
         },
         async loadForce(name) {
           let myForces = this.getMyForces();
           if (name !== undefined) {
             this.myForce = myForces.filter(force => force.name === name)[0];
-            console.log('flag 0', myForces.filter(force => force.name === name))
           } else if (myForces.length > 0) {
             console.log('flag 1')
             this.myForce = myForces[0];
@@ -197,13 +206,16 @@ export default {
               this.myForce.isPublic = false;
             }
 
+            this.forceName = this.myForce.name;
             this.setForceName(this.myForce.name);
 
             this.forceSlot = this.$store.state.forceSlot || 'Home';
 
             this.recalcTotals();
           }
-         
+
+          this.myForces = myForces;
+          this.isLoading = false;
         },
         decr(die) {
           if (die.amount > 0) {

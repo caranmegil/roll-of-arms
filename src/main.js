@@ -78,7 +78,7 @@ const store = createStore({
     },
     getters: {
         getMyForces(state) {
-            return state.myForces;
+            return state.myForces || [];
         },
     },
     mutations: {
