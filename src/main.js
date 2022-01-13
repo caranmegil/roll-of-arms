@@ -78,7 +78,9 @@ const store = createStore({
     },
     getters: {
         getMyForces(state) {
-            return state.myForces || [];
+            let myForce = state.myForces || [];
+            myForce.sort( (a,b) => a.name.localeCompare(b.name));
+            return myForce;
         },
     },
     mutations: {
