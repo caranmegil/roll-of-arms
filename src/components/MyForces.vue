@@ -3,13 +3,14 @@
     <div class="collections">
       <Loading v-model:active="isLoading"/>
       <div class="header">
-        <div @click="() => expandForcesSelector()" class="open-forces-selector"><h1>My Force <span id="force-action-button" class="material-icons material-icons-outlined">expand_more</span></h1></div>
-        <div id="force-selector-expansion">
-          <MyForcesSelector @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
-        </div>
+      <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
+      <div id="force-selector-expansion">
+        <MyForcesSelector :my-forces="myForces" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+      </div>
         <div class="element">
           <label for="forceName">Force Name</label>
           <input type="text" id="forceName" v-model="myForce.name" @change="saveTheForces"/>
+          <button id="deleteBtn" @click="deleteCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">delete</span></button>
           <!-- <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button> -->
         </div>
         <div class="element">
@@ -127,23 +128,26 @@ export default {
             forceSlot: 'Home',
             timerHandle: null,
             isLoading: true,
+            tether: null,
         };
     },
     async mounted() {
+      let that = this;
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
-      new Tether( {
+      this.timerHandle = setInterval(this.saveAndClear, 5000);
+      this.isLoading = false;
+      this.loadForce(this.$route.query.name);
+      this.tether = new Tether( {
         element: '#force-selector-expansion',
         target: '.open-forces-selector',
-        attachment: 'top left',
+        attachment: 'bottom left',
         targetAttachment: 'bottom left',
-        constraints: [{
-          to: 'window',
-          attachment: 'together'
-        }],
       });
-      this.loadForce(this.$route.query.name);
 
+      setTimeout(function() {
+        that.tether.position();
+      })
     },
     unmounted() {
       this.saveAndClear();
@@ -151,10 +155,17 @@ export default {
     },
     methods: {
         ...mapActions(['setForceSlot', 'setFilters']),
+        async deleteCurrentForce() {
+          let that = this;
+          this.myForces = this.myForces.filter( force => force.name !== that.myForce.name);
+
+          await saveCollection('forces', this.myForces);
+          this.loadForce();
+        },
         async loadForce(name) {
           if (name !== undefined) {
             this.myForce = this.myForces.filter(force => force.name === name)[0];
-          } else if (this.myForces.length == 0) {
+          } else if (name === null) {
             this.myForce = {name: `Force #${this.myForces.length+1}`}
             this.myForces.push(this.myForce);
           } else {
@@ -175,9 +186,7 @@ export default {
           this.forceSlot = this.$store.state.forceSlot || 'Home';
 
           this.recalcTotals();
-          
-          this.timerHandle = setInterval(this.saveAndClear, 5000);
-          this.isLoading = false;
+         
         },
         decr(die) {
           if (die.amount > 0) {
@@ -230,10 +239,10 @@ export default {
             a.click();
           }
         },
-        saveAndClear() {
+        async saveAndClear() {
           resetSlots(this.myForce);
           this.recalcTotals();
-          saveCollection('forces', this.myForces);
+          await saveCollection('forces', this.myForces);
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
@@ -283,9 +292,9 @@ export default {
           const filteredDie = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition)) [0] || {};
           return filteredDie.id; 
         },
-        saveTheForces() {
-          if (this.myForce.name && this.myForce.trim() !== '') {
-            saveCollection('forces', this.myForces);
+        async saveTheForces() {
+          if (this.myForce.name && this.myForce.name.trim() !== '') {
+            await saveCollection('forces', this.myForces);
           }
         },
         browseDice() {
@@ -544,9 +553,12 @@ export default {
 
   .open-forces-selector {
     width: 100%;
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 2fr 1fr;
+    text-align: center;
+  }
+
+  #force-action-button {
+    position: relative;
+    top: .3em;
   }
 
   #force-selector-expansion {
@@ -556,8 +568,8 @@ export default {
     background-color: ivory;
     width: 100%;
     padding: .5em;
+    border: 1px solid black;
   }
-
   .menu-overlay {
     display: none;
     background-color: #D3D3D3;
