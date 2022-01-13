@@ -7,10 +7,10 @@
             <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
             <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
             <span v-if="profile.isCollectionPublic">
-              <DiceCollectionWidget :profile="profile" :source-dice="sourceDice"/>
+              <DiceCollectionWidget :uid="uid" :profile="profile" :source-dice="sourceDice"/>
             </span>
           </div>
-          <ProfileForces :source-dice="sourceDice"/>
+          <ProfileForces :uid="uid" :source-dice="sourceDice"/>
       </div>
     </div>
 </template>
@@ -167,7 +167,7 @@ export default {
   async mounted() {
     const usernames = await getEntireCollection('usernames');
     this.uid = usernames[this.$route.params.id] || this.$route.params.id;
-    this.profile = await getCollectionByField('profiles', uid);
+    this.profile = await getCollectionByField('profiles', this.uid);
     this.profile.displayName = this.profile.name;
 
     if( this.profile.displayName === undefined || this.profile.displayName === '' ) {
@@ -176,7 +176,7 @@ export default {
 
     if (this.profile.isCollectionPublic) {
       this.sourceDice = await getEntireCollection('dice');
-      this.dice = await getCollectionByField('collections', uid) || [];
+      this.dice = await getCollectionByField('collections', this.uid) || [];
 
       this.dice.sort((a,b) => {
         let result = a.name.localeCompare(b.name);
