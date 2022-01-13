@@ -68,7 +68,7 @@ import 'es6-promise/auto';
 import {
   getCollection,
   getEntireCollection,
-  saveCollection,
+  updateCollection,
 } from '@/firebase';
 
 export default {
@@ -303,12 +303,12 @@ export default {
             this.myForce.slots[this.$store.state.forceSlot].push(newDie);
           }
 
-          saveCollection('forces', this.myForces);
+          updateCollection('forces', this.myForces);
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
           profile.diceBrowserTour = false;
-          saveCollection('profiles', profile);
+          updateCollection('profiles', profile);
         },
         setSpeciesFilter: function() {
             this.isLoading=true;

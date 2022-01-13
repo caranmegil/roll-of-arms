@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, get } from "firebase/database";
+import { getDatabase, ref, set, get, runTransaction } from "firebase/database";
 import {
     getAuth,
     signInWithEmailAndPassword,
@@ -51,6 +51,19 @@ const saveCollection = async (collectionName, data) => {
         const user = auth.currentUser;
         const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
         await set(collectionNameUserRef, data);
+        return true;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
+};
+
+const updateCollection = async (collectionName, data) => {
+    try {
+        auth = getAuth();
+        const user = auth.currentUser;
+        const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
+        await runTransaction(collectionNameUserRef, () => data);
         return true;
     } catch (e) {
         console.error(e);
@@ -207,6 +220,7 @@ export {
   confirmPassword,
   getCurrentUser,
   saveCollection,
+  updateCollection,
   saveCollectionByField,
   getCollection,
   getCollectionByField,

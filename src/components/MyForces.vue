@@ -74,7 +74,7 @@ import 'es6-promise/auto';
 import MyForcesSelector from '@/components/MyForcesSelector.vue';
 import {
   getCollection,
-  saveCollection,
+  updateCollection,
   getEntireCollection,
 } from '@/firebase';
 
@@ -135,6 +135,7 @@ export default {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
+      console.log(this.myForces);
       this.timerHandle = setInterval(this.saveAndClear, 5000);
       this.isLoading = false;
       this.loadForce(this.$route.query.name);
@@ -159,15 +160,15 @@ export default {
           let that = this;
           this.myForces = this.myForces.filter( force => force.name !== that.myForce.name);
 
-          await saveCollection('forces', this.myForces);
+          await updateCollection('forces', this.myForces);
           this.loadForce();
         },
         async loadForce(name) {
-          if (name !== undefined) {
-            this.myForce = this.myForces.filter(force => force.name === name)[0];
-          } else if (name === null) {
+          if (name === null) {
             this.myForce = {name: `Force #${this.myForces.length+1}`}
             this.myForces.push(this.myForce);
+          } else if (name !== undefined) {
+            this.myForce = this.myForces.filter(force => force.name === name)[0];
           } else {
             this.myForce = this.myForces[0];
           }
@@ -242,7 +243,7 @@ export default {
         async saveAndClear() {
           resetSlots(this.myForce);
           this.recalcTotals();
-          await saveCollection('forces', this.myForces);
+          await updateCollection('forces', this.myForces);
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
@@ -294,7 +295,7 @@ export default {
         },
         async saveTheForces() {
           if (this.myForce.name && this.myForce.name.trim() !== '') {
-            await saveCollection('forces', this.myForces);
+            await updateCollection('forces', this.myForces);
           }
         },
         browseDice() {
@@ -410,7 +411,7 @@ export default {
         async noMoreTours() {
           let profile = await getCollection('profiles');
           profile.forcesTour = false;
-          saveCollection('profiles', profile);
+          updateCollection('profiles', profile);
         },
         setForcesSlot() {
           this.recalcTotals();
