@@ -2,10 +2,12 @@
     <div class="collections">
       <div class="header">
         <div class="element-horizontal">
-            <select id="forcesFilter" v-model="forceName" size="5" @click="$emit('onForceChanged', forceName)">
+            <select id="forcesFilter" v-model="forceName" size="5" @change="$emit('onForceChanged', this.forceName)">
                 <option v-for="name in myForces.map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
-          <button id="newForceBtn" @click="$emit('onForceChanged')">Create</button>
+        </div>
+        <div class="element-horizontal">
+          <button id="newForceBtn" @click="$emit('onForceChanged', null)">Create</button>
         </div>
       </div>
     </div>
@@ -13,21 +15,15 @@
 
 <script>
 import 'es6-promise/auto';
-import {
-  getCollection,
-} from '@/firebase';
 
 export default {
     name: 'MyForcesSelector',
     emits: ['onForceChanged'],
+    props: ['myForces'],
     data() {
         return {
           forceName: '',
-          myForces: [],
         };
-    },
-    async created() {
-      this.myForces = await getCollection('forces') || [];
     },
 };
 </script>
