@@ -7,7 +7,7 @@
             </select>
         </div>
         <div class="element-horizontal">
-          <button id="newForceBtn" @click="$emit('onForceChanged')">Create</button>
+          <button id="newForceBtn" @click="$emit('onNewForce')">Create</button>
         </div>
       </div>
     </div>
@@ -18,7 +18,7 @@ import 'es6-promise/auto';
 
 export default {
     name: 'MyForcesSelector',
-    emits: ['onForceChanged'],
+    emits: ['onForceChanged', 'onNewForce'],
     props: ['myForces'],
     data() {
         return {

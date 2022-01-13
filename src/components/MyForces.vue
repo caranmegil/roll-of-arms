@@ -5,11 +5,11 @@
       <div class="header">
       <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
       <div id="force-selector-expansion">
-        <MyForcesSelector :my-forces="$store.state.myForces" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+        <MyForcesSelector :my-forces="$store.state.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
       </div>
         <div class="element">
           <label for="forceName">Force Name</label>
-          <input type="text" id="forceName" v-model="myForce.name" @change="saveTheForces"/>
+          <input type="text" id="forceName" v-model="forceName" @change="saveTheForces"/>
           <button id="deleteBtn" @click="deleteCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">delete</span></button>
           <!-- <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button> -->
         </div>
@@ -161,20 +161,18 @@ export default {
           await saveCollection('forces', this.$store.state.myForces.filter( force => force.name !== that.myForce.name));
           this.loadForce();
         },
-        async loadForce(name) {
-          console.log(name);
-          if (name == null) {
-            console.log('flag 0')
+        onNewForce() {
             this.myForce = {name: `Force #${this.$store.state.myForces.length+1}`}
             let myForces = this.$store.state.myForces;
             myForces.push(this.myForce);
             this.setMyForces(myForces);
-          } else if (name !== undefined) {
-            console.log('flag 1')
+            this.loadForce(this.myForce.name);
+        },
+        async loadForce(name) {
+          if (name !== undefined) {
             this.myForce = this.$store.state.myForces.filter(force => force.name === name)[0];
             console.log(this.myForce);
-          } else {
-            console.log('flag 2')
+          } else if (this.$store.state.myForces.length > 0) {
             this.myForce = this.$store.state.myForces[0];
           }
 
@@ -301,7 +299,8 @@ export default {
           return filteredDie.id; 
         },
         async saveTheForces() {
-          if (this.myForce.name && this.myForce.name.trim() !== '') {
+          if (this.forceName && this.forceName.trim() !== '') {
+            this.myForce.name = this.forceName;
             await saveCollection('forces', this.$store.state.myForces);
           }
         },
