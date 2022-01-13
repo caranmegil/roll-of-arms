@@ -124,7 +124,6 @@ export default {
             sourceDice: [],
             myForce: {slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
             filteredDice: [],
-            forceName: "",
             forceSlot: 'Home',
             timerHandle: null,
             isLoading: true,
@@ -136,15 +135,14 @@ export default {
       this.sourceDice = await getEntireCollection('dice');
       this.timerHandle = setInterval(this.saveAndClear, 5000);
       getCollectionOn('forces', (forces) => {
-        console.log(forces);
         that.setMyForces(forces)
-        that.loadForce(this.$route.query.name);
+        that.loadForce(that.$store.state.forceName);
       });
       this.isLoading = false;
       this.tether = new Tether( {
         element: '#force-selector-expansion',
         target: '.open-forces-selector',
-        attachment: 'bottom left',
+        attachment: 'top left',
         targetAttachment: 'bottom left',
       });
 
@@ -157,19 +155,26 @@ export default {
       clearInterval(this.timerHandle);
     },
     methods: {
-        ...mapActions(['setForceSlot', 'setFilters', 'setMyForces']),
+        ...mapActions(['setForceSlot', 'setFilters', 'setMyForces', 'setForceName']),
         async deleteCurrentForce() {
           let that = this;
           await saveCollection('forces', this.$store.state.myForces.filter( force => force.name !== that.myForce.name));
           this.loadForce();
         },
         async loadForce(name) {
-          if (name === null) {
+          console.log(name);
+          if (name == null) {
+            console.log('flag 0')
             this.myForce = {name: `Force #${this.$store.state.myForces.length+1}`}
-            this.$store.state.myForces.push(this.myForce);
+            let myForces = this.$store.state.myForces;
+            myForces.push(this.myForce);
+            this.setMyForces(myForces);
           } else if (name !== undefined) {
+            console.log('flag 1')
             this.myForce = this.$store.state.myForces.filter(force => force.name === name)[0];
+            console.log(this.myForce);
           } else {
+            console.log('flag 2')
             this.myForce = this.$store.state.myForces[0];
           }
 
@@ -184,7 +189,7 @@ export default {
             this.myForce.isPublic = false;
           }
 
-          this.forceName = this.myForce.name;
+          this.setForceName(this.myForce.name);
 
           this.forceSlot = this.$store.state.forceSlot || 'Home';
 
@@ -304,7 +309,7 @@ export default {
           this.setForceSlot(this.forceSlot);
           if (this.myForce.name !== undefined && this.myForce.name !== '') {
             clearInterval(this.timerHandle);
-            this.$router.push(`/forcesdicebrowser/?name=${encodeURI(this.myForce.name).replace(/#/g, '%23')}`);
+            this.$router.push('/forcesdicebrowser');
           }
         },
         changeAmount(grDie) {

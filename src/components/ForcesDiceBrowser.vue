@@ -30,7 +30,7 @@
               </span>
 
               <div class="anchor-element">
-                <a @click="returnToModifier">Return to {{this.$route.query.name}}</a>
+                <a @click="returnToModifier">Return to {{this.$store.state.forceName}}</a>
               </div>
 
               <div class="table-header">
@@ -122,7 +122,7 @@ export default {
       this.dice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
 
-      this.myForce = this.myForces.filter( force => force.name === this.$route.query.name)[0];
+      this.myForce = this.myForces.filter( force => force.name === this.$store.state.forceName)[0];
 
       resetSlots(this.myForce);
 
@@ -330,7 +330,7 @@ export default {
         },
         returnToModifier: function() {
           this.setFilters({species: '', edition: '', size: '', type: ''});
-          this.$router.push(`/my-forces?name=${encodeURI(this.myForce.name).replace(/#/g, '%23')}`)
+          this.$router.push('/my-forces')
         }
     },
 };
