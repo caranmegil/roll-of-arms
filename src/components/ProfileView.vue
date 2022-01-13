@@ -6,51 +6,9 @@
             <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
             <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
             <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
-            <span v-if="profile.isCollectionPublic" id="filters">
-              <div class="element">
-                  <label for="speciesFilter">Species/Set</label>
-                  <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
-                      <option value="">All</option>
-                      <option v-for="option in species" :key="option" :value="option">{{option}}</option>
-                  </select>
-              </div>
-              <div class="element">
-                  <label for="sizeFilter">Size</label>
-                  <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
-                      <option value="" selected="true">All</option>
-                      <option v-for="option in sizes" :key="option" :value="option">{{option}}</option>
-                  </select>
-              </div>
-              <div class="element">
-                  <label for="typeFilter">Type</label>
-                  <select id="typeFilter" v-model="typeFilter" @change="setTypeFilter">
-                      <option value="" selected="true">All</option>
-                      <option v-for="option in types" :key="option" :value="option">{{option}}</option>
-                  </select>
-              </div>
+            <span v-if="profile.isCollectionPublic">
+              <DiceCollectionWidget :profile="profile" :source-dice="sourceDice"/>
             </span>
-            <span class="dice">
-              <div v-if="profile.isCollectionPublic" class="header">
-                  <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
-                  <div class="column-header size" @click="changeSizeDirection">Size  <span v-if="sortColumn != 1" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
-                  <div class="column-header type" @click="changeTypeDirection">Type  <span v-if="sortColumn != 2" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
-                <div></div>
-              </div>
-            </span>
-          </div>
-          <div v-if="profile.isCollectionPublic" class="body">
-              <div v-for="die in filteredDice" :key="die.name" :id="die.name" class="row">
-                  <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
-                  <div class="size">{{die.rarity}}</div>
-                  <div class="type">{{die.type}}</div>
-                  <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
-                  <div id="expansion">
-                    <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
-                      <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
-                      <div class="amount">{{grDie.amount}}</div>
-                    </div>
-                  </div>
-              </div>
           </div>
           <ProfileForces :source-dice="sourceDice"/>
       </div>
@@ -64,11 +22,12 @@ import {
 } from '@/firebase';
 import ProfileForces from '@/components/ProfileForces.vue';
 import 'es6-promise/auto';
-
+import DiceCollectionWidget from '@/components/DiceCollectionWidget.vue';
 export default {
   name: 'ProfileView',
   components: {
     ProfileForces,
+    DiceCollectionWidget,
   },
   props: {
   },
@@ -176,7 +135,7 @@ export default {
       if (this.diceGroupedByEdition[die.name] === undefined) {
         return 0;
       }
-      return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
+      return this.dice.filter(fDie => fDie.name === die.name).reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
     },
     expand(id) {
       let row = document.getElementById(id);

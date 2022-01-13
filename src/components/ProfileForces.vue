@@ -1,33 +1,31 @@
 <template>
     <div class="collections" v-if="publicForces.length > 0">
         <h2>Their Forces</h2>
-        <span class="dice">
-            <span id="filters">
-                <div class="element-horizontal">
-                    <select id="forcesFilter" v-model="forceName" size="5" @change="() => loadForce(forceName)">
-                        <option v-for="name in (publicForces || []).map( force => force.name )" :key="name" :value="name">{{name}}</option>
-                    </select>
-                </div>
-                <div class="element">
-                    <label for="forceFilter">Dice Group</label>
-                    <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
-                        <option value="Home" selected="selected">Home Army</option>
-                        <option value="Home Terrain">Home Terrain</option>
-                        <option value="Horde">Horde Army</option>
-                        <option value="Campaign">Campaign Army</option>
-                        <option value="Frontier Terrain">Frontier Terrain</option>
-                        <option value="Summoning">Summoning Pool</option>
-                    </select>
-                </div>
-                <div class="element"><label for="totalPoints">Total Points</label><div id="totalPoints">{{totalPoints}}</div></div>
-            </span>
-            <div class="header">
-                <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
-                <div class="column-header size" @click="changeSizeDirection">Size  <span v-if="sortColumn != 1" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
-                <div class="column-header type" @click="changeTypeDirection">Type  <span v-if="sortColumn != 2" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
-                <div></div>
+        <div class="filters">
+            <div class="element-horizontal">
+                <select id="forcesFilter" v-model="forceName" size="5" @change="() => loadForce(forceName)">
+                    <option v-for="name in (publicForces || []).map( force => force.name )" :key="name" :value="name">{{name}}</option>
+                </select>
             </div>
-        </span>
+            <div class="element">
+                <label for="forceFilter">Dice Group</label>
+                <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
+                    <option value="Home" selected="selected">Home Army</option>
+                    <option value="Home Terrain">Home Terrain</option>
+                    <option value="Horde">Horde Army</option>
+                    <option value="Campaign">Campaign Army</option>
+                    <option value="Frontier Terrain">Frontier Terrain</option>
+                    <option value="Summoning">Summoning Pool</option>
+                </select>
+            </div>
+            <div class="element"><label for="totalPoints">Total Points</label><div id="totalPoints">{{totalPoints}}</div></div>
+        </div>
+        <div class="header">
+            <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+            <div class="column-header size" @click="changeSizeDirection">Size  <span v-if="sortColumn != 1" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+            <div class="column-header type" @click="changeTypeDirection">Type  <span v-if="sortColumn != 2" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 2 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 2 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
+            <div></div>
+        </div>
 
         <div class="dice">
             <div class="body" v-if="myForce != null">
@@ -278,9 +276,6 @@ export default {
   }
 
   .element-horizontal {
-    align-self: center;
-    justify-self: center;
-    display: grid;
     padding-bottom: .5em;
   }
 
@@ -316,12 +311,27 @@ export default {
   .collections .header {
     width: 100%;
     position: sticky;
+    margin-bottom: .75em;
+    border-bottom: 1px solid black;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr 1fr;
+    font-weight: bold;
+    align-items: center;
+    justify-items: center;
   }
 
   .collections .header h1 {
     text-align: center;
     align-self: center;
     justify-self: center;    
+  }
+  .filters {
+    margin-bottom: .75em;
+    font-weight: bold;
+    display: grid;
+    align-items: center;
+    justify-items: center;
   }
 
   .element {
@@ -348,7 +358,7 @@ export default {
     border-bottom: 1px solid black;
     display: grid;
     grid-auto-flow: column;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     font-weight: bold;
     align-items: center;
     justify-items: center;
@@ -363,7 +373,7 @@ export default {
   .body .row {
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     justify-items: center;
     align-items: center;
     gap: .25em;
