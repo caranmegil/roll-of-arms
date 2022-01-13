@@ -76,7 +76,6 @@ export default {
     align-self: center;
     justify-self: center;
     display: grid;
-    grid-template-rows: 1fr 1fr;
     padding-bottom: .5em;
   }
 
