@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, get, runTransaction } from "firebase/database";
+import { getDatabase, ref, set, get, onValue } from "firebase/database";
 import {
     getAuth,
     signInWithEmailAndPassword,
@@ -58,19 +58,6 @@ const saveCollection = async (collectionName, data) => {
     }
 };
 
-const updateCollection = async (collectionName, data) => {
-    try {
-        auth = getAuth();
-        const user = auth.currentUser;
-        const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
-        await runTransaction(collectionNameUserRef, () => data);
-        return true;
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
-};
-
 const getCollection = async (collectionName) => {
     try {
         auth = getAuth();
@@ -90,6 +77,21 @@ const getCollection = async (collectionName) => {
     } catch (e) {
         console.error(e);
         return null;
+    }
+}
+
+const getCollectionOn = (collectionName, callback) => {
+    try {
+        auth = getAuth();
+        const user = auth.currentUser;
+        if (user != null) {
+            const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
+            onValue(collectionNameUserRef, (snapshot) => {
+                callback(snapshot.val());
+            });
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 
@@ -220,9 +222,9 @@ export {
   confirmPassword,
   getCurrentUser,
   saveCollection,
-  updateCollection,
   saveCollectionByField,
   getCollection,
+  getCollectionOn,
   getCollectionByField,
   getEntireCollection,
   resetPasswordInGoogle,

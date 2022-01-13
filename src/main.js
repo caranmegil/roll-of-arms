@@ -69,10 +69,17 @@ const store = createStore({
             user: JSON.parse(localStorage.getItem('user') || null),
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             bufferDie: null,
+            forceName: null,
             forceSlot: 'Home',
             filters: {species: '', edition: '', size: '', type: '',},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
+            myForces: [],
         };
+    },
+    getters: {
+        getMyForces(state) {
+            return state.myForces || [];
+        },
     },
     mutations: {
         setUser(state, user) {
@@ -96,13 +103,21 @@ const store = createStore({
         setForceSlot(state, slot) {
             state.forceSlot = slot;
         },
+        setForceName(state, forceName) {
+            state.forceName = forceName;
+        },
+        setMyForces(state, myForces) {
+            state.myForces = myForces;
+        },
         signOut(state) {
             state.user = null;
             state.credentials = {}
             state.filters = {species: '', edition: '', size: '', type: '',}
             state.dice = [];
             state.forceSlot = 'Home';
+            state.forceName = null;
             state.bufferDie = null;
+            state.myForces = [];
             localStorage.setItem('credentials', JSON.stringify({}));
             localStorage.setItem('dice', JSON.stringify(null));
             localStorage.setItem('user', JSON.stringify(null));
@@ -129,6 +144,12 @@ const store = createStore({
         },
         setForceSlot({ commit }, slot) {
             commit('setForceSlot', slot);
+        },
+        setForceName( { commit }, forceName) {
+            commit( 'setForceName', forceName);
+        },
+        setMyForces( { commit }, myForces) {
+            commit('setMyForces', myForces);
         },
         signOut({ commit }) {
             commit('signOut');
