@@ -43,6 +43,9 @@
 import {
   getCollection,
 } from '@/firebase';
+import {
+  resetSlots
+} from '@/utils';
 import 'es6-promise/auto';
 
 export default {
@@ -162,6 +165,27 @@ export default {
         actionButton.innerText = 'expand_more';
       }
     },
+    loadForce(name) {
+      if (name !== undefined) {
+        this.myForce = this.publicForces.filter(force => force.name === name)[0];
+      } else if (this.publicForces.length > 0) {
+        this.myForce = this.publicForces[0];
+      }
+
+      if (this.myForce !== undefined) {
+        resetSlots(this.myForce);
+
+        if (this.myForce.isPublic === undefined) {
+          this.myForce.isPublic = false;
+        }
+
+        this.forceName = this.myForce.name;
+        this.forceSlot = 'Home';
+
+        this.recalcTotals();
+      }
+    },
+
     weightDie(die, isSummoning) {
         let pointValue = 0;
 
