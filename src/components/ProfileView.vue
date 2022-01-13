@@ -46,6 +46,7 @@ export default {
       sizeFilter: '',
       types: [],
       typeFilter: '',
+      uid: null,
     };
   },
   methods: {
@@ -165,7 +166,7 @@ export default {
   },
   async mounted() {
     const usernames = await getEntireCollection('usernames');
-    const uid = usernames[this.$route.params.id] || this.$route.params.id;
+    this.uid = usernames[this.$route.params.id] || this.$route.params.id;
     this.profile = await getCollectionByField('profiles', uid);
     this.profile.displayName = this.profile.name;
 
