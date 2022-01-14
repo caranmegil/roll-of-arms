@@ -38,9 +38,9 @@ const saveCollectionByField = async (collectionName, fieldName, data) => {
     try {
         auth = getAuth();
         const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
-        await set(collectionNameUserRef, data);
-        return true;
+        return await set(collectionNameUserRef, data);
     } catch (e) {
+        console.error(e);
         return false;
     }
 };
@@ -115,10 +115,8 @@ const getEntireCollection = async (collectionName) => {
 const createUserInGoogle = async (email, password) => {
     const auth = getAuth();
 
-    await createUserWithEmailAndPassword(auth, email, password);
-    sendSignInLinkToEmail(auth, email, actionCodeSettings);
-
-    return true;
+    return await createUserWithEmailAndPassword(auth, email, password);
+    // sendSignInLinkToEmail(auth, email, actionCodeSettings);
 };
 
 const confirmPassword = async (authCode, password) => {
