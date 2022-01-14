@@ -73,13 +73,18 @@ const store = createStore({
             forceSlot: 'Home',
             filters: {species: '', edition: '', size: '', type: '',},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
-            myForces: [],
+            myForces: null,
         };
     },
     getters: {
         getMyForces(state) {
-            let myForce = state.myForces || [];
-            myForce.sort( (a,b) => a.name.localeCompare(b.name));
+            let myForce = state.myForces;
+
+            if (myForce != null) {
+                console.log(myForce)
+                myForce.sort( (a,b) => a.name.localeCompare(b.name));
+            }
+
             return myForce;
         },
     },

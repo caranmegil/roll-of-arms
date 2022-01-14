@@ -64,8 +64,12 @@ import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import {
   mapActions,
+  mapGetters,
 } from 'vuex';
-import { resetSlots } from '@/utils';
+import {
+  resetSlots,
+  mergeMyForces,
+} from '@/utils';
 import 'es6-promise/auto';
 import {
   getCollection,
@@ -120,20 +124,9 @@ export default {
             isLoading: true,
         };
     },
-    computed: {
-      getMyForces() {
-        return this.$store.getters.getMyForces;
-      },
-    },
-    watch: {
-      getMyForces(value) {
-        this.myForces = value;
-      },
-    },
-
     async mounted() {
       this.dice = await getEntireCollection('dice');
-      this.myForces = this.getMyForces;
+      this.myForces = this.getMyForces();
       this.myForce = this.myForces.filter( force => force.name === this.$store.state.forceName)[0];
 
       resetSlots(this.myForce);
@@ -166,6 +159,7 @@ export default {
     },
     methods: {
         ...mapActions(['setFilters', 'setMyForces']),
+        ...mapGetters(['getMyForces']),
         capAmount() {
           if (this.$store.state.forceSlot.includes('Terrain')) {
             if (this.dieAmnt > 1) {
@@ -315,7 +309,7 @@ export default {
             this.myForce.slots[this.$store.state.forceSlot].push(newDie);
           }
 
-          saveCollection('forces', this.myForces);
+          saveCollection('forces', mergeMyForces(this.myForces, this.getMyForces()));
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
