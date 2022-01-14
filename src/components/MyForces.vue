@@ -201,6 +201,8 @@ export default {
             myForce = myForces.filter(force => force.name === name)[0];
           } else if (myForces.length > 0) {
             myForce = myForces[0];
+          } else {
+            myForce = {isPublic: false, name: `Force #${myForces.length+1}`}
           }
 
           if (myForce !== undefined) {
@@ -216,9 +218,10 @@ export default {
             this.forceSlot = this.$store.state.forceSlot || 'Home';
 
             this.recalcTotals();
+
+            this.myForce = myForce;
+            this.myForces = myForces;
           }
-          this.myForce = myForce;
-          this.myForces = myForces;
           this.isLoading = false;
         },
         decr(die) {
@@ -273,7 +276,7 @@ export default {
           }
         },
         async saveAndClear() {
-          if (this.myForce) {
+          if (this.myForce !== undefined && this.myForce != null) {
             resetSlots(this.myForce);
             this.recalcTotals();
             await saveCollection('forces', this.getMyForces());
