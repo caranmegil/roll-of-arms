@@ -5,12 +5,14 @@
             <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
             <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
             <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
-            <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
-            <span v-if="profile.isCollectionPublic">
-              <DiceCollectionWidget :uid="uid" :profile="profile" :source-dice="sourceDice"/>
-            </span>
           </div>
-          <ProfileForces :uid="uid" :source-dice="sourceDice"/>
+          <div class="dice">
+            <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
+          </div>
+          <span v-if="profile.isCollectionPublic">
+            <DiceCollectionWidget :uid="uid" :profile="profile" :source-dice="sourceDice"/>
+          </span>
+≈          <ProfileForces :uid="uid" :source-dice="sourceDice"/>
       </div>
     </div>
 </template>
@@ -221,11 +223,6 @@ export default {
 
   .collections {
     width: 100%;
-    display: grid;
-    grid-template-columns: auto;
-    grid-template-rows: 1fr auto;
-    align-items: center;
-    justify-items: center;
     gap: .5em;
   }
 
@@ -236,8 +233,9 @@ export default {
 
   .collections .header h1 {
     text-align: center;
-    align-self: center;
-    justify-self: center;    
+  }
+  .dice h1 {
+    text-align: center;
   }
 
   .element {
@@ -257,6 +255,7 @@ export default {
 
   .dice {
     width: 100%;
+    display: grid;
   }
 
   .collections .dice .header {
