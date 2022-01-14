@@ -282,11 +282,24 @@ export default {
     setForcesSlot() {
         this.recalcTotals();
     },
+    async loadData() {
+      let publicForces = await getCollectionByField('forces', this.uid) || [];
+      this.publicForces = publicForces.filter(force => force.isPublic);
+
+      if (this.publicForces.length > 0) {
+        this.myForce = this.publicForces[0];
+      }
+
+      this.loadForce(this.myForce.name);
+    }
+  },
+  watch: {
+    async uid() {
+      this.loadData();
+    },
   },
   async mounted() {
-    const publicForces = (await getCollectionByField('forces', this.uid)) || [];
-    this.publicForces = publicForces.filter(force => force.isPublic);
-    this.myForce = this.publicForces[0];
+    this.loadData();
   },
 }
 </script>
