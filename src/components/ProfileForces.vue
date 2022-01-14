@@ -267,15 +267,14 @@ export default {
     recalcTotals() {
         let that = this;
         if (this.forceSlot === 'Summoning') {
-        const totalDKPoints = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragonkin'), true) : 0;
-        const totalDragons = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragons'), true) : 0;
-        const totalMTs = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.rarity === 'Minor Terrain'), true) : 0;
-        this.totalPoints = `Dragons ${totalDragons} / Kin: ${totalDKPoints} / Minors: ${totalMTs}`;
-        console.log('summoning', this.totalPoints)
+          const totalDKPoints = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragonkin'), true) : 0;
+          const totalDragons = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragons'), true) : 0;
+          const totalMTs = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.rarity === 'Minor Terrain'), true) : 0;
+          this.totalPoints = `Dragons ${totalDragons} / Kin: ${totalDKPoints} / Minors: ${totalMTs}`;
         } else {
-        const forceTotal = Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0) + this.calcMediumEquipment();
-        const slotTotal = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot], false) : 0;
-        this.totalPoints = `${slotTotal} / ${forceTotal}`;
+          const forceTotal = Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0) + this.calcMediumEquipment();
+          const slotTotal = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot], false) : 0;
+          this.totalPoints = `${slotTotal} / ${forceTotal}`;
         }
 
     },
