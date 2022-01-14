@@ -1,6 +1,9 @@
 export const sleep = (timeout) => new Promise(resolve => setTimeout(resolve, timeout));
 
 export const resetSlots = (myForce) => {
+    if (!myForce) {
+        return null;
+    }
     if (!myForce.slots) {
         myForce.slots = {};
     }

@@ -5,7 +5,7 @@
       <div class="header">
       <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
       <div id="force-selector-expansion">
-        <MyForcesSelector :my-forces="myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+        <MyForcesSelector :my-force="myForce" :my-forces="getMyForces()" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
       </div>
         <div class="element">
           <label for="forceName">Force Name</label>
@@ -70,6 +70,7 @@ import Tether from 'tether';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import {
   mapActions,
+  mapGetters,
 } from 'vuex';
 import { resetSlots } from '@/utils';
 import 'es6-promise/auto';
@@ -86,16 +87,6 @@ export default {
     components: {
       Loading,
       MyForcesSelector,
-    },
-    computed: {
-      getMyForces() {
-        return this.$store.getters.getMyForces;
-      },
-    },
-    watch: {
-      getMyForces(value) {
-        this.myForces = value;
-      },
     },
     data() {
         return {
@@ -148,8 +139,12 @@ export default {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = await getCollection('forces') || [];
+      console.log(this.myForces);
       this.setMyForces(this.myForces);
-      if (this.myForces.length == 0) {
+      if (this.$store.state.forceName === '') {
+        this.myForce = this.myForces.filter( force => force.name !== this.$store.state.forceName)[0];
+        this.loadForce(this.$store.state.forceName);
+      } else if (this.myForces.length == 0) {
         this.onNewForce();
       } else {
         this.loadForce();
@@ -177,15 +172,18 @@ export default {
       }
     },
     unmounted() {
+      console.log('unmounted')
       this.saveAndClear();
       clearInterval(this.timerHandle);
     },
     methods: {
         ...mapActions(['setForceSlot', 'setFilters', 'setMyForces', 'setForceName']),
+        ...mapGetters(['getMyForces']),
         async deleteCurrentForce() {
           let that = this;
           const newMyForces = this.myForces.filter( force => force.name !== that.myForce.name);
           this.setMyForces(newMyForces);
+          saveCollection('forces', newMyForces);
 
           if (newMyForces.length == 0) {
             this.onNewForce();
@@ -193,27 +191,15 @@ export default {
             this.loadForce();
           }
         },
-        onNewForce() {
-          this.isLoading = true;
-          this.myForce = {isPublic: false, name: `Force #${this.myForces.length+1}`}
-          this.myForces.push(this.myForce);
-          this.setMyForces(this.myForces);
-
-          this.loadForce(this.myForce.name);
-        },
-        async loadForce(name) {
-          let myForces = this.myForces;
-          let myForce = null;
-          if (name !== undefined) {
-            myForce = myForces.filter(force => force.name === name)[0];
-          } else if (myForces.length > 0) {
-            myForce = myForces[0];
-          } else {
-            myForce = {isPublic: false, name: `Force #${myForces.length+1}`}
-            myForces.push(myForce);
+        loadForceData(myForce) {
+          if (!myForce) {
+            return;
           }
 
-          myForce = resetSlots(myForce);
+          if (!resetSlots(myForce)) {
+            this.isLoading = false;
+            return;
+          }
 
           if (myForce.isPublic === undefined) {
             myForce.isPublic = false;
@@ -226,11 +212,35 @@ export default {
 
           this.recalcTotals();
 
+          this.isLoading = false;
+        },
+        onNewForce() {
+          this.isLoading = true;
+          this.myForce = {isPublic: false, name: `Force #${this.myForces.length+1}`}
+          this.forceName = this.myForce.name;
+          this.myForces.push(this.myForce);
+          this.setMyForces(this.myForces);
+
+          this.loadForceData(this.myForce);
+          this.saveAndClear();
+        },
+        async loadForce(name) {
+          let myForces = this.getMyForces();
+          let myForce = null;
+          if (name !== undefined) {
+            myForce = myForces.filter(force => force.name === name)[0];
+          } else if (myForces.length > 0) {
+            myForce = myForces[0];
+          } else {
+            myForce = {isPublic: false, name: `Force #${myForces.length+1}`}
+            myForces.push(myForce);
+          }
+
           this.myForce = myForce;
           this.myForces = myForces;
-          this.setMyForces(this.myForces);
-          this.isLoading = false;
 
+          this.loadForceData(myForce);
+          this.saveAndClear();
         },
         decr(die) {
           if (die.amount > 0) {
@@ -284,9 +294,9 @@ export default {
           }
         },
         async saveAndClear() {
-          resetSlots(this.myForce);
-          this.recalcTotals();
-          await saveCollection('forces', this.myForces);
+          // resetSlots(this.myForce);
+          // this.recalcTotals();
+          // await saveCollection('forces', this.myForces);
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
@@ -339,6 +349,7 @@ export default {
         async saveTheForces() {
           if (this.forceName && this.forceName.trim() !== '') {
             this.myForce.name = this.forceName;
+            this.setMyForces(this.myForces);
             await saveCollection('forces', this.myForces);
             this.loadForce();
           }
@@ -448,8 +459,8 @@ export default {
             const totalMTs = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.rarity === 'Minor Terrain'), true) : 0;
             this.totalPoints = `Dragons ${totalDragons} / Kin: ${totalDKPoints} / Minors: ${totalMTs}`;
           } else {
-            const forceTotal = Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0) + this.calcMediumEquipment();
-            const slotTotal = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot], false) : 0;
+            const forceTotal = (this.myForce !== undefined) ? Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0) + this.calcMediumEquipment() : 0;
+            const slotTotal =  (this.myForce !== undefined) ? this.calcSlotTotal(this.myForce.slots[this.forceSlot], false) : 0;
             this.totalPoints = `${slotTotal} / ${forceTotal}`;
           }
         },

@@ -4,7 +4,7 @@
         <div class="element-horizontal">
             <label for="forcesFilter">Select Force</label>
             <select id="forcesFilter" v-model="forceName" size="5" @change="$emit('onForceChanged', this.forceName)">
-                <option v-for="name in (myForces || []).map( force => force.name )" :key="name" :value="name">{{name}}</option>
+                <option v-for="name in (myForces || []).map( force => force.name )" :key="name" :selected="myForce.name === name ? 'selected' : ''" :value="name">{{name}}</option>
             </select>
         </div>
         <div class="element-horizontal"><label>OR</label></div>
@@ -21,7 +21,7 @@ import 'es6-promise/auto';
 export default {
     name: 'MyForcesSelector',
     emits: ['onForceChanged', 'onNewForce'],
-    props: ['myForces'],
+    props: ['myForces', 'myForce',],
     data() {
         return {
           forceName: '',
