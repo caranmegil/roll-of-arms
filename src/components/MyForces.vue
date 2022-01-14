@@ -125,7 +125,7 @@ export default {
               },
             ],
             sourceDice: [],
-            myForce: {name: '', slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
+            myForce: {name: '', isPublic: false, slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
             myForces: [],
             filteredDice: [],
             forceSlot: 'Home',
@@ -139,7 +139,11 @@ export default {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
       this.setMyForces(await getCollection('forces') || []);
-      this.loadForce();
+      if (this.getMyForces().length == 0) {
+        this.onNewForce();
+      } else {
+        this.loadForce();
+      }
       this.isLoading = false;
       this.timerHandle = setInterval(this.saveAndClear, 5000);
       getCollectionOn('forces', (forces) => {
@@ -155,7 +159,12 @@ export default {
 
       setTimeout(function() {
         that.tether.position();
-      })
+      });
+
+      this.profile = await getCollection('profiles') || {};
+      if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
+        this.$tours['forcesTour'].start();
+      }
     },
     unmounted() {
       this.saveAndClear();
@@ -168,7 +177,7 @@ export default {
           let that = this;
           const newMyForces = this.getMyForces().filter( force => force.name !== that.myForce.name);
           this.setMyForces(newMyForces);
-          await saveCollection('forces', newMyForces);
+
           if (newMyForces.length == 0) {
             this.onNewForce();
           } else {
@@ -187,32 +196,28 @@ export default {
         },
         async loadForce(name) {
           let myForces = this.getMyForces();
+          let myForce = null;
           if (name !== undefined) {
-            this.myForce = myForces.filter(force => force.name === name)[0];
+            myForce = myForces.filter(force => force.name === name)[0];
           } else if (myForces.length > 0) {
-            this.myForce = myForces[0];
+            myForce = myForces[0];
           }
 
-          if (this.myForce !== undefined) {
-            resetSlots(this.myForce);
+          if (myForce !== undefined) {
+            myForce = resetSlots(myForce);
 
-            this.profile = await getCollection('profiles') || {};
-            if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
-              this.$tours['forcesTour'].start();
+            if (myForce.isPublic === undefined) {
+              myForce.isPublic = false;
             }
 
-            if (this.myForce.isPublic === undefined) {
-              this.myForce.isPublic = false;
-            }
-
-            this.forceName = this.myForce.name;
-            this.setForceName(this.myForce.name);
+            this.forceName = myForce.name;
+            this.setForceName(myForce.name);
 
             this.forceSlot = this.$store.state.forceSlot || 'Home';
 
             this.recalcTotals();
           }
-
+          this.myForce = myForce;
           this.myForces = myForces;
           this.isLoading = false;
         },
@@ -268,9 +273,11 @@ export default {
           }
         },
         async saveAndClear() {
-          resetSlots(this.myForce);
-          this.recalcTotals();
-          await saveCollection('forces', this.getMyForces());
+          if (this.myForce) {
+            resetSlots(this.myForce);
+            this.recalcTotals();
+            await saveCollection('forces', this.getMyForces());
+          }
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
