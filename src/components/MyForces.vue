@@ -70,7 +70,6 @@ import Tether from 'tether';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import {
   mapActions,
-  mapGetters,
 } from 'vuex';
 import { resetSlots } from '@/utils';
 import 'es6-promise/auto';
@@ -87,6 +86,16 @@ export default {
     components: {
       Loading,
       MyForcesSelector,
+    },
+    computed: {
+      getMyForces() {
+        return this.$store.getters.getMyForces;
+      },
+    },
+    watch: {
+      getMyForces(value) {
+        this.myForces = value;
+      },
     },
     data() {
         return {
@@ -138,8 +147,9 @@ export default {
     async mounted() {
       let that = this;
       this.sourceDice = await getEntireCollection('dice');
-      this.setMyForces(await getCollection('forces') || []);
-      if (this.getMyForces().length == 0) {
+      this.myForces = await getCollection('forces') || [];
+      this.setMyForces(this.myForces);
+      if (this.myForces.length == 0) {
         this.onNewForce();
       } else {
         this.loadForce();
@@ -172,10 +182,9 @@ export default {
     },
     methods: {
         ...mapActions(['setForceSlot', 'setFilters', 'setMyForces', 'setForceName']),
-        ...mapGetters(['getMyForces']),
         async deleteCurrentForce() {
           let that = this;
-          const newMyForces = this.getMyForces().filter( force => force.name !== that.myForce.name);
+          const newMyForces = this.myForces.filter( force => force.name !== that.myForce.name);
           this.setMyForces(newMyForces);
 
           if (newMyForces.length == 0) {
@@ -186,16 +195,14 @@ export default {
         },
         onNewForce() {
           this.isLoading = true;
-          let myForces = this.getMyForces();
+          this.myForce = {isPublic: false, name: `Force #${this.myForces.length+1}`}
+          this.myForces.push(this.myForce);
+          this.setMyForces(this.myForces);
 
-          this.myForce = {isPublic: false, name: `Force #${myForces.length+1}`}
-          myForces.push(this.myForce);
-          this.setMyForces(myForces);
-          this.myForces = myForces;
           this.loadForce(this.myForce.name);
         },
         async loadForce(name) {
-          let myForces = this.getMyForces();
+          let myForces = this.myForces;
           let myForce = null;
           if (name !== undefined) {
             myForce = myForces.filter(force => force.name === name)[0];
@@ -203,26 +210,27 @@ export default {
             myForce = myForces[0];
           } else {
             myForce = {isPublic: false, name: `Force #${myForces.length+1}`}
+            myForces.push(myForce);
           }
 
-          if (myForce !== undefined) {
-            myForce = resetSlots(myForce);
+          myForce = resetSlots(myForce);
 
-            if (myForce.isPublic === undefined) {
-              myForce.isPublic = false;
-            }
-
-            this.forceName = myForce.name;
-            this.setForceName(myForce.name);
-
-            this.forceSlot = this.$store.state.forceSlot || 'Home';
-
-            this.recalcTotals();
-
-            this.myForce = myForce;
-            this.myForces = myForces;
+          if (myForce.isPublic === undefined) {
+            myForce.isPublic = false;
           }
+
+          this.forceName = myForce.name;
+          this.setForceName(myForce.name);
+
+          this.forceSlot = this.$store.state.forceSlot || 'Home';
+
+          this.recalcTotals();
+
+          this.myForce = myForce;
+          this.myForces = myForces;
+          this.setMyForces(this.myForces);
           this.isLoading = false;
+
         },
         decr(die) {
           if (die.amount > 0) {
@@ -276,11 +284,9 @@ export default {
           }
         },
         async saveAndClear() {
-          if (this.myForce !== undefined && this.myForce != null) {
-            resetSlots(this.myForce);
-            this.recalcTotals();
-            await saveCollection('forces', this.getMyForces());
-          }
+          resetSlots(this.myForce);
+          this.recalcTotals();
+          await saveCollection('forces', this.myForces);
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
@@ -312,7 +318,7 @@ export default {
         applyFiltersAndSort() {
           let that = this;
 
-          let dice = this.getMyForces()[this.forceSlot];
+          let dice = this.myForces[this.forceSlot];
 
           dice.forEach(die => {
             let namesArr = that.diceGroupedByEdition[die.name];
@@ -333,7 +339,7 @@ export default {
         async saveTheForces() {
           if (this.forceName && this.forceName.trim() !== '') {
             this.myForce.name = this.forceName;
-            await saveCollection('forces', this.getMyForces());
+            await saveCollection('forces', this.myForces);
             this.loadForce();
           }
         },
@@ -346,7 +352,7 @@ export default {
         },
         changeAmount(grDie) {
           if (!isNaN(grDie.amount)) {
-            this.getMyForces()[this.forceSlot].map(die => {
+            this.myForces[this.forceSlot].map(die => {
               let newDie = {...die};
 
               if (die.name === grDie.name && die.edition === grDie.edition) {
