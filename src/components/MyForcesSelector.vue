@@ -2,12 +2,14 @@
     <div class="collections">
       <div class="header">
         <div class="element-horizontal">
+            <label for="forcesFilter">Select Force</label>
             <select id="forcesFilter" v-model="forceName" size="5" @change="$emit('onForceChanged', this.forceName)">
                 <option v-for="name in (myForces || []).map( force => force.name )" :key="name" :value="name">{{name}}</option>
             </select>
         </div>
+        <div class="element-horizontal"><label>OR</label></div>
         <div class="element-horizontal">
-          <button id="newForceBtn" @click="$emit('onNewForce')">Create</button>
+          <button id="newForceBtn" @click="$emit('onNewForce')">Create New</button>
         </div>
       </div>
     </div>
@@ -86,11 +88,10 @@ export default {
     padding: .1em;
   }
 
-  .element > label {
+  .element-horizontal > label {
     font-weight: bold;
-    justify-self: end;
+    justify-self: center;
     align-self: center;
-    padding-right: .5em;
   }
 
   .dice {
