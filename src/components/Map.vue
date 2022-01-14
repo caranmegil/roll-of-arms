@@ -1,4 +1,8 @@
 <template>
+    <div class="element">
+      <button @click="recenterMap">Recenter</button>
+    </div>
+
     <div id="map"></div>
 </template>
 
@@ -15,11 +19,11 @@ export default {
     data() {
         return {
             profile: null,
+            map: null,
         }
     },
     async mounted() {
         this.map = L.map('map', {maxZoom: 16, minZoom: 2}).fitWorld().setMaxBounds([[-90,-180],[90,180]]);
-        let that = this;
         this.profile = await getCollection('profiles') || null;
 
         L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -74,21 +78,26 @@ export default {
                 .bindPopup(names)
                 .openPopup();
         }
+        this.recenterMap();
+    },
+    methods: {
+        recenterMap() {
+            let that = this;
+            const defaultPosition = () => {
+                that.map.setView([33.69702810000002, -84.3251817], 13)
+            }
 
-        const defaultPosition = () => {
-            that.map.setView([33.69702810000002, -84.3251817], 13)
-        }
-
-        if (this.profile && this.profile.geolocation) {
-            this.map.setView(this.profile.geolocation, 13);
-        } else if (navigator.geolocation) { 
-            navigator.geolocation.getCurrentPosition((position) => {
-            that.map.setView([position.coords.latitude, position.coords.longitude], 13);
-            }, () => {
-            defaultPosition();
-            });
-        } else {
-            defaultPosition();
+            if (this.profile && this.profile.geolocation) {
+                this.map.setView(this.profile.geolocation, 13);
+            } else if (navigator.geolocation) { 
+                navigator.geolocation.getCurrentPosition((position) => {
+                that.map.setView([position.coords.latitude, position.coords.longitude], 13);
+                }, () => {
+                defaultPosition();
+                });
+            } else {
+                defaultPosition();
+            }
         }
     }
 }
