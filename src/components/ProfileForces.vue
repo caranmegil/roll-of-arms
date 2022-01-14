@@ -59,6 +59,7 @@ export default {
         filteredDice: [],
         publicForces: [],
         myForce: null,
+        forceName: '',
         forceSlot: 'Home',
     };
   },
@@ -283,7 +284,8 @@ export default {
     },
   },
   async mounted() {
-    this.publicForces = (await getCollectionByField('forces', this.uid) || []).filter(force => force.isPublic);
+    const publicForces = await getCollectionByField('forces', this.uid) || []
+    this.publicForces = publicForces.filter(force => force.isPublic);
     this.myForce = this.publicForces[0];
   },
 }
