@@ -284,7 +284,7 @@ export default {
     },
   },
   async mounted() {
-    const publicForces = await getCollectionByField('forces', this.uid) || []
+    const publicForces = (await getCollectionByField('forces', this.uid)) || [];
     this.publicForces = publicForces.filter(force => force.isPublic);
     this.myForce = this.publicForces[0];
   },
