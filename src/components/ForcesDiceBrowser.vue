@@ -336,7 +336,6 @@ export default {
         },
         returnToModifier: function() {
           this.setFilters({species: '', edition: '', size: '', type: ''});
-          this.setMyForces(this.myForces);
           this.$router.push('/my-forces')
         }
     },

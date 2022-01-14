@@ -3,7 +3,7 @@
       <div class="header">
         <div class="element-horizontal">
             <label for="forcesFilter">Select Force</label>
-            <select id="forcesFilter" v-model="forceName" size="5" @change="$emit('onForceChanged', this.forceName)">
+            <select id="forcesFilter" v-model="forceName" size="5" @change="onChange()">
                 <option v-for="name in (myForces || []).map( force => force.name )" :key="name" :selected="myForce.name === name ? 'selected' : ''" :value="name">{{name}}</option>
             </select>
         </div>
@@ -27,6 +27,11 @@ export default {
           forceName: '',
         };
     },
+    methods: {
+      onChange() {
+        this.$emit('onForceChanged', this.forceName);
+      }
+    }
 };
 </script>
 

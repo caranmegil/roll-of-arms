@@ -81,11 +81,13 @@ const store = createStore({
             let myForce = state.myForces;
 
             if (myForce != null) {
-                console.log(myForce)
                 myForce.sort( (a,b) => a.name.localeCompare(b.name));
             }
 
             return myForce;
+        },
+        getForceName(state) {
+            return state.forceName;
         },
     },
     mutations: {
