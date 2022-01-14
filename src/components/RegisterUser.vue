@@ -77,8 +77,6 @@ export default {
                     if (await createUserInGoogle(this.email, this.password)) {
                         let user = await signIntoGoogle(this.email, this.password);
                         if (user) {
-                            console.log(user);
-                            console.log(that.username);
                             if (saveCollectionByField('usernames', that.username, user.uid)) {
                                 that.setUser(user);
                                 that.setCredentials({email: that.email, password: that.password});
