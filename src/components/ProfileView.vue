@@ -12,7 +12,7 @@
           <span v-if="profile.isCollectionPublic">
             <DiceCollectionWidget :uid="uid" :profile="profile" :source-dice="sourceDice"/>
           </span>
-≈          <ProfileForces :uid="uid" :source-dice="sourceDice"/>
+          <ProfileForces :uid="uid" :source-dice="sourceDice"/>
       </div>
     </div>
 </template>
