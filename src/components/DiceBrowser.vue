@@ -261,8 +261,7 @@ export default {
             this.amount = {};
           }
         },
-        addDie(die) {
-          let added = false;
+        async addDie(die) {
           let that = this;
           this.amount.forEach( async edAmnt => {
             let newDie = {...die};
@@ -272,17 +271,12 @@ export default {
             if(edAmnt.value > 0) {
               newDie.edition = edAmnt.edition;
               newDie.amount = edAmnt.value;
-              that.myCollection.forEach( die => {
-                if (added) return;
-                if (die.name === newDie.name && die.edition === newDie.edition) {
-                  die.amount += edAmnt.value;
-                  added = true;
-                }
-              });
-
-              if(!added) {
+              let dieForEdition = that.myCollection.filter(die => die.name === newDie.name && die.edition === newDie.edition);
+              if (dieForEdition.length == 0) {
                 that.myCollection.push(newDie);
-                await saveCollection('collections', that.myCollection);
+              } else {
+                let die = dieForEdition[0];
+                die.amount += edAmnt.value;
               }
             }
           });
