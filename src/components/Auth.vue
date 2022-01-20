@@ -1,23 +1,20 @@
 <template>
   <div v-if="$route.query.mode === 'signIn'" class="verify">
     <h1>Time to verify!</h1>
+    In order for us to propertly verify your account, the email used during set up will need to be re-entered.
     <div v-if="hasError" class="error">{{message}}</div>
     <div class="verify-form">
         <div class="element">
-            <label for="username">username</label>
-            <input id="username" v-model="username" type="text"/>
-        </div>
-            <div class="element">
             <label for="email">email</label>
             <input id="email" v-model="email" type="text"/>
         </div>
         <div class="element">
-            <label for="password">password</label>
-            <input id="password" v-model="password" type="password"/>
+            <label for="username">username</label>
+            <input id="username" v-model="username" type="text"/>
         </div>
         <div class="element">
-            <label for="retype-password">Re-type password</label>
-            <input id="retype-password" v-model="password2" type="password"/>
+            <label for="password">password</label>
+            <input id="password" v-model="password" type="password"/>
         </div>
         <button @click="verify">Verify</button>
     </div>
@@ -82,16 +79,10 @@ export default {
         verify: async function() {
             this.username = (this.username == null) ? '' :  this.username.trim() 
 
-            if (this.username === '') {
-                this.message = 'Please make sure your username is correct!';
+            if (this.username === '' || this.email === '') {
+                this.message = 'Please make sure your username and email are correct!';
                 this.hasError = true;
-            } else if (this.password != null && this.password.trim() !== '' && this.password === this.password2) {
-                if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[$@$!%*?&])[A-Za-z\d$@$!%*?&].{6,}/.test(this.password)) {
-                    this.message = 'Please make sure your password is at least 6 characters and contains letters, numbers, and special symbols.';
-                    this.hasError = true;
-                    return;
-                }
-
+            } else if (this.password != null && this.password.trim() !== '') {
                 let that = this;
                 const actionCode = this.$route.query.oobCode;
                 const usernames = await getEntireCollection('usernames');
@@ -103,7 +94,7 @@ export default {
                             that.hasError = false;
                             that.$router.push('/');
                         } else {
-                            that.message = 'There was an error while trying to link your account up!'
+                            that.message = 'There was an error while trying to verify your account!'
                             that.hasError = true;
                         }
                     }).catch( function (e) {
@@ -137,9 +128,6 @@ export default {
                     this.message = 'Please make sure your username is correct!';
                     this.hasError = true;
                 }
-            } else {
-                this.message = 'Please make sure the password fields match!';
-                this.hasError = true;
             }
         },
     },
