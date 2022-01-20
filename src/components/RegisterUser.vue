@@ -70,7 +70,7 @@ export default {
                 }
 
                 const usernames = await getEntireCollection('usernames');
-                if ( !usernames[this.username] ) {
+                if ( !Object.keys(usernames).includes(this.username) ) {
                     const user = await createUserInGoogle(this.email, this.password);
                     if (user) {
                         if (saveCollectionByField('usernames', this.username, user.uid)) {
