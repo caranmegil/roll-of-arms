@@ -30,9 +30,7 @@
 <script>
 import {
     createUserInGoogle,
-    saveCollectionByField,
     getEntireCollection,
-    signIntoGoogle,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -57,8 +55,6 @@ export default {
         this.$router.go(-1);
     },
     async register() {
-        let that = this;
-
         try {
             this.username = (this.username == null) ? '' :  this.username.trim() 
 
