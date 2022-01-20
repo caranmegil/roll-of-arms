@@ -80,6 +80,7 @@ export default {
             }
         },
         verify: async function() {
+            console.log(this.$route.query.email);
             this.username = (this.username == null) ? '' :  this.username.trim() 
 
             if (this.username === '') {
