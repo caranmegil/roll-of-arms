@@ -75,18 +75,8 @@ export default {
                 const usernames = await getEntireCollection('usernames');
                 if ( !usernames[this.username] ) {
                     if (await createUserInGoogle(this.email, this.password)) {
-                        let user = await signIntoGoogle(this.email, this.password);
-                        if (user) {
-                            if (saveCollectionByField('usernames', that.username, user.uid)) {
-                                that.setUser(user);
-                                that.setCredentials({email: that.email, password: that.password});
-                                that.hasError = false;
-                                that.$router.push('/');
-                            } else {
-                                that.message = 'There was an error while trying to link your account up!'
-                                that.hasError = true;
-                            }
-                        }
+                        this.$router.push('/signin');
+                        this.hasError = false;
                     } else {
                         this.message = 'Unable to create account.';
                         this.hasError = true;
@@ -103,7 +93,6 @@ export default {
             if (e.code === 'auth/email-already-in-use') {
                 this.hasError = true;
                 this.message = 'This email address is already in use.';
-//                this.$router.push('/signin')
             } else {
                 this.hasError = true;
                 this.message = 'Please make sure the form is filled out correctly!';
