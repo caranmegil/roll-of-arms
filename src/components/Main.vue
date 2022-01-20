@@ -120,6 +120,7 @@ export default {
       if(this.$store.state.credentials != undefined && this.$store.state.credentials != null && this.$store.state.credentials.email != undefined) {
         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
         this.setUser(user);
+        console.log(user);
         this.profile = await getCollection('profiles') || null;
         if (this.profile == null) {
           this.$router.push('/profile');
