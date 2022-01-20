@@ -1,6 +1,21 @@
 export const sleep = (timeout) => new Promise(resolve => setTimeout(resolve, timeout));
 
+export const mergeMyForces = (myForcesA, myForcesB) => {
+    return myForcesA.map( myForceA => {
+        // let myForceAP = resetSlots(myForceA);
+        return {...myForceA, ...myForcesB.filter(myForceB => myForceB.name === myForceA.name)[0]};
+
+        // });
+        // Object.keys(myForceAP.slots).forEach(slotName => {
+        //     myForceAPCopy.slots[slotName] = [myForceAP.slots[slotName], myForcesB.filter(myForceB => myForceAP.name === slot)]
+        // })
+    });
+}
+
 export const resetSlots = (myForce) => {
+    if (!myForce) {
+        return null;
+    }
     if (!myForce.slots) {
         myForce.slots = {};
     }

@@ -216,7 +216,9 @@ export default {
           return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
         },
         recalcTotals() {
-            this.totalDice = this.dice.reduce((previousValue, currentValue) => previousValue += currentValue.amount, 0);
+          const filteredDiceNames = this.filteredDice.map(die => die.name);
+          let totalDice = this.dice.filter(die => filteredDiceNames.includes(die.name)).map(die => die.amount).reduce( (total, amount) => total + amount, 0);
+          this.totalDice = totalDice;
         },
         setCurrentDie(die) {
           this.setCollectionDie(die);
