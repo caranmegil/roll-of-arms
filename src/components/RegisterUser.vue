@@ -74,6 +74,7 @@ export default {
                     const user = await createUserInGoogle(this.email, this.password);
                     if (user) {
                         if (saveCollectionByField('usernames', this.username, user.uid)) {
+                            this.setCredentials({email: this.email, password: this.password});
                             this.$router.push('/verifywarn');
                             this.hasError = false;
                         }
