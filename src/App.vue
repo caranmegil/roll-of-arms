@@ -2,7 +2,7 @@
     <div @click="toggleMenu" class="menu-overlay"></div>
   <div v-if="isLoaded" class="roll-of-arms-body">
     <header>
-      <div class="menu-button" @click="toggleMenu" v-if="$store.state.user != null"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
+      <div class="menu-button" @click="toggleMenu" v-if="$store.state.user != null && $store.state.user.emailVerified"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
     </header>
     <div id="menu" class="menu-container">
