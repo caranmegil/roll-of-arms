@@ -1,6 +1,6 @@
 <template>
     <div class="element">
-      <button @click="recenterMap">Recenter</button>
+      <button @click="recenterMap">Re-Center</button>
     </div>
 
     <div id="map"></div>
@@ -104,8 +104,21 @@ export default {
 </script>
 
 <style scoped>
-#map {
-    height: 60vh;
-    width: 95%;
-}
+    #map {
+        height: 60vh;
+        width: 95%;
+    }
+  .element {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    grid-auto-flow: column;
+  }
+
+  .element > label {
+    font-weight: bold;
+    justify-self: end;
+    align-self: start;
+    padding-right: .5em;
+  }
 </style>
