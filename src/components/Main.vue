@@ -113,14 +113,13 @@ export default {
   },
   async mounted() {
     let that = this;
-        this.setUser(this.$store.state.user);
-
+  console.log(this.$store.state.user)
     // Find if there is this weird state happening
     // If so, kill the credentials and go to sign-in page.
     if (this.$store.state.user == null) {
       if(this.$store.state.credentials != undefined && this.$store.state.credentials != null && this.$store.state.credentials.email != undefined) {
         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
-        console.log(user);
+        this.setUser(user);
         this.profile = await getCollection('profiles') || null;
         if (this.profile == null) {
           this.$router.push('/profile');
