@@ -24,14 +24,6 @@ let auth = null;
 let user = null;
 // utils
 const db = getDatabase(app);
-const actionCodeSettings = {
-    // URL you want to redirect back to. The domain (www.example.com) for this
-    // URL must be in the authorized domains list in the Firebase Console.
-    url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
-    // This must be true.
-    handleCodeInApp: true,
-};
-
 
 // generic collection actions
 const saveCollectionByField = async (collectionName, fieldName, data) => {
@@ -129,9 +121,18 @@ const getEntireCollection = async (collectionName) => {
 
 const createUserInGoogle = async (email, password) => {
     const auth = getAuth();
+    const actionCodeSettings = {
+        // URL you want to redirect back to. The domain (www.example.com) for this
+        // URL must be in the authorized domains list in the Firebase Console.
+        url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
+        // This must be true.
+        handleCodeInApp: true,
+    };
+    
+    const val = await createUserWithEmailAndPassword(auth, email, password);
+    sendSignInLinkToEmail(auth, email, actionCodeSettings);
 
-    return await createUserWithEmailAndPassword(auth, email, password);
-    // sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    return val;
 };
 
 const confirmPassword = async (authCode, password) => {
@@ -182,6 +183,14 @@ const verifyEmailWithLink = async (email, password, actionCode) => {
 
 const resendEmailWithLink = async (email) => {
     auth = getAuth();
+    const actionCodeSettings = {
+        // URL you want to redirect back to. The domain (www.example.com) for this
+        // URL must be in the authorized domains list in the Firebase Console.
+        url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
+        // This must be true.
+        handleCodeInApp: true,
+    };
+    
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
 }
 
