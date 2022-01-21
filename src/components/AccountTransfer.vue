@@ -37,14 +37,13 @@ export default {
       ...mapActions(['signOut',]),
     async changeEmail() {
         try {
-            const credentials = this.$store.state.credentials;
-            const wasChanged = await changeEmail(this.email, credentials.email, credentials.password);
+            const wasChanged = await changeEmail(this.email);
 
             if(wasChanged) {
                 this.signOut();
                 this.hasSuccess = true;
                 this.hasError = false;
-                this.$router.push('/');
+                // this.$router.push('/');
             }
         } catch (e) {
             switch(e.code) {
