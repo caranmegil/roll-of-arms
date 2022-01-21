@@ -10,6 +10,7 @@
       <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">public</span> Player Map</div>
       <div class="separator"></div>
       <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
+      <div @click="resetPassword" class="menu-item"><span class="material-icons material-icons-outlined">lock</span> Reset Password</div>
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
       <div class="separator"></div>
@@ -55,6 +56,10 @@ export default {
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
+    resetPassword: function() {
+      this.toggleMenu();
+      this.$router.push('/reset');
+    },
     closeMenu: function() {
       this.toggleMenu();
     },
@@ -162,6 +167,8 @@ button {
   top: 0em;
   width: 20em;
   height: 100%;
+  align-items: start;
+  justify-items: start;
   grid-auto-flow: row;
 }
 
@@ -245,7 +252,7 @@ button {
 
 .menu-item {
   display: grid;
-  grid-auto-flow: row;
+  grid-auto-flow: column;
   grid-template-columns: auto 1fr;
   align-items: center;
   padding: 2px;
