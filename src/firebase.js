@@ -210,21 +210,7 @@ const getCurrentUser = () => {
 const changeEmail = async (newEmail) => {
     auth = getAuth();
 
-//    const credential = await signInWithEmailAndPassword(auth, oldEmail, password)
     await updateEmail(auth.currentUser, newEmail);
-    // if (user == null) {
-    //     user = auth.currentUser;
-    // }
-
-    // const actionCodeSettings = {
-    //     // URL you want to redirect back to. The domain (www.example.com) for this
-    //     // URL must be in the authorized domains list in the Firebase Console.
-    //     url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
-    //     // This must be true.
-    //     handleCodeInApp: true,
-    // };
-
-    // await verifyBeforeUpdateEmail(user, newEmail, actionCodeSettings);
 
     return true;
 }
