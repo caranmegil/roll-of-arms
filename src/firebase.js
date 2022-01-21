@@ -217,8 +217,9 @@ const changeEmail = async (newEmail, oldEmail, password) => {
 }
 
 const recoverEmail = async (email, actionCode) => {
+    auth = getAuth();
     if (await checkActionCode(auth, actionCode)) {
-        await sendPasswordResetEmail(auth, email);4
+        await sendPasswordResetEmail(auth, email);
         return true;
     }
 
