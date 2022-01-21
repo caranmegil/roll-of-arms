@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$route.query.mode === 'signIn'" class="verify">
+  <div v-if="$route.query.mode === 'signIn' || $route.query.mode === 'verifyAndChangeEmail'" class="verify">
     <h1>Time to verify!</h1>
     In order for us to propertly verify your account, the email used during set up will need to be re-entered.
     <div v-if="hasError" class="error">{{message}}</div>
@@ -13,6 +13,18 @@
             <input id="password" v-model="password" type="password"/>
         </div>
         <button @click="verify">Verify</button>
+    </div>
+  </div>
+  <div v-if="$route.query.mode === 'recoverEmail'" class="verify">
+    <h1>Time to verify!</h1>
+    In order for us to propertly recover your account, the original email will need to be re-entered.
+    <div v-if="hasError" class="error">{{message}}</div>
+    <div class="verify-form">
+        <div class="element">
+            <label for="email">email</label>
+            <input id="email" v-model="email" type="text"/>
+        </div>
+        <button @click="recoverEmail">Verify</button>
     </div>
   </div>
   <div v-if="$route.query.mode === 'resetPassword'" class="verify">
@@ -36,6 +48,7 @@
 import {
     confirmPassword,
     verifyEmailWithLink,
+    recoverEmail,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -55,7 +68,15 @@ export default {
     },
     methods: {
         ...mapActions(['setUser', 'setCredentials']),
-        resetPassword: async function() {
+        async recoverEmail() {
+            if (this.email === '') {
+                this.message = 'Please make sure your email is correct!';
+                this.hasError = true;
+            }
+
+            await recoverEmail(this.email, this.$route.query.oobCode);
+        },
+        async resetPassword() {
             if (this.password != null && this.password.trim() && this.password === this.password2) {
                 this.hasPasswordMismatch = false;
 
@@ -70,11 +91,11 @@ export default {
                 this.hasPasswordMismatch = true;
             }
         },
-        verify: async function() {
+        async verify() {
             this.username = (this.username == null) ? '' :  this.username.trim() 
 
             if (this.email === '' || this.password === '') {
-                this.message = 'Please make sure your email and password correct!';
+                this.message = 'Please make sure your email and password are correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
                 let that = this;
