@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$route.query.mode === 'signIn'" class="verify">
+  <div v-if="$route.query.mode === 'signIn' || $route.query.mode === 'verifyAndChangeEmail'" class="verify">
     <h1>Time to verify!</h1>
     In order for us to propertly verify your account, the email used during set up will need to be re-entered.
     <div v-if="hasError" class="error">{{message}}</div>
