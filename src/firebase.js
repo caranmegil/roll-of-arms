@@ -12,6 +12,7 @@ import {
     signInWithEmailLink,
     confirmPasswordReset,
     updatePassword,
+    updateEmail,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -140,8 +141,7 @@ const signIntoGoogle = async (email, password) => {
     }
 
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    user = userCredential.user;
-    return user;
+    return userCredential.user;
 };
 
 const signInAgain = async (func) => {
@@ -207,6 +207,15 @@ const getCurrentUser = () => {
     return user;
 }
 
+const changeEmail = async (newEmail, oldEmail, password) => {
+    auth = getAuth();
+
+    const credential = await await signInWithEmailAndPassword(auth, oldEmail, password)
+    await updateEmail(credential.user, newEmail);
+
+    return true;
+}
+
 // export utils/refs
 export {
   app,
@@ -226,4 +235,5 @@ export {
   signIntoGoogle,
   signInAgain,
   signOutOfGoogle,
+  changeEmail,
 };

@@ -25,7 +25,7 @@ import {resetPasswordInGoogle} from '@/firebase';
 import 'es6-promise/auto';
 
 export default {
-  name: 'RegisterUser',
+  name: 'ResetPassword',
   props: {
   },
   data() {

@@ -11,6 +11,7 @@
       <div class="separator"></div>
       <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
       <div @click="resetPassword" class="menu-item"><span class="material-icons material-icons-outlined">lock</span> Reset Password</div>
+      <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div>
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
       <!-- <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div> -->
@@ -55,18 +56,22 @@ export default {
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
-    resetPassword: function() {
+    changeEmail() {
+      this.toggleMenu();
+      this.$router.push('/account-transfer');
+    },
+    resetPassword() {
       this.toggleMenu();
       this.$router.push('/reset');
     },
-    closeMenu: function() {
+    closeMenu() {
       this.toggleMenu();
     },
-    goHome: function() {
+    goHome() {
       this.toggleMenu();
       this.$router.push('/');
     },
-    toggleMenu: function() {
+    toggleMenu() {
       let menuElem = document.getElementById('menu');
       let menuOverlay = document.querySelector('.menu-overlay');
 
@@ -78,23 +83,23 @@ export default {
         menuOverlay.style.display = 'none';
       }
     },
-    openProfileEdit: function () {
+    openProfileEdit () {
       this.toggleMenu();
       this.$router.push('/profile');
     },
-    editCollection: function () {
+    editCollection () {
       this.toggleMenu();
       this.$router.push('/my-collection');
     },
-    editForces: function () {
+    editForces () {
       this.toggleMenu();
       this.$router.push('/my-forces');
     },
-    openDiceBrowser: function () {
+    openDiceBrowser () {
       this.toggleMenu();
       this.$router.push('/dicebrowser');
     },
-    logoff: async function () {
+    async logoff() {
       const isSignedOut = await signOutOfGoogle();
 
       if (isSignedOut) {

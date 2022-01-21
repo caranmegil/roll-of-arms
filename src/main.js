@@ -23,6 +23,7 @@ import DiceBrowser from './components/DiceBrowser.vue';
 import DiceCollection from './components/DiceCollection.vue';
 import MyForces from './components/MyForces.vue';
 import VerificationFailure from './components/VerificationFailure.vue';
+import AccountTransfer from './components/AccountTransfer.vue';
 
 const routes = [
     { path: '/', component: Main, meta: { requiresAuth: true } },
@@ -36,6 +37,7 @@ const routes = [
     { path: '/my-collection', component: DiceCollection, meta: { requiresAuth: true } },
     { path: '/my-forces', component: MyForces, meta: { requiresAuth: true } },
     { path: '/verifywarn', component: VerificationFailure, meta: { requiresAuth: false } },
+    { path: '/account-transfer', component: AccountTransfer, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter( {
