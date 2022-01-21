@@ -1,10 +1,11 @@
 <template>
   <div class="login">
     <h1>Hey, Dragon Dicer!</h1>
-    <section class="welcome-msg">Forgot your passord?  No problem!</section>
+    <section class="welcome-msg" v-if="$store.state.credentials == null || !$store.state.credentials.email">Forgot your passord?  No problem!</section>
+    <section class="welcome-msg" v-if="$store.state.credentials != null && $store.state.credentials.email">Want to reset your password?  No problem!</section>
     <div v-if="hasError" class="error">Please make sure the email is entered!</div>
     <div v-if="hasSuccess" class="success">Please, check your email for a password reset!</div>
-    <div class="login-form">
+    <div class="login-form" v-if="$store.state.credentials == null || !$store.state.credentials.email">
         <div class="element">
             <label for="email">email</label>
             <input id="email" type="text"/>
@@ -12,6 +13,9 @@
         <button @click="register">Reset Password!</button>
         <div class="separator"></div>
         <a class="element" @click="back">Back</a>
+    </div>
+    <div class="login-form" v-if="$store.state.credentials != null && $store.state.credentials.email">
+        <button @click="resetCurrentUser">Reset Password for {{$store.state.credentials.email}}!</button>
     </div>
   </div>
 </template>
@@ -31,10 +35,21 @@ export default {
       }
   },
   methods: {
-    back: function() {
+    back() {
         this.$router.go(-1);
     },
-    register: async function() {
+    async resetCurrentUser() {
+        const wasReset = await resetPasswordInGoogle(this.$store.state.credentials.email);
+
+        if(wasReset) {
+            this.hasSuccess = true;
+            this.hasError = false;
+        } else {
+            this.hasSuccess = false;
+            this.hasError = true;
+        }
+    },
+    async register() {
         const email = document.getElementById('email').value;
         
         const wasReset = await resetPasswordInGoogle(email);
