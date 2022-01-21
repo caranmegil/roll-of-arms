@@ -71,10 +71,9 @@ export default {
 
                 const usernames = await getEntireCollection('usernames');
                 if ( !Object.keys(usernames).includes(this.username) ) {
-                    const user = await createUserInGoogle(this.email, this.password);
-                    if (user) {
-                        console.log(user)
-                        if (saveCollectionByField('usernames', this.username, user.uid)) {
+                    const cred = await createUserInGoogle(this.email, this.password);
+                    if (cred) {
+                        if (saveCollectionByField('usernames', this.username, cred.user.uid)) {
                             this.setCredentials({email: this.email, password: this.password});
                             this.$router.push('/verifywarn');
                             this.hasError = false;
