@@ -43,7 +43,7 @@ export default {
                 this.signOut();
                 this.hasSuccess = true;
                 this.hasError = false;
-                // this.$router.push('/');
+                this.$router.push('/');
             }
         } catch (e) {
             switch(e.code) {
