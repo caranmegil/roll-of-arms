@@ -216,6 +216,15 @@ const changeEmail = async (newEmail, oldEmail, password) => {
     return true;
 }
 
+const recoverEmail = async (email, actionCode) => {
+    if (await checkActionCode(auth, actionCode)) {
+        await sendPasswordResetEmail(auth, email);4
+        return true;
+    }
+
+    return false;
+}
+
 // export utils/refs
 export {
   app,
@@ -236,4 +245,5 @@ export {
   signInAgain,
   signOutOfGoogle,
   changeEmail,
+  recoverEmail,
 };
