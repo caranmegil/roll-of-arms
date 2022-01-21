@@ -16,6 +16,9 @@
 
 <script>
 import {changeEmail} from '@/firebase';
+import {
+    mapActions
+} from 'vuex';
 import 'es6-promise/auto';
 
 export default {
@@ -31,12 +34,14 @@ export default {
       }
   },
   methods: {
+      ...mapActions(['signOut',]),
     async changeEmail() {
         try {
             const credentials = this.$store.state.credentials;
             const wasChanged = await changeEmail(this.email, credentials.email, credentials.password);
 
             if(wasChanged) {
+                this.signOut();
                 this.hasSuccess = true;
                 this.hasError = false;
             }
