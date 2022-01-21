@@ -9,10 +9,6 @@
             <input id="email" v-model="email" type="text"/>
         </div>
         <div class="element">
-            <label for="username">username</label>
-            <input id="username" v-model="username" type="text"/>
-        </div>
-        <div class="element">
             <label for="password">password</label>
             <input id="password" v-model="password" type="password"/>
         </div>
@@ -39,8 +35,6 @@
 <script>
 import {
     confirmPassword,
-    getEntireCollection,
-    saveCollectionByField,
     verifyEmailWithLink,
 } from '@/firebase';
 import {mapActions} from 'vuex';
@@ -79,55 +73,44 @@ export default {
         verify: async function() {
             this.username = (this.username == null) ? '' :  this.username.trim() 
 
-            if (this.username === '' || this.email === '') {
-                this.message = 'Please make sure your username and email are correct!';
+            if (this.email === '' || this.password === '') {
+                this.message = 'Please make sure your email and password correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
                 let that = this;
                 const actionCode = this.$route.query.oobCode;
-                const usernames = await getEntireCollection('usernames');
-                if ( !usernames[this.username] ) {
-                    verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
-                        if (saveCollectionByField('usernames', that.username, user.uid)) {
-                            that.setUser(user);
-                            that.setCredentials({email: that.email, password: that.password});
-                            that.hasError = false;
-                            that.$router.push('/');
-                        } else {
-                            that.message = 'There was an error while trying to verify your account!'
-                            that.hasError = true;
-                        }
-                    }).catch( function (e) {
-                        switch (e.code) {
-                            case 'auth/expired-action-code':
-                                that.message = 'The link you were sent is stale.';
-                                break;
-                            case 'auth/invalid-email':
-                                that.message = 'An invalid email was entered.';
-                                break;
-                            case 'auth/user-disabled':
-                                that.message = 'The account is disabled.';
-                                break;
-                            case 'auth/user-not-found':
-                                that.message = 'The account was not found.';
-                                break;
-                            case 'auth/invalid-action-code':
-                                that.message = 'The link is invalid or has already been used previously.';
-                                break;
-                            case 'auth/weak-password':
-                                that.message = 'Please choose a stronger password that is at least 6 characters.';
-                                break;
-                            default:
-                                that.message = 'There was an unknown error.  Please contact support at service2@sfr-inc.com'
-                                console.error(e);
-                                break;
-                        }
-                        that.hasError = true;
-                    });
-                } else {
-                    this.message = 'Please make sure your username is correct!';
-                    this.hasError = true;
-                }
+                verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
+                    that.setUser(user);
+                    that.setCredentials({email: that.email, password: that.password});
+                    that.hasError = false;
+                    that.$router.push('/');
+                }).catch( function (e) {
+                    switch (e.code) {
+                        case 'auth/expired-action-code':
+                            that.message = 'The link you were sent is stale.';
+                            break;
+                        case 'auth/invalid-email':
+                            that.message = 'An invalid email was entered.';
+                            break;
+                        case 'auth/user-disabled':
+                            that.message = 'The account is disabled.';
+                            break;
+                        case 'auth/user-not-found':
+                            that.message = 'The account was not found.';
+                            break;
+                        case 'auth/invalid-action-code':
+                            that.message = 'The link is invalid or has already been used previously.';
+                            break;
+                        case 'auth/weak-password':
+                            that.message = 'Please choose a stronger password that is at least 6 characters.';
+                            break;
+                        default:
+                            that.message = 'There was an unknown error.  Please contact support at service2@sfr-inc.com'
+                            console.error(e);
+                            break;
+                    }
+                    that.hasError = true;
+                });
             }
         },
     },

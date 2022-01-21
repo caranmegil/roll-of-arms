@@ -31,6 +31,7 @@
 import {
     createUserInGoogle,
     getEntireCollection,
+    saveCollectionByField,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -69,10 +70,14 @@ export default {
                 }
 
                 const usernames = await getEntireCollection('usernames');
-                if ( !usernames[this.username] ) {
-                    if (await createUserInGoogle(this.email, this.password)) {
-                        this.$router.push('/signin');
-                        this.hasError = false;
+                if ( !Object.keys(usernames).includes(this.username) ) {
+                    const cred = await createUserInGoogle(this.email, this.password);
+                    if (cred) {
+                        if (saveCollectionByField('usernames', this.username, cred.user.uid)) {
+                            this.setCredentials({email: this.email, password: this.password});
+                            this.$router.push('/verifywarn');
+                            this.hasError = false;
+                        }
                     } else {
                         this.message = 'Unable to create account.';
                         this.hasError = true;
