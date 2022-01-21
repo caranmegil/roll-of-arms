@@ -73,8 +73,8 @@ export default {
         verify: async function() {
             this.username = (this.username == null) ? '' :  this.username.trim() 
 
-            if (this.username === '' || this.email === '') {
-                this.message = 'Please make sure your username and email are correct!';
+            if (this.email === '' || this.password === '') {
+                this.message = 'Please make sure your email and password correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
                 let that = this;
