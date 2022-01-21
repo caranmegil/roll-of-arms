@@ -222,13 +222,22 @@ const getCurrentUser = () => {
     return user;
 }
 
-const changeEmail = async (newEmail, oldEmail, password) => {
+const changeEmail = async (newEmail) => {
     auth = getAuth();
 
-    const credential = await await signInWithEmailAndPassword(auth, oldEmail, password)
-    await updateEmail(credential.user, newEmail);
+    await updateEmail(auth.currentUser, newEmail);
 
     return true;
+}
+
+const recoverEmail = async (email, actionCode) => {
+    auth = getAuth();
+    if (await checkActionCode(auth, actionCode)) {
+        await sendPasswordResetEmail(auth, email);
+        return true;
+    }
+
+    return false;
 }
 
 // export utils/refs
@@ -252,4 +261,5 @@ export {
   signInAgain,
   signOutOfGoogle,
   changeEmail,
+  recoverEmail,
 };
