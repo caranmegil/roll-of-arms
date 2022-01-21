@@ -12,6 +12,7 @@ import {
     signInWithEmailLink,
     confirmPasswordReset,
     updatePassword,
+    verifyBeforeUpdateEmail,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -223,7 +224,7 @@ const changeEmail = async (newEmail) => {
         handleCodeInApp: true,
     };
 
-    await user.verifyBeforeUpdateEmail(newEmail, actionCodeSettings);
+    await verifyBeforeUpdateEmail(user, newEmail, actionCodeSettings);
 
     return true;
 }
