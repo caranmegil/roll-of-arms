@@ -4,8 +4,8 @@
     <div class="verify-form">
         <div class="element">
             Unfortunately, your account is not verified and we cannot proceed with sign in.  There 
-            should be a verification email sent to the email account <strong>{{$store.state.credentials.email}}</strong>.  If you do not have this, 
-            press the button below.
+            should be a verification email sent to the email account <strong>{{$store.state.credentials.email}}</strong>.  If you do not have this,
+            please check your spam or junk folder.  Otherwise, press the button below.
         </div>
         <button @click="resendVerification">Send Verification</button>
     </div>

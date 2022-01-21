@@ -37,7 +37,7 @@ const routes = [
     { path: '/forcesdicebrowser', component: ForcesDiceBrowser, meta: { requiresAuth: true } },
     { path: '/my-collection', component: DiceCollection, meta: { requiresAuth: true } },
     { path: '/my-forces', component: MyForces, meta: { requiresAuth: true } },
-    { path: '/verifywarn', component: VerificationFailure, meta: { requiresAuth: true } },
+    { path: '/verifywarn', component: VerificationFailure, meta: { requiresAuth: false } },
 ];
 
 const router = createRouter( {
