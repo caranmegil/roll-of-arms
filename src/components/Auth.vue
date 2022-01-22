@@ -24,7 +24,7 @@
             <label for="email">email</label>
             <input id="email" v-model="email" type="text"/>
         </div>
-        <button @click="recoverEmail">Verify</button>
+        <button @click="recoverEmail">Recover</button>
     </div>
   </div>
   <div v-if="$route.query.mode === 'resetPassword'" class="verify">
