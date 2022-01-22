@@ -13,6 +13,9 @@ import {
     confirmPasswordReset,
     updatePassword,
     updateEmail,
+    EmailAuthProvider,
+    reauthenticateWithCredential,
+    applyActionCode,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -222,9 +225,11 @@ const getCurrentUser = () => {
     return user;
 }
 
-const changeEmail = async (newEmail) => {
+const changeEmail = async (newEmail, oldEmail, password) => {
     auth = getAuth();
 
+    const userCredential = await EmailAuthProvider.credential(oldEmail, password);
+    await reauthenticateWithCredential(auth.currentUser, userCredential);
     await updateEmail(auth.currentUser, newEmail);
 
     return true;
@@ -233,6 +238,7 @@ const changeEmail = async (newEmail) => {
 const recoverEmail = async (email, actionCode) => {
     auth = getAuth();
     if (await checkActionCode(auth, actionCode)) {
+        await applyActionCode(auth, actionCode);
         await sendPasswordResetEmail(auth, email);
         return true;
     }
