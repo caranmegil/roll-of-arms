@@ -6,9 +6,14 @@
     <div v-if="hasSuccess" class="success">Please, check your email account and spam/junk folder for a confirmation!</div>
     <div class="login-form">
         <div class="element">
-            <label for="email">New Email</label>
+            <label for="email">new email</label>
             <input id="email" v-model="email" type="text"/>
         </div>
+        <div class="element">
+            <label for="password">current password</label>
+            <input id="password" v-model="password" type="password"/>
+        </div>
+
         <button @click="changeEmail">Change Email!</button>
     </div>
   </div>
@@ -31,19 +36,30 @@ export default {
           hasSuccess: false,
           message: '',
           email: '',
+          password: '',
       }
   },
   methods: {
       ...mapActions(['signOut',]),
     async changeEmail() {
         try {
-            const wasChanged = await changeEmail(this.email);
+            if (this.email === '' || this.password === '') {
+                this.message = 'Please make sure your email and password are correct!';
+                this.hasError = true;
+            } else if (this.password != null && this.password.trim() !== '') {
+                const credentials = this.$store.state.credentials;
+                const wasChanged = await changeEmail(this.email, credentials.email, this.password);
 
-            if(wasChanged) {
-                this.signOut();
-                this.hasSuccess = true;
-                this.hasError = false;
-                this.$router.push('/');
+                if(wasChanged) {
+                    this.signOut();
+                    this.hasSuccess = true;
+                    this.hasError = false;
+                    this.$router.push('/');
+                }
+            } else {
+                this.message = 'Please make sure your password is correct!';
+                this.hasSuccess = false;
+                this.hasError = true;
             }
         } catch (e) {
             switch(e.code) {
@@ -55,6 +71,9 @@ export default {
                     break;
                 case 'auth/requires-recent-login':
                     this.message = 'Please, sign in again!';
+                    break;
+                case 'auth/wrong-password':
+                    this.message = 'Please, enter a valid password.';
                     break;
                 default:
                     this.message = 'There was an unknown error!';
