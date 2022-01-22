@@ -74,7 +74,9 @@ export default {
                 this.hasError = true;
             }
 
-            await recoverEmail(this.email, this.$route.query.oobCode);
+            if (await recoverEmail(this.email, this.$route.query.oobCode)) {
+                this.$router.push('/');
+            }
         },
         async resetPassword() {
             if (this.password != null && this.password.trim() && this.password === this.password2) {
