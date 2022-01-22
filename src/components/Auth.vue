@@ -146,6 +146,9 @@ export default {
         display: grid;
         grid-auto-flow: row;
         grid-template-columns: auto;
+        justify-self: center;
+        align-content: center;
+        justify-content: center;
         gap: .5em;
     }
 
