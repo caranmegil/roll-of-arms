@@ -280,6 +280,7 @@ export default {
               }
             }
           });
+          await saveCollection('collections', that.myCollection);
           this.expand(die);
           this.amount = {};
         },
