@@ -213,9 +213,9 @@ const getCurrentUser = () => {
 const changeEmail = async (newEmail, oldEmail, password) => {
     auth = getAuth();
 
-    const userCredential = await EmailAuthProvider.credential(oldEmail, password);
-    await reauthenticateWithCredential(auth.currentUser, userCredential);
-    await updateEmail(auth.currentUser, newEmail);
+    const emailAuthCredential = await EmailAuthProvider.credential(oldEmail, password);
+    const userCredential = await reauthenticateWithCredential(auth.currentUser, emailAuthCredential);
+    await updateEmail(userCredential.user, newEmail);
 
     return true;
 }
