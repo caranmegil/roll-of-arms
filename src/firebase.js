@@ -161,9 +161,9 @@ const verifyEmailWithLink = async (email, password, actionCode) => {
     if ( isSignInWithEmailLink(auth, window.location.href) ) {
         await checkActionCode(auth, actionCode);
         await applyActionCode(auth, actionCode);
-        const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
-        const user = userCredentials.user;
-        await updatePassword(user, password);
+        // const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
+        // const user = userCredentials.user;
+        // await updatePassword(user, password);
         return auth.currentUser;
     } else {
         return null;
