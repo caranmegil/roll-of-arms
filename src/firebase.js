@@ -15,7 +15,7 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential,
     applyActionCode,
-    verifyBeforeUpdateEmail,
+    updateEmail,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -223,7 +223,7 @@ const changeEmail = async (newEmail, oldEmail, password) => {
 
     const emailAuthCredential = await EmailAuthProvider.credential(oldEmail, password);
     await reauthenticateWithCredential(auth.currentUser, emailAuthCredential).then(userCredential => {
-        return verifyBeforeUpdateEmail(userCredential.user, newEmail, actionCodeSettings);
+        return updateEmail(userCredential.user, newEmail, actionCodeSettings);
     })
 
     return true;
