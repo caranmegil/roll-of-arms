@@ -156,16 +156,16 @@ const isVerifyEmailWithLink = async () => {
 
 const verifyEmailWithLink = async (email, password, actionCode) => {
     auth = getAuth();
-    if ( isSignInWithEmailLink(auth, window.location.href) ) {
+    // if ( isSignInWithEmailLink(auth, window.location.href) ) {
         await checkActionCode(auth, actionCode);
         await applyActionCode(auth, actionCode);
         // const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
         // const user = userCredentials.user;
         // await updatePassword(user, password);
         return auth.currentUser;
-    } else {
-        return null;
-    }
+    // } else {
+        // return null;
+    // }
 };
 
 const resendEmailWithLink = async (email) => {
