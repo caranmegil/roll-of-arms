@@ -15,6 +15,7 @@ import {
     applyActionCode,
     updateEmail,
     signInWithEmailLink,
+    updatePassword,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -160,6 +161,7 @@ const verifyEmailWithLink = async (email, password, actionCode) => {
     if ( isSignInWithEmailLink(auth, window.location.href) ) {
         const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
         const user = userCredentials.user;
+        await updatePassword(email, password);
         return user;
     } else {
         return null;
