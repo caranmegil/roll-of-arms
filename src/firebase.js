@@ -156,13 +156,24 @@ const isVerifyEmailWithLink = async () => {
     return isSignInWithEmailLink(auth, window.location.href);
 };
 
+const verifyAndChangeEmail = (email, password, actionCode) => {
+    let auth = getAuth();
+    return checkActionCode(auth, actionCode).then( async () => {
+        await applyActionCode(auth, actionCode);
+        return await signIntoGoogle(email, password);
+    }).catch( () => null);
+};
+
 const verifyEmailWithLink = async (email, password, actionCode) => {
-    console.log(actionCode);
+    let auth = getAuth();
     if ( isSignInWithEmailLink(auth, window.location.href) ) {
-        const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
-        const user = userCredentials.user;
-        await updatePassword(user, password);
-        return user;
+        return checkActionCode(auth, actionCode).then( async () => {
+            const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
+            const user = userCredentials.user;
+            // await applyActionCode(auth, actionCode);
+            await updatePassword(user, password);
+            return user;
+        }).catch( () => null)
     } else {
         return null;
     }
@@ -260,4 +271,5 @@ export {
   signOutOfGoogle,
   changeEmail,
   recoverEmail,
+  verifyAndChangeEmail,
 };
