@@ -14,6 +14,7 @@ import {
     reauthenticateWithCredential,
     applyActionCode,
     updateEmail,
+    signInWithEmailLink,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -155,19 +156,14 @@ const isVerifyEmailWithLink = async () => {
 };
 
 const verifyEmailWithLink = async (email, password, actionCode) => {
-    auth = getAuth();
     console.log(actionCode);
-    // if ( isSignInWithEmailLink(auth, window.location.href) ) {
-        await checkActionCode(auth, actionCode).then(() => {
-            return applyActionCode(auth, actionCode);
-        })
-        // const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
-        // const user = userCredentials.user;
-        // await updatePassword(user, password);
-        return auth.currentUser;
-    // } else {
-        // return null;
-    // }
+    if ( isSignInWithEmailLink(auth, window.location.href) ) {
+        const userCredentials = await signInWithEmailLink(auth, email, window.location.href);
+        const user = userCredentials.user;
+        return user;
+    } else {
+        return null;
+    }
 };
 
 const resendEmailWithLink = async (email) => {
