@@ -17,7 +17,6 @@ import {
     signInWithEmailLink,
     updatePassword,
     linkWithCredential,
-    sendEmailVerification,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -225,20 +224,19 @@ const getCurrentUser = () => {
 }
 
 const changeEmail = async (newEmail, oldEmail, password) => {
-    const actionCodeSettings = {
-        // URL you want to redirect back to. The domain (www.example.com) for this
-        // URL must be in the authorized domains list in the Firebase Console.
-        url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
-        // This must be true.
-        handleCodeInApp: true,
-    };
+    // const actionCodeSettings = {
+    //     // URL you want to redirect back to. The domain (www.example.com) for this
+    //     // URL must be in the authorized domains list in the Firebase Console.
+    //     url: `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}`,
+    //     // This must be true.
+    //     handleCodeInApp: true,
+    // };
 
     auth = getAuth();
 
     const emailAuthCredential = await EmailAuthProvider.credential(oldEmail, password);
     await reauthenticateWithCredential(auth.currentUser, emailAuthCredential).then(async userCredential => {
         await updateEmail(userCredential.user, newEmail);
-        return sendEmailVerification(userCredential.user, actionCodeSettings)
     })
 
     return true;
