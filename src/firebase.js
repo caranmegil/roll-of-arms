@@ -16,6 +16,7 @@ import {
     updateEmail,
     signInWithEmailLink,
     updatePassword,
+    linkWithCredential,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -160,7 +161,9 @@ const verifyAndChangeEmail = (email, password, actionCode) => {
     let auth = getAuth();
     return checkActionCode(auth, actionCode).then( async () => {
         await applyActionCode(auth, actionCode);
-        return await signIntoGoogle(email, password);
+        const credential = EmailAuthProvider.credential(email, password);
+        const userCredential = await linkWithCredential(auth, credential);
+        return userCredential.user;
     }).catch( () => null);
 };
 
