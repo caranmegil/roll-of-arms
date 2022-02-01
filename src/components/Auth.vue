@@ -1,5 +1,5 @@
 <template>
-  <div v-if="$route.query.mode === 'signIn' || $route.query.mode === 'verifyAndChangeEmail'" class="verify">
+  <div v-if="$route.query.mode === 'signIn'" class="verify">
     <h1>Time to verify!</h1>
     In order for us to propertly verify your account, the email used during set up will need to be re-entered.
     <div v-if="hasError" class="error">{{message}}</div>
@@ -13,6 +13,22 @@
             <input id="password" v-model="password" type="password"/>
         </div>
         <button @click="verify">Verify</button>
+    </div>
+  </div>
+  <div v-if="$route.query.mode === 'verifyAndChangeEmail'" class="verify">
+    <h1>Time to verify!</h1>
+    In order for us to propertly verify your account, the email used during set up will need to be re-entered.
+    <div v-if="hasError" class="error">{{message}}</div>
+    <div class="verify-form">
+        <div class="element">
+            <label for="email">email</label>
+            <input id="email" v-model="email" type="text"/>
+        </div>
+        <div class="element">
+            <label for="password">password</label>
+            <input id="password" v-model="password" type="password"/>
+        </div>
+        <button @click="verifyAndChange">Verify</button>
     </div>
   </div>
   <div v-if="$route.query.mode === 'recoverEmail'" class="verify">
@@ -49,6 +65,7 @@ import {
     confirmPassword,
     verifyEmailWithLink,
     recoverEmail,
+    verifyAndChangeEmail,
 } from '@/firebase';
 import {mapActions} from 'vuex';
 import 'es6-promise/auto';
@@ -103,6 +120,49 @@ export default {
                 let that = this;
                 const actionCode = this.$route.query.oobCode;
                 verifyEmailWithLink(this.email, this.password, actionCode).then(async function(user) {
+                    that.setUser(user);
+                    that.setCredentials({email: that.email, password: that.password});
+                    that.hasError = false;
+                    that.$router.push('/');
+                }).catch( function (e) {
+                    switch (e.code) {
+                        case 'auth/expired-action-code':
+                            that.message = 'The link you were sent is stale.';
+                            break;
+                        case 'auth/invalid-email':
+                            that.message = 'An invalid email was entered.';
+                            break;
+                        case 'auth/user-disabled':
+                            that.message = 'The account is disabled.';
+                            break;
+                        case 'auth/user-not-found':
+                            that.message = 'The account was not found.';
+                            break;
+                        case 'auth/invalid-action-code':
+                            that.message = 'The link is invalid or has already been used previously.';
+                            break;
+                        case 'auth/weak-password':
+                            that.message = 'Please choose a stronger password that is at least 6 characters.';
+                            break;
+                        default:
+                            that.message = 'There was an unknown error.  Please contact support at service2@sfr-inc.com'
+                            console.error(e);
+                            break;
+                    }
+                    that.hasError = true;
+                });
+            }
+        },
+        async verifyAndChange() {
+            this.username = (this.username == null) ? '' :  this.username.trim() 
+
+            if (this.email === '' || this.password === '') {
+                this.message = 'Please make sure your email and password are correct!';
+                this.hasError = true;
+            } else if (this.password != null && this.password.trim() !== '') {
+                let that = this;
+                const actionCode = this.$route.query.oobCode;
+                verifyAndChangeEmail(this.email, this.password, actionCode).then(async function(user) {
                     that.setUser(user);
                     that.setCredentials({email: that.email, password: that.password});
                     that.hasError = false;
