@@ -134,7 +134,7 @@ export default {
 
       this.observer = new IntersectionObserver((entries) => {
         entries.forEach( entry => {
-          entry.target.scrollIntoView({behavior: 'smooth', block: 'start'});
+          entry.target.parentNode.scrollIntoView({behavior: 'smooth', block: 'start'});
         })
       }, options);
 
