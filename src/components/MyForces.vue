@@ -253,7 +253,11 @@ export default {
           }
         },
         incr(die) {
-          die.amount++;
+          if (die.rarity.includes('Terrain')) {
+            die.amount = 1;
+          } else {
+            die.amount++;
+          }
           this.saveTheForces();
         },
         expandForcesSelector() {
