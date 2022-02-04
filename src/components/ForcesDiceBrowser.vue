@@ -5,6 +5,7 @@
       <div id="dice">
           <div class="header">
               <h1>Dice Browser - {{this.$store.state.forceSlot}}</h1>
+              <div v-if="hasError" class="error">{{message}}</div>
               <span id="filters">
                 <div class="element">
                     <label for="speciesFilter">Species/Set</label>
@@ -121,12 +122,14 @@ export default {
             speciesFilter: '',
             species: [],
             dieAmnt: 0,
+            hasError: false,
+            message: '',
             isLoading: true,
         };
     },
     async mounted() {
       this.dice = await getEntireCollection('dice');
-      this.myForces = this.getMyForces();
+      this.myForces = this.getMyForces() || [];
       this.myForce = this.myForces.filter( force => force.name === this.$store.state.forceName)[0];
 
       resetSlots(this.myForce);
@@ -291,9 +294,17 @@ export default {
           delete newDie.id;
           newDie.amount = this.dieAmnt;
           this.expand(die);
+          this.hasError = false;
+          this.message = '';
           if (newDie.rarity.includes('Terrain')) {
-            this.myForce.slots[this.$store.state.forceSlot] = [newDie];
-            added = true;
+            if (this.myForce.slots[this.$store.state.forceSlot].length > 0) {
+              this.hasError = true;
+              this.message = 'We\'re sorry, but only one terrain die may be added here.';
+              return;
+            } else {
+              this.myForce.slots[this.$store.state.forceSlot] = [newDie];
+              added = true;
+            }
           } else {
             this.myForce.slots[this.$store.state.forceSlot].forEach( die => {
               if (added) return;
@@ -509,5 +520,10 @@ export default {
     .type {
       width: 5em;
     }
+  }
+  .error {
+      align-self: center;
+      justify-self: center;
+      color: red;
   }
 </style>
