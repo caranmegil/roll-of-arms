@@ -155,6 +155,8 @@ export default {
         expansion.style.display = 'none';
         actionButton.innerText = 'expand_more';
       }
+
+      row.classList.toggle('highlight');
     },
     setSpeciesFilter: function() {
         this.sizeFilter = '';
@@ -289,7 +291,7 @@ export default {
   }
 
   .body .row {
-    width: 100%;
+    width: 99%;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     justify-items: center;
@@ -344,6 +346,11 @@ export default {
     grid-area: 2 / 1 / 2 / 5;
     width: 100%;
     border: 1px dashed black;
+  }
+
+  .highlight {
+    background-color: #fff;
+    border: 1pt solid black;
   }
 
   .add-button {
