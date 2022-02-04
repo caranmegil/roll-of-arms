@@ -46,14 +46,14 @@
                 <div @click="() => expand(die)" class="type">{{die.type}}</div>
                 <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
-                  <button @click="() => addDie(die)">Add</button>
+                  <button @click="() => addDie(die)">Add {{die.name}}</button>
                   <div v-for="edAmnt in amount" :key="die.name + '/' + edAmnt.edition" class="add-die">
                     <span>{{ (edAmnt.edition === '-') ? 'Standard' : edAmnt.edition}}</span>
                     <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
                     <input type="number" v-model="edAmnt.value"/>
                     <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
                   </div>
-                  <button @click="() => addDie(die)">Add</button>
+                  <button @click="() => addDie(die)">Add {{die.name}}</button>
                 </div>
               </div>
           </div>
@@ -271,6 +271,7 @@ export default {
             });
             this.amount = {};
           }
+          row.classList.toggle('highlight');
         },
         async addDie(die) {
           let that = this;
@@ -355,7 +356,6 @@ export default {
     align-self: center;
     padding-right: .5em;
   }
-
   #dice .header select {
     border-radius: .25em;
     width: 15em;
@@ -418,8 +418,13 @@ export default {
     border: 1px dashed black;
   }
 
+  .highlight {
+    background-color: #fff;
+    border: 1pt solid black;
+  }
+
   .row {
-    width: 100%;
+    width: 99%;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
     grid-template-rows: 1fr auto;

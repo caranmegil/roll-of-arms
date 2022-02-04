@@ -200,6 +200,8 @@ export default {
               actionButton.innerText = 'expand_more';
             });
           }
+
+          row.classList.toggle('highlight');
         },
         saveAndClear() {
           this.dice = this.dice.filter(die => die.amount > 0);
@@ -478,6 +480,11 @@ export default {
     grid-area: 2 / 1 / 2 / 5;
     width: 100%;
     border: 1px dashed black;
+  }
+
+  .highlight {
+    background-color: #fff;
+    border: 1pt solid black;
   }
 
   .add-button {
