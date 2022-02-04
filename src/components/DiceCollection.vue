@@ -77,6 +77,7 @@ export default {
     name: 'DiceBrowser',
     data() {
         return {
+            observer: null,
             totalDice: 0,
             sortColumn: 0,
             sortDirection: 1,
@@ -125,6 +126,19 @@ export default {
         };
     },
     async mounted() {
+      let options = {
+        root: document.querySelector('.body'),
+        rootMargin: '0px',
+        threshold: 1.0
+      }
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach( entry => {
+          entry.target.scrollIntoView({behavior: 'smooth', block: 'start'});
+        })
+      }, options);
+
+
       this.sourceDice = await getEntireCollection('dice');
       this.profile = await getCollection('profiles') || {};
       if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
@@ -178,6 +192,7 @@ export default {
             });
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
+            this.observer.observe(expansion);
           } else {
             allExpansions.forEach(expansion => {
               let actionButton = expansion.parentNode.querySelector('#action-button');

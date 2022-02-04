@@ -1,7 +1,5 @@
 <template>
     <v-tour name="diceBrowserTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
-    <div @click="expand(die)" id="expansion-overlay"></div>
-
     <div class="dice-browser">
       <div id="dice">
           <Loading v-model:active="isLoading"/>
@@ -42,20 +40,21 @@
               </div>
           </div>
           <div class="body">
-              <div id="expansion">
-                <div v-for="edAmnt in editions" :key="die.name + '/' + edAmnt.edition" class="add-die">
-                  <span>{{edAmnt.edition}}</span>
-                  <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
-                  <input type="number" v-model="edAmnt.value"/>
-                  <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
-                </div>
-                <button @click="() => addDie(die)">Add</button>
-              </div>
               <div v-for="die in filteredDice" :key="die.name" class="row"  :id="die.name">
                 <div class="die-id"><img @click="() => expand(die)" :src="die.id"/><div>{{die.name}}</div></div>
                 <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
                 <div @click="() => expand(die)" class="type">{{die.type}}</div>
                 <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div id="expansion">
+                  <button @click="() => addDie(die)">Add</button>
+                  <div v-for="edAmnt in amount" :key="die.name + '/' + edAmnt.edition" class="add-die">
+                    <span>{{ (edAmnt.edition === '-') ? 'Standard' : edAmnt.edition}}</span>
+                    <span @click="() => decr(edAmnt)" class="material-icons material-icons-outlined">remove</span>
+                    <input type="number" v-model="edAmnt.value"/>
+                    <span @click="() => incr(edAmnt)" class="material-icons material-icons-outlined">add</span>
+                  </div>
+                  <button @click="() => addDie(die)">Add</button>
+                </div>
               </div>
           </div>
       </div>
@@ -65,7 +64,6 @@
 <script>
 import Loading from 'vue-loading-overlay';
 import 'vue-loading-overlay/dist/vue-loading.css';import { mapActions } from 'vuex';
-import Tether from 'tether';
 import 'es6-promise/auto';
 import {
   getCollection,
@@ -80,6 +78,7 @@ export default {
     },
     data() {
         return {
+            observer: null,
             dice: [],
             tourCallbacks: {
               onSkip: this.noMoreTours,
@@ -88,8 +87,7 @@ export default {
             sortColumn: 0,
             sortDirection: 1,
             myCollection: [],
-            die: {},
-            editions: {},
+            amount: {},
             openedId: null,
             sizes: [],
             sizeFilter: '',
@@ -118,10 +116,20 @@ export default {
             speciesFilter: '',
             species: [],
             isLoading: true,
-            tether: null,
         };
     },
     async mounted() {
+      let options = {
+        root: document.querySelector('.body'),
+        rootMargin: '0px',
+        threshold: 1.0
+      }
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach( entry => {
+          entry.target.scrollIntoView({behavior: 'smooth', block: 'start'});
+        })
+      }, options);
       this.dice = await getEntireCollection('dice');
       this.myCollection = await getCollection('collections') || [];
 
@@ -139,15 +147,8 @@ export default {
       species = [...new Set(species)];
       species.sort();
 
-      this.tether = new Tether( {
-        element: '#expansion',
-        target: 'body',
-        attachment: 'top left',
-        targetAttachment: 'top left',
-      });
-
       this.species = species;
-      this.setSpeciesFilter();      
+      this.setSpeciesFilter();     
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
@@ -247,29 +248,33 @@ export default {
           this.isLoading=false;
         },
         expand(die) {
-          // TODO Rethink how thing will indicate the current row during expansion.
           let row = document.getElementById(die.name);
           let actionButton = row.querySelector('#action-button');
-          let expansion = document.querySelector('#expansion');
-          let expansionOverlay = document.getElementById('expansion-overlay');
+          let expansion = row.querySelector('#expansion');
+          let allExpansions = document.querySelectorAll('#expansion');
 
           if (window.getComputedStyle(expansion).display === 'none') {
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
+            this.observer.observe(expansion);
             expansion.style.display = 'grid';
-            expansionOverlay.style.display = 'grid';
             actionButton.innerText = 'expand_less';
-            this.editions = die.editions.map(edition => { return {edition, value: 0} });
-            this.die = die;
+            this.amount = die.editions.map(edition => { return {edition, value: 0} });
           } else {
-            expansion.style.display = 'none';
-            expansionOverlay.style.display = 'none';
-            actionButton.innerText = 'expand_more';
-            this.die = {};
-            this.editions = {};
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
+            this.amount = {};
           }
         },
         async addDie(die) {
           let that = this;
-          this.editions.forEach( async edAmnt => {
+          this.amount.forEach( async edAmnt => {
             let newDie = {...die};
             delete newDie.editions;
             delete newDie.id;
@@ -288,7 +293,7 @@ export default {
           });
           await saveCollection('collections', that.myCollection);
           that.expand(die);
-          this.editions = {};
+          this.amount = {};
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
@@ -398,7 +403,6 @@ export default {
     align-content: center;
     justify-items: start;
     align-items: center;
-    background-color: #fff;
     gap: .5em;
     padding-left: 1.0em;
   }
@@ -410,21 +414,8 @@ export default {
   #expansion {
     display: none;
     grid-area: 2 / 1 / 2 / 5;
-    width: 99%;
-    z-index: 999;
-    border: 1px dashed black;
-  }
-  
-  #expansion-overlay {
-    display: none;
-    background-color: #D3D3D3;
-    position: fixed;
-    top: 0;
-    left: 0;
-    opacity: .5;
     width: 100%;
-    height: 100%;
-    z-index: 998;
+    border: 1px dashed black;
   }
 
   .row {
