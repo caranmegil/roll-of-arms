@@ -144,7 +144,7 @@ export default {
       this.sourceDice = await getEntireCollection('dice');
       this.myForces = this.getMyForces();
       if (this.myForces == null) {
-        this.myForces = await getCollection('forces');
+        this.myForces = await getCollection('forces') || [];
       }
       
       if (this.myForces == null) {
@@ -162,7 +162,7 @@ export default {
       }
       this.isLoading = false;
       getCollectionOn('forces', (forces) => {
-        that.myForces = forces;
+        that.myForces = forces || [];
         that.loadForceData();
       });
       this.tether = new Tether( {
@@ -200,27 +200,19 @@ export default {
             this.loadForce();
           }
         },
-        loadForceData(myForce) {
-          if (myForce == null || myForce === undefined) {
-            return;
+        loadForceData() {
+          this.forceName = this.myForce.name;
+          this.setForceName(this.myForce.name);
+
+          resetSlots(this.myForce);
+
+          if (this.myForce.isPublic === undefined) {
+            this.myForce.isPublic = false;
           }
-          this.forceName = myForce.name;
-          this.setForceName(myForce.name);
-          console.log('flag 0')
-
-          resetSlots(myForce);
-
-          if (myForce.isPublic === undefined) {
-            myForce.isPublic = false;
-          }
-          console.log('flag 1')
-
 
           this.forceSlot = this.$store.state.forceSlot || 'Home';
-          console.log('flag 2')
 
           this.recalcTotals();
-          console.log('flag 3')
 
           this.isLoading = false;
         },
@@ -243,7 +235,7 @@ export default {
             this.myForce = this.myForces[0];
           }
 
-          this.loadForceData(this.myForce);
+          this.loadForceData();
           this.saveTheForces();
         },
         decr(die) {
