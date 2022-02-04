@@ -1,5 +1,6 @@
 <template>
   <div class="profiles">
+      <Loading v-model:active="isLoading"/>
       <div class="collections">
           <div class="header">
             <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
@@ -18,6 +19,7 @@
 </template>
 
 <script>
+import Loading from 'vue-loading-overlay';
 import {
   getCollectionByField,
   getEntireCollection,
@@ -28,10 +30,9 @@ import DiceCollectionWidget from '@/components/DiceCollectionWidget.vue';
 export default {
   name: 'ProfileView',
   components: {
+    Loading,
     ProfileForces,
     DiceCollectionWidget,
-  },
-  props: {
   },
   data() {
     return {
@@ -49,6 +50,7 @@ export default {
       sizeFilter: '',
       types: [],
       typeFilter: '',
+      isLoading: true,
       uid: null,
     };
   },
@@ -64,7 +66,9 @@ export default {
       } else {
         this.sortDirection *= -1;
       }
+      this.isLoading=true;
       this.filteredDice = this.applyFiltersAndSort();
+      this.isLoading=false;
     },
     changeSizeDirection() {
       if (this.sortColumn != 1) {
@@ -73,7 +77,9 @@ export default {
       } else {
         this.sortDirection *= -1;
       }
+      this.isLoading=true;
       this.filteredDice = this.applyFiltersAndSort();
+      this.isLoading=false;
     },
     changeTypeDirection() {
       if (this.sortColumn != 2) {
@@ -82,7 +88,9 @@ export default {
       } else {
         this.sortDirection *= -1;
       }
+      this.isLoading=true;
       this.filteredDice = this.applyFiltersAndSort();
+      this.isLoading=false;
     },
     applyFiltersAndSort() {
       let that = this;
@@ -158,16 +166,22 @@ export default {
 
       row.classList.toggle('highlight');
     },
-    setSpeciesFilter: function() {
+    setSpeciesFilter() {
+        this.isLoading = true;
         this.sizeFilter = '';
         this.typeFilter = '';
         this.filteredDice = this.applyFiltersAndSort();
+        this.isLoading = false;
     },
-    setSizeFilter: function() {
+    setSizeFilter() {
+        this.isLoading = true;
         this.filteredDice = this.applyFiltersAndSort();
+        this.isLoading = false;
     },
-    setTypeFilter: function() {
+    setTypeFilter() {
+        this.isLoading = true;
         this.filteredDice = this.applyFiltersAndSort();
+        this.isLoading = false;
     },
   },
   async mounted() {

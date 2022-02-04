@@ -1,6 +1,7 @@
 <template>
     <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
+      <Loading v-model:active="isLoading"/>
       <div class="header">
         <h1>My Collection</h1>
         <div class="element">
@@ -66,6 +67,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import Loading from 'vue-loading-overlay';
 import 'es6-promise/auto';
 import {
   getCollection,
@@ -75,6 +77,10 @@ import {
 
 export default {
     name: 'DiceBrowser',
+    components: {
+      Loading,
+    },
+
     data() {
         return {
             observer: null,
@@ -123,6 +129,7 @@ export default {
             types: [],
             typeFilter: '',
             timerHandle: null,
+            isLoading: true,
         };
     },
     async mounted() {
@@ -216,7 +223,9 @@ export default {
           } else {
             this.sortDirection *= -1;
           }
+          this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
+          this.isLoading=false;
         },
         changeSizeDirection() {
           if (this.sortColumn != 1) {
@@ -225,7 +234,9 @@ export default {
           } else {
             this.sortDirection *= -1;
           }
+          this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
+          this.isLoading=false;
         },
         changeTypeDirection() {
           if (this.sortColumn != 2) {
@@ -234,7 +245,9 @@ export default {
           } else {
             this.sortDirection *= -1;
           }
+          this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
+          this.isLoading=false;
         },
         applyFiltersAndSort() {
           let that = this;
@@ -332,18 +345,24 @@ export default {
           saveCollection('profiles', profile);
         },
         setSpeciesFilter: function() {
+            this.isLoading = true;
             this.sizeFilter = '';
             this.typeFilter = '';
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
+            this.isLoading = false;
         },
         setSizeFilter: function() {
+            this.isLoading = true;
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
+            this.isLoading = false;
         },
         setTypeFilter: function() {
+            this.isLoading = true;
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
+            this.isLoading = false;
         },
     },
 };
