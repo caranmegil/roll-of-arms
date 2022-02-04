@@ -35,6 +35,7 @@ export default {
   },
   data() {
     return {
+      observer: null,
       sortColumn: 0,
       sortDirection: 1,
       profile: {},
@@ -149,6 +150,7 @@ export default {
         [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
         expansion.style.display = 'grid';
         actionButton.innerText = 'expand_less';
+        this.observer.observe(expansion);
       } else {
         expansion.style.display = 'none';
         actionButton.innerText = 'expand_more';
@@ -167,6 +169,17 @@ export default {
     },
   },
   async mounted() {
+    let options = {
+      root: document.querySelector('.body'),
+      rootMargin: '0px',
+      threshold: 1.0
+    }
+
+    this.observer = new IntersectionObserver((entries) => {
+      entries.forEach( entry => {
+        entry.target.parentNode.scrollIntoView({behavior: 'smooth', block: 'start'});
+      })
+    }, options);
     const usernames = await getEntireCollection('usernames');
     this.uid = usernames[this.$route.params.id] || this.$route.params.id;
     this.profile = await getCollectionByField('profiles', this.uid);
