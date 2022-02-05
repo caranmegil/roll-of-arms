@@ -20,7 +20,12 @@
 </template>
 
 <script>
-import {changeEmail} from '@/firebase';
+import {
+    createUserInGoogle,
+    getCollectionByField,
+    getEntireCollection,
+    saveCollectionByField,
+} from '@/firebase';
 import {
     mapActions
 } from 'vuex';
@@ -47,14 +52,31 @@ export default {
                 this.message = 'Please make sure your email and password are correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
-                const credentials = this.$store.state.credentials;
-                const wasChanged = await changeEmail(this.email, credentials.email, this.password);
+                const user = this.$store.state.user;
+                // Create new user account
+                const newCreds = await createUserInGoogle(this.email, this.password);
+                const newUser = newCreds.user;
 
-                if(wasChanged) {
+                if (newCreds) {
+                    // Update Username collection to new User ID.
+                    const usernames = await getEntireCollection('usernames') || {};
+                    const username = Object.keys(usernames).filter(username => usernames[username] === user.uid)[0] || null;
+                    saveCollectionByField('usernames', username, newUser.uid);
+
+                    // Update Collection collection to new User ID.
+                    const collection = await getCollectionByField('collections', user.uid);
+                    saveCollectionByField('collections', newUser.uid, collection);
+
+                    // Update Profile collection to new User ID.
+                    const profile = await getCollectionByField('profiles', user.uid);
+                    saveCollectionByField('profiles', newUser.uid, profile);
+
                     this.signOut();
                     this.hasSuccess = true;
                     this.hasError = false;
                     this.$router.push('/');
+                } else {
+                    console.log('what a test!');
                 }
             } else {
                 this.message = 'Please make sure your password is correct!';
