@@ -65,12 +65,10 @@ export default {
 
                     // Update Collection collection to new User ID.
                     const collection = await getCollectionByField('collections', user.uid);
-                    console.log(collection);
                     saveCollectionByField('collections', newUser.uid, collection);
 
                     // Update Profile collection to new User ID.
                     const profile = await getCollectionByField('profiles', user.uid);
-                    console.log(profile);
                     saveCollectionByField('profiles', newUser.uid, profile);
 
                     this.signOut();
