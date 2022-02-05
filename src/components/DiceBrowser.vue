@@ -33,6 +33,7 @@
                 <a @click="returnToModifier">Return to My Collection</a>
               </div>
 
+              <input type="text" @model="nameFilter" @keyup="setNameFilter"/>
               <div class="table-header">
                   <div class="column-header die-id" @click="changeNameDirection">Name <span v-if="sortColumn != 0" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 0 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 0 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
                   <div class="column-header size" @click="changeSizeDirection">Size  <span v-if="sortColumn != 1" class="material-icons material-icons-outlined">unfold_more</span><span v-if="sortColumn == 1 && sortDirection == -1" class="sort-icon material-icons material-icons-outlined">expand_less</span><span v-if="sortColumn == 1 && sortDirection == 1" class="sort-icon material-icons material-icons-outlined">expand_more</span></div>
@@ -89,6 +90,7 @@ export default {
             myCollection: [],
             amount: {},
             openedId: null,
+            nameFilter: '',
             sizes: [],
             sizeFilter: '',
             types: [],
@@ -169,7 +171,8 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter(die => that.speciesFilter === '' || die.species === that.speciesFilter);
+
+          let dice = this.dice.filter(die => (that.speciesFilter === '' || die.species === that.speciesFilter) && die.name.toLowerCase().includes(that.nameFilter.toLowerCase()));
 
           let sizes = [];
           let types = [];
@@ -301,7 +304,12 @@ export default {
           profile.diceBrowserTour = false;
           saveCollection('profiles', profile);
         },
-        setSpeciesFilter: function() {
+        setNameFilter() {
+            this.isLoading=true;
+            this.filteredDice = this.applyFiltersAndSort();
+            this.isLoading=false;
+        },
+        setSpeciesFilter() {
             this.isLoading=true;
             this.editionFilter = '';
             this.sizeFilter = '';
@@ -309,12 +317,12 @@ export default {
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
-        setSizeFilter: function() {
+        setSizeFilter() {
             this.isLoading=true;
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
-        setTypeFilter: function() {
+        setTypeFilter() {
             this.isLoading=true;
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
