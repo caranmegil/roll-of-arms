@@ -55,9 +55,9 @@ export default {
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
                 // Create new user account
-                const newCreds = createUserInGoogle(this.email, this.password);
+                const newCreds = await createUserInGoogle(this.email, this.password);
                 const newUser = newCreds.user;
-console.log(newCreds);
+
                 if (newCreds) {
                     // Update Username collection to new User ID.
                     const usernames = await getEntireCollection('usernames') || {};
