@@ -22,7 +22,7 @@
 <script>
 import {
     createUserInGoogle,
-    getCollection,
+    getCollectionByField,
     getEntireCollection,
     saveCollectionByField,
 } from '@/firebase';
@@ -65,11 +65,11 @@ export default {
                     saveCollectionByField('usernames', username, newUser.uid);
 
                     // Update Collection collection to new User ID.
-                    const collection = await getCollection('collections') || [];
+                    const collection = await getCollectionByField('collections', this.$store.state.user.uid) || [];
                     saveCollectionByField('collections', newUser.uid, collection);
 
                     // Update Profile collection to new User ID.
-                    const profile = await getCollection('profiles') || {};
+                    const profile = await getCollectionByField('profiles', this.$store.state.user.uid) || {};
                     saveCollectionByField('profiles', newUser.uid, profile);
 
                     this.signOut();
