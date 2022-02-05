@@ -52,7 +52,7 @@ export default {
                 this.message = 'Please make sure your email and password are correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
-                const user = this.$store.staste.user;
+                const user = this.$store.state.user;
                 // Create new user account
                 const newCreds = await createUserInGoogle(this.email, this.password);
                 const newUser = newCreds.user;
