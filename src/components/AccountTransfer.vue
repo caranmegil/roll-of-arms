@@ -76,6 +76,8 @@ export default {
                     this.hasSuccess = true;
                     this.hasError = false;
                     this.$router.push('/');
+                } else {
+                    console.log('what a test!');
                 }
             } else {
                 this.message = 'Please make sure your password is correct!';
