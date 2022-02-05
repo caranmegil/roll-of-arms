@@ -51,7 +51,7 @@ export default {
   },
   methods: {
     ...mapActions(['setUser', 'setCredentials']),
-    signIn: async function() {
+    async signIn() {
         let user = null;
         try {
           user = await signIntoGoogle(this.email, this.password);
@@ -75,10 +75,10 @@ export default {
             this.hasError = true;
         }
     },
-    register: function() {
+    register() {
         this.$router.push('/register');
     },
-    forgotPassword: function() {
+    forgotPassword() {
         this.$router.push('/reset');
     }
   }

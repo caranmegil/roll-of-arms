@@ -20,7 +20,12 @@
 </template>
 
 <script>
-import {changeEmail} from '@/firebase';
+import {
+    createUserInGoogle,
+    getCollection,
+    getEntireCollection,
+    saveCollectionByField,
+} from '@/firebase';
 import {
     mapActions
 } from 'vuex';
@@ -42,15 +47,31 @@ export default {
   methods: {
       ...mapActions(['signOut',]),
     async changeEmail() {
+        let that = this;
+
         try {
             if (this.email === '' || this.password === '') {
                 this.message = 'Please make sure your email and password are correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
-                const credentials = this.$store.state.credentials;
-                const wasChanged = await changeEmail(this.email, credentials.email, this.password);
+                // Create new user account
+                const newCreds = createUserInGoogle(this.email, this.password);
+                const newUser = newCreds.user;
 
-                if(wasChanged) {
+                if (newCreds) {
+                    // Update Username collection to new User ID.
+                    const usernames = await getEntireCollection('usernames') || {};
+                    const username = Object.keys(usernames).filter(username => usernames[username] === that.$store.state.user.uid)[0] || null;
+                    saveCollectionByField('usernames', username, newUser.uid);
+
+                    // Update Collection collection to new User ID.
+                    const collection = await getCollection('collections') || [];
+                    saveCollectionByField('collections', newUser.uid, collection);
+
+                    // Update Profile collection to new User ID.
+                    const profile = await getCollection('profiles') || {};
+                    saveCollectionByField('profiles', newUser.uid, profile);
+
                     this.signOut();
                     this.hasSuccess = true;
                     this.hasError = false;
