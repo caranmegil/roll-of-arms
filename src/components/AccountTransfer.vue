@@ -47,13 +47,12 @@ export default {
   methods: {
       ...mapActions(['signOut',]),
     async changeEmail() {
-        let that = this;
-
         try {
             if (this.email === '' || this.password === '') {
                 this.message = 'Please make sure your email and password are correct!';
                 this.hasError = true;
             } else if (this.password != null && this.password.trim() !== '') {
+                const user = this.$store.staste.user;
                 // Create new user account
                 const newCreds = await createUserInGoogle(this.email, this.password);
                 const newUser = newCreds.user;
@@ -61,15 +60,17 @@ export default {
                 if (newCreds) {
                     // Update Username collection to new User ID.
                     const usernames = await getEntireCollection('usernames') || {};
-                    const username = Object.keys(usernames).filter(username => usernames[username] === that.$store.state.user.uid)[0] || null;
+                    const username = Object.keys(usernames).filter(username => usernames[username] === user.uid)[0] || null;
                     saveCollectionByField('usernames', username, newUser.uid);
 
                     // Update Collection collection to new User ID.
-                    const collection = await getCollectionByField('collections', this.$store.state.user.uid) || [];
+                    const collection = await getCollectionByField('collections', user.uid);
+                    console.log(collection);
                     saveCollectionByField('collections', newUser.uid, collection);
 
                     // Update Profile collection to new User ID.
-                    const profile = await getCollectionByField('profiles', this.$store.state.user.uid) || {};
+                    const profile = await getCollectionByField('profiles', user.uid);
+                    console.log(profile);
                     saveCollectionByField('profiles', newUser.uid, profile);
 
                     this.signOut();
