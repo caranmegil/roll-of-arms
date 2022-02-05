@@ -2,17 +2,26 @@
     <v-tour name="forcesTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
       <Loading v-model:active="isLoading"/>
-      <div class="header">
-      <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
-      <div id="force-selector-expansion">
-        <MyForcesSelector :my-force="myForce" :my-forces="this.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+      <div class="dialog" :style="{visibility: willShowConfirmation ? 'visible' : 'hidden'}">
+        <div @click="onNo" class="modal-overlay"/>
+        <div class="modal">
+          <div>Are you sure you want to delete?</div>
+          <div class="element">
+            <button id="noBtn" @click="onNo">No</button>
+            <button id="yesBtn" @click="onYes">Yes</button>
+          </div>
+        </div>
       </div>
+      <div class="header">
+        <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
+        <div id="force-selector-expansion">
+          <MyForcesSelector :my-force="myForce" :my-forces="this.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+        </div>
         <div class="element">
           <label for="forceName">Force Name</label>
           <input type="text" id="forceName" v-model="forceName" @change="saveTheForces"/>
-          <button id="deleteBtn" @click="deleteCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">delete</span></button>
-          <!-- <button id="export" @click="exportCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">file_download</span></button> -->
         </div>
+        <button id="deleteBtn" @click="deleteCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">delete</span> Delete</button>
         <div class="element">
           <label for="privacy">Make Public</label>
           <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
@@ -134,6 +143,7 @@ export default {
             forceName: '',
             isLoading: true,
             tether: null,
+            willShowConfirmation: false,
         };
     },
     async unmounted() {
@@ -184,7 +194,9 @@ export default {
     methods: {
         ...mapActions(['setForceSlot', 'setFilters', 'setMyForces', 'setForceName']),
         ...mapGetters(['getMyForces', 'getForceName']),
-        async deleteCurrentForce() {
+        async onYes() {
+          this.willShowConfirmation = false;
+
           let that = this;
           let newMyForces = this.myForces.filter( force => force.name !== that.myForce.name);
           if (!newMyForces) {
@@ -199,6 +211,12 @@ export default {
           } else {
             this.loadForce();
           }
+        },
+        onNo() {
+          this.willShowConfirmation = false;
+        },
+        deleteCurrentForce() {
+          this.willShowConfirmation = true;
         },
         loadForceData() {
           this.forceName = this.myForce.name;
@@ -622,8 +640,24 @@ export default {
     padding: .5em;
     border: 1px solid black;
   }
-  .menu-overlay {
-    display: none;
+
+  .dialog {
+    display: grid;
+    align-items: center;
+    justify-items: center;
+  }
+  .modal {
+    display: grid;
+    align-items: center;
+    align-content: center;
+    z-index: 2;
+    position: fixed;
+    background-color: ivory;
+    width: 30%;
+    padding: .5em;
+    border: 1px solid black;
+  }
+  .modal-overlay {
     background-color: #D3D3D3;
     position: fixed;
     top: 0;
