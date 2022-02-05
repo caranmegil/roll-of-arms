@@ -11,7 +11,7 @@
       <div class="separator"></div>
       <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
       <div @click="resetPassword" class="menu-item"><span class="material-icons material-icons-outlined">lock</span> Reset Password</div>
-      <!-- <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div> -->
+      <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div>
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
       <!-- <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div> -->
