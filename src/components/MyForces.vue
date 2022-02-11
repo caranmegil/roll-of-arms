@@ -358,7 +358,7 @@ export default {
           return dice;
         },
         getImageID(die) {
-          const filteredDie = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition)) [0] || {};
+          const filteredDie = this.sourceDice.filter(sourceDie => sourceDie.name === die.name)[0] || {};
           return filteredDie.id; 
         },
         async saveTheForces() {
