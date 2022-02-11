@@ -32,6 +32,7 @@
                     <input id="nameFilter" type="text" v-model="nameFilter" @keyup="setNameFilter"/>
                 </div>
               </span>
+              <button class="single-element" @click="clearAllFilters">Clear</button>
 
               <div class="anchor-element">
                 <a @click="returnToModifier">Return to My Collection</a>
@@ -330,7 +331,16 @@ export default {
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
-        returnToModifier: function() {
+        clearAllFilters() {
+          this.speciesFilter = '';
+          this.sizeFilter = '';
+          this.typeFilter = '';
+          this.nameFilter = '';
+          this.isLoading=true;
+          this.filteredDice = this.applyFiltersAndSort();
+          this.isLoading=false;
+        },
+        returnToModifier() {
           this.$router.push('/my-collection');
         },
     },
@@ -360,7 +370,12 @@ export default {
     grid-template-columns: 1fr 1fr;
     padding: .25em;
   }
-
+  #dice .header .single-element {
+    align-self: center;
+    justify-self: center;
+    margin: 0em;
+    width: 25%;
+  }
   #dice .header .element > label {
     font-weight: bold;
     justify-self: end;
