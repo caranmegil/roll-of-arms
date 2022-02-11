@@ -23,6 +23,10 @@
                   <option v-for="option in types" :key="option" :value="option">{{option}}</option>
               </select>
           </div>
+          <div class="element">
+              <label for="nameFilter">Name</label>
+              <input id="nameFilter" type="text" v-model="nameFilter" @keyup="setNameFilter"/>
+          </div>
           <div class="element"><label for="totalDice">Total Dice</label><div id="totalDice">{{totalDice}}</div></div>
         </span>
 
@@ -37,7 +41,7 @@
         </span>
       </div>
       <div class="dice">
-        <div class="body">
+        <div id="dice-body" class="body">
           <div v-for="(die) in filteredDice" :key="die.name" :id="die.name" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
               <div class="size">{{die.rarity}}</div>
@@ -79,10 +83,23 @@ export default {
             sizeFilter: '',
             types: [],
             typeFilter: '',
-            timerHandle: null,
+            nameFilter: '',
+            observer: null,
         };
     },
     async mounted() {
+      let options = {
+        root: document.getElementById('dice-body'),
+        rootMargin: '0px',
+        threshold: 1.0
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach( entry => {
+          entry.target.parentNode.scrollIntoView({behavior: 'smooth', block: 'start'});
+        })
+      }, options);
+
       if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
         this.$tours['collectionTour'].start();
       }
@@ -117,6 +134,7 @@ export default {
             });
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
+            this.observer.observe(expansion);
           } else {
             allExpansions.forEach(expansion => {
               let actionButton = expansion.parentNode.querySelector('#action-button');
@@ -154,7 +172,8 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter( die => that.speciesFilter === '' || die.species === that.speciesFilter );
+
+          let dice = this.dice.filter(die => (that.speciesFilter === '' || die.species === that.speciesFilter) && die.name.toLowerCase().includes(that.nameFilter.toLowerCase()));
 
           let sizes = [];
           let types = [];
@@ -223,17 +242,22 @@ export default {
         setCurrentDie(die) {
           this.setCollectionDie(die);
         },
-        setSpeciesFilter: function() {
+        setNameFilter() {
+            this.isLoading=true;
+            this.filteredDice = this.applyFiltersAndSort();
+            this.isLoading=false;
+        },
+        setSpeciesFilter() {
             this.sizeFilter = '';
             this.typeFilter = '';
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
         },
-        setSizeFilter: function() {
+        setSizeFilter() {
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
         },
-        setTypeFilter: function() {
+        setTypeFilter() {
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
         },
