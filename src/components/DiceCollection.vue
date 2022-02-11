@@ -31,6 +31,10 @@
                   <option v-for="option in types" :key="option" :value="option">{{option}}</option>
               </select>
           </div>
+          <div class="element">
+              <label for="nameFilter">Name</label>
+              <input id="nameFilter" type="text" v-model="nameFilter" @keyup="setNameFilter"/>
+          </div>
           <div class="element"><label for="totalDice">Total Dice</label><div id="totalDice">{{totalDice}}</div></div>
         </span>
 
@@ -122,6 +126,7 @@ export default {
             dice: [],
             diceGroupedByEdition: {},
             filteredDice: [],
+            nameFilter: '',
             speciesFilter: '',
             species: [],
             sizes: [],
@@ -251,7 +256,8 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter( die => that.speciesFilter === '' || die.species === that.speciesFilter );
+
+          let dice = this.dice.filter(die => (that.speciesFilter === '' || die.species === that.speciesFilter) && die.name.toLowerCase().includes(that.nameFilter.toLowerCase()));
 
           let sizes = [];
           let types = [];
@@ -344,7 +350,12 @@ export default {
           profile.collectionTour = false;
           saveCollection('profiles', profile);
         },
-        setSpeciesFilter: function() {
+        setNameFilter() {
+            this.isLoading=true;
+            this.filteredDice = this.applyFiltersAndSort();
+            this.isLoading=false;
+        },
+        setSpeciesFilter() {
             this.isLoading = true;
             this.sizeFilter = '';
             this.typeFilter = '';
@@ -352,13 +363,13 @@ export default {
             this.recalcTotals();
             this.isLoading = false;
         },
-        setSizeFilter: function() {
+        setSizeFilter() {
             this.isLoading = true;
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
             this.isLoading = false;
         },
-        setTypeFilter: function() {
+        setTypeFilter() {
             this.isLoading = true;
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
