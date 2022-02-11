@@ -28,7 +28,13 @@
                         <option v-for="option in types" :key="option" :value="option">{{option}}</option>
                     </select>
                 </div>
+                <div class="element">
+                    <label for="nameFilter">Name</label>
+                    <input id="nameFilter" type="text" v-model="nameFilter" @keyup="setNameFilter"/>
+                </div>
               </span>
+
+              <button class="single-element" @click="clearAllFilters">Clear</button>
 
               <div class="anchor-element">
                 <a @click="returnToModifier">Return to {{this.$store.state.forceName}}</a>
@@ -121,6 +127,7 @@ export default {
             filteredDice: [],
             speciesFilter: '',
             species: [],
+            nameFilter: '',
             dieAmnt: 0,
             hasError: false,
             message: '',
@@ -199,7 +206,8 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter(die => that.speciesFilter === '' || die.species === that.speciesFilter);
+
+          let dice = this.dice.filter(die => (that.speciesFilter === '' || die.species === that.speciesFilter) && die.name.toLowerCase().includes(that.nameFilter.toLowerCase()));
 
           let sizes = [];
           let types = [];
@@ -341,7 +349,12 @@ export default {
           profile.diceBrowserTour = false;
           saveCollection('profiles', profile);
         },
-        setSpeciesFilter: function() {
+        setNameFilter() {
+            this.isLoading=true;
+            this.filteredDice = this.applyFiltersAndSort();
+            this.isLoading=false;
+        },
+        setSpeciesFilter() {
             this.isLoading=true;
             this.editionFilter = '';
             this.sizeFilter = '';
@@ -349,17 +362,26 @@ export default {
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
-        setSizeFilter: function() {
+        setSizeFilter() {
             this.isLoading=true;
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
-        setTypeFilter: function() {
+        setTypeFilter() {
             this.isLoading=true;
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
-        returnToModifier: function() {
+        clearAllFilters() {
+          this.speciesFilter = '';
+          this.sizeFilter = '';
+          this.typeFilter = '';
+          this.nameFilter = '';
+          this.isLoading=true;
+          this.filteredDice = this.applyFiltersAndSort();
+          this.isLoading=false;
+        },
+        returnToModifier() {
           this.setFilters({species: '', edition: '', size: '', type: ''});
           this.$router.push('/my-forces')
         }
@@ -383,7 +405,12 @@ export default {
     display: grid;
     grid-auto-flow: column;
   }
-
+  .single-element {
+    align-self: center;
+    justify-self: center;
+    margin: 0em;
+    width: 25%;
+  }
   #dice .header .element {
     align-self: center;
     justify-self: center;
