@@ -125,12 +125,25 @@ export default {
             hasError: false,
             message: '',
             isLoading: true,
+            observer: null,
         };
     },
     async mounted() {
       this.dice = await getEntireCollection('dice');
       this.myForces = this.getMyForces() || [];
       this.myForce = this.myForces.filter( force => force.name === this.$store.state.forceName)[0];
+
+      let options = {
+        root: document.querySelector('.body'),
+        rootMargin: '0px',
+        threshold: 1.0
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach( entry => {
+          entry.target.parentNode.scrollIntoView({behavior: 'smooth', block: 'start'});
+        })
+      }, options);
 
       resetSlots(this.myForce);
 
@@ -279,6 +292,7 @@ export default {
             });
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
+            this.observer.observe(expansion);
           } else {
             allExpansions.forEach(expansion => {
               let actionButton = expansion.parentNode.querySelector('#action-button');
