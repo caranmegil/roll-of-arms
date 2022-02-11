@@ -34,6 +34,8 @@
                 </div>
               </span>
 
+              <button class="single-element" @click="clearAllFilters">Clear</button>
+
               <div class="anchor-element">
                 <a @click="returnToModifier">Return to {{this.$store.state.forceName}}</a>
               </div>
@@ -370,7 +372,16 @@ export default {
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
-        returnToModifier: function() {
+        clearAllFilters() {
+          this.speciesFilter = '';
+          this.sizeFilter = '';
+          this.typeFilter = '';
+          this.nameFilter = '';
+          this.isLoading=true;
+          this.filteredDice = this.applyFiltersAndSort();
+          this.isLoading=false;
+        },
+        returnToModifier() {
           this.setFilters({species: '', edition: '', size: '', type: ''});
           this.$router.push('/my-forces')
         }
@@ -394,7 +405,12 @@ export default {
     display: grid;
     grid-auto-flow: column;
   }
-
+  .single-element {
+    align-self: center;
+    justify-self: center;
+    margin: 0em;
+    width: 25%;
+  }
   #dice .header .element {
     align-self: center;
     justify-self: center;

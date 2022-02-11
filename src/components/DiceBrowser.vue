@@ -32,6 +32,7 @@
                     <input id="nameFilter" type="text" v-model="nameFilter" @keyup="setNameFilter"/>
                 </div>
               </span>
+
               <button class="single-element" @click="clearAllFilters">Clear</button>
 
               <div class="anchor-element">
