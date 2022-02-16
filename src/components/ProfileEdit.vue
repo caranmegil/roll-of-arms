@@ -1,6 +1,6 @@
 <template>
     <div class="profiles">
-      <h1>My Profile</h1>
+      <h1>My Profile <span id="profileURL" class="material-icons material-icons-outlined" @click="getProfileLink">content_copy</span></h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
         <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
         <div class="element">
@@ -49,9 +49,12 @@ export default {
     };
   },
   methods: {
-    changePassword: async function () {
+    async changePassword() {
       await resetPasswordInGoogle(this.$store.state.credentials.email);
       this.$router.go(-1);
+    },
+    getProfileLink() {
+      navigator.clipboard.writeText(`${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}/profile/${this.username}/`);
     },
     async save() {
       let that = this;
@@ -95,6 +98,7 @@ export default {
 </script>
 
 <style scoped>
+.material-icons { font-size: 16px; }
   @media screen and (max-width: 480px) {
     .social {
       display: grid;
