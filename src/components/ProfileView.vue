@@ -239,7 +239,7 @@ export default {
     if( this.profile.displayName === undefined || this.profile.displayName === '' ) {
       this.profile.displayName = this.$route.params.id;
     }
-
+console.log(this.profile)
     if (this.profile.isCollectionPublic) {
       this.isLoading = true;
       this.sourceDice = await getEntireCollection('dice');
