@@ -12,7 +12,7 @@
           </div>
         </div>
       </div>
-      <div class="header">
+      <div class="header" v-if="myForces !== undefined && myForces[myForce] !== undefined">
         <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
         <div id="force-selector-expansion">
           <MyForcesSelector :my-force="myForce" :my-forces="this.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
@@ -24,7 +24,7 @@
         <button id="deleteBtn" @click="deleteCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">delete</span> Delete</button>
         <div class="element">
           <label for="privacy">Make Public</label>
-          <input type="checkbox" id="privacy" v-model="myForce.isPublic" @change="saveTheForces"/>
+          <input type="checkbox" id="privacy" v-model="myForces[myForce].isPublic" @change="saveTheForces"/>
         </div>
         <span id="filters">
           <div class="element">
@@ -54,8 +54,8 @@
         </span>
       </div>
       <div class="dice">
-        <div class="body">
-          <div v-for="die in myForce.slots[forceSlot]" :key="die.name" :id="die.name" class="row">
+        <div class="body" v-if="myForces !== undefined && myForces[myForce] !== undefined">
+          <div v-for="die in myForces[myForce].slots[forceSlot]" :key="die.name" :id="die.name" class="row">
               <div @click="() => expand(die)" class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{die.amount}})</div></div>
               <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
               <div @click="() => expand(die)" class="type">{{die.type}}</div>
@@ -136,7 +136,7 @@ export default {
               },
             ],
             sourceDice: [],
-            myForce: {name: '', isPublic: false, slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}},
+            myForce: -1,
             myForces: [],
             filteredDice: [],
             forceSlot: 'Home',
@@ -212,10 +212,10 @@ export default {
           this.willShowConfirmation = false;
 
           let that = this;
-          let newMyForces = this.myForces.filter( force => force.name !== that.myForce.name);
+          let newMyForces = this.myForces.filter( force => force.name !== that.myForces[that.myForce].name);
           if (!newMyForces) {
             newMyForces = [];
-            this.myForce = {name: '', isPublic: false, slots: {'Home': [], 'Horde': [], 'Campaign': [], 'Summoning': []}}
+            this.myForce = -1;
           }
           this.setMyForces(newMyForces);
           saveCollection('forces', newMyForces);
@@ -233,13 +233,13 @@ export default {
           this.willShowConfirmation = true;
         },
         loadForceData() {
-          this.forceName = this.myForce.name;
-          this.setForceName(this.myForce.name);
+          this.forceName = this.myForces[this.myForce].name;
+          this.setForceName(this.myForces[this.myForce].name);
 
           resetSlots(this.myForce);
 
-          if (this.myForce.isPublic === undefined) {
-            this.myForce.isPublic = false;
+          if (this.myForces[this.myForce].isPublic === undefined) {
+            this.myForces[this.myForce].isPublic = false;
           }
 
           this.forceSlot = this.$store.state.forceSlot || 'Home';
@@ -251,20 +251,25 @@ export default {
         onNewForce() {
           this.isLoading = true;
           const myForcesLen = this.myForces != null ? this.myForces.length + 1 : 1;
-          this.myForce = {isPublic: false, name: `Force #${myForcesLen}`}
-          this.forceName = this.myForce.name;
-          this.myForces.push(this.myForce);
+          const myForce = {isPublic: false, name: `Force #${myForcesLen}`}
+          this.forceName = this.myForces[this.myForce].name;
+          this.myForces.push(myForce);
           this.setMyForces(this.myForces);
 
-          this.loadForceData(this.myForce);
+          this.loadForceData(myForce);
           this.saveTheForces();
         },
         async loadForce(name) {
-          this.myForce = null;
+          let that = this;
+          this.myForce = -1;
           if (name !== undefined) {
-            this.myForce = this.myForces.filter(force => force.name === name)[0];
+            this.myForces.forEach( (force, index) => {
+              if (force.name === name) {
+                that.myForce = index;
+              }
+            });
           } else {
-            this.myForce = this.myForces[0];
+            this.myForce = 0;
           }
 
           this.loadForceData();
@@ -273,6 +278,7 @@ export default {
         decr(die) {
           if (die.amount > 0) {
             die.amount--;
+            this.recalcTotals();
             this.saveTheForces();
           }
         },
@@ -282,6 +288,7 @@ export default {
           } else {
             die.amount++;
           }
+          this.recalcTotals();
           this.saveTheForces();
         },
         expandForcesSelector() {
@@ -320,14 +327,14 @@ export default {
             });
           }
         },
-        exportCurrentForce() {
-          if (this.myForce !== undefined && this.myForce.name !== undefined) {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL( new Blob([JSON.stringify(this.myForce)], { type: 'text/json' }) );
-            a.download = `${encodeURI(this.myForce.name)}.json`;
-            a.click();
-          }
-        },
+        // exportCurrentForce() {
+        //   if (this.myForce !== undefined && this.myForce.name !== undefined) {
+        //     const a = document.createElement('a');
+        //     a.href = URL.createObjectURL( new Blob([JSON.stringify(this.myForce)], { type: 'text/json' }) );
+        //     a.download = `${encodeURI(this.myForce.name)}.json`;
+        //     a.click();
+        //   }
+        // },
         changeNameDirection() {
           if (this.sortColumn != 0) {
             this.sortColumn = 0;
@@ -358,7 +365,7 @@ export default {
         applyFiltersAndSort() {
           let that = this;
 
-          let dice = this.myForces[this.forceSlot];
+          let dice = this.myForces[this.myForce][this.forceSlot];
 
           dice.forEach(die => {
             let namesArr = that.diceGroupedByEdition[die.name];
@@ -378,20 +385,20 @@ export default {
         },
         async saveTheForces() {
           if (this.forceName && this.forceName.trim() !== '') {
-            this.myForce.name = this.forceName;
+            this.myForces[this.myForce].name = this.forceName;
             this.setMyForces(this.myForces);
             await saveCollection('forces', this.myForces);
           }
         },
         browseDice() {
           this.setForceSlot(this.forceSlot);
-          if (this.myForce.name !== undefined && this.myForce.name !== '') {
+          if (this.myForces[this.myForce].name !== undefined && this.myForces[this.myForce].name !== '') {
             this.$router.push('/forcesdicebrowser');
           }
         },
         changeAmount(grDie) {
           if (!isNaN(grDie.amount)) {
-            this.myForces[this.forceSlot].map(die => {
+            this.myForces[this.myForce][this.forceSlot].map(die => {
               let newDie = {...die};
 
               if (die.name === grDie.name && die.edition === grDie.edition) {
@@ -400,6 +407,9 @@ export default {
 
               return newDie;
             });
+
+            this.recalcTotals();
+            this.saveTheForces();
           }
         },
         weightDie(die, isSummoning) {
@@ -465,7 +475,7 @@ export default {
         },
         flattenForce() {
           let dice = []
-          Object.keys(this.myForce.slots).forEach( slotName => slotName !== 'Summoning' ? dice = [...dice, ...this.myForce.slots[slotName]] : dice);
+          Object.keys(this.myForces[this.myForce].slots).forEach( slotName => slotName !== 'Summoning' ? dice = [...dice, ...this.myForces[this.myForce].slots[slotName]] : dice);
           return dice;
         },
         calcMediumEquipment() {
@@ -481,14 +491,18 @@ export default {
         },
         recalcTotals() {
           let that = this;
+          if (this.myForces[this.myForce] !== undefined) {
+            this.myForces[this.myForce].slots[this.forceSlot] = this.myForces[this.myForce].slots[this.forceSlot].filter(die => die.amount > 0);
+          }
+          const myForce = this.myForces[this.myForce];
           if (this.forceSlot === 'Summoning') {
-            const totalDKPoints = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragonkin'), true) : 0;
-            const totalDragons = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.species === 'Dragons'), true) : 0;
-            const totalMTs = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(this.myForce.slots[this.forceSlot].filter(die => die.rarity === 'Minor Terrain'), true) : 0;
+            const totalDKPoints = myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(myForce.slots[this.forceSlot].filter(die => die.species === 'Dragonkin'), true) : 0;
+            const totalDragons = myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(myForce.slots[this.forceSlot].filter(die => die.species === 'Dragons'), true) : 0;
+            const totalMTs = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(myForce.slots[this.forceSlot].filter(die => die.rarity === 'Minor Terrain'), true) : 0;
             this.totalPoints = `Dragons ${totalDragons} / Kin: ${totalDKPoints} / Minors: ${totalMTs}`;
           } else {
-            const forceTotal = (this.myForce !== undefined) ? Object.keys(this.myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(that.myForce.slots[slotName]), 0) + this.calcMediumEquipment() : 0;
-            const slotTotal =  (this.myForce !== undefined) ? this.calcSlotTotal(this.myForce.slots[this.forceSlot], false) : 0;
+            const forceTotal = (this.myForces[this.myForce] !== undefined) ? Object.keys(myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(myForce.slots[slotName]), 0) + this.calcMediumEquipment() : 0;
+            const slotTotal =  (this.myForces[this.myForce] !== undefined) ? this.calcSlotTotal(myForce.slots[this.forceSlot], false) : 0;
             this.totalPoints = `${slotTotal} / ${forceTotal}`;
           }
         },
