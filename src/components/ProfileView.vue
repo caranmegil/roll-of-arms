@@ -86,7 +86,7 @@ export default {
       sizeFilter: '',
       types: [],
       typeFilter: '',
-      isLoading: true,
+      isLoading: false,
     };
   },
   methods: {
@@ -241,6 +241,7 @@ export default {
     }
 
     if (this.profile.isCollectionPublic) {
+      this.isLoading = true;
       this.sourceDice = await getEntireCollection('dice');
       this.dice = await getCollectionByField('collections', uid) || [];
 
@@ -261,7 +262,6 @@ export default {
 
       this.setSpeciesFilter();
     }
-    this.isLoading = false;
   },
 }
 </script>
