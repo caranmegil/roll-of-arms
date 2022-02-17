@@ -260,6 +260,8 @@ export default {
       this.species = species;
 
       this.setSpeciesFilter();
+    } else {
+      this.isLoading = false;
     }
   },
 }
