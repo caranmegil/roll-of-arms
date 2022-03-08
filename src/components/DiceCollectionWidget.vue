@@ -65,6 +65,9 @@ import 'es6-promise/auto';
 import {
   getCollectionByField,
 } from '@/firebase';
+import {
+  convertEditionForDie,
+} from '@/utils';
 
 export default {
     name: 'DiceCollectionWidget',
@@ -105,6 +108,7 @@ export default {
       }
 
       this.dice = await getCollectionByField('collections', this.uid) || [];
+      this.dice.forEach( die => die.edition = convertEditionForDie(die));
 
       this.speciesFilter = '';
       this.sizeFilter = this.$store.state.filters.size;
