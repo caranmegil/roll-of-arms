@@ -64,6 +64,9 @@ import {
   getEntireCollection,
 } from '@/firebase';
 import 'es6-promise/auto';
+import {
+  convertEditionForDie,
+} from '@/utils';
 
 export default {
   name: 'ProfileView',
@@ -244,6 +247,8 @@ export default {
       this.isLoading = true;
       this.sourceDice = await getEntireCollection('dice');
       this.dice = await getCollectionByField('collections', uid) || [];
+
+      this.dice.forEach( die => die.edition = convertEditionForDie(die));
 
       this.dice.sort((a,b) => {
         let result = a.name.localeCompare(b.name);

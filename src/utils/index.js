@@ -4,7 +4,7 @@ export const convertEditionForDie = die => {
     let newEdition = die.edition;
     if (die.edition === 'SFR Terrain' && die.rarity === 'Advanced Terrain') {
         newEdition = 'SFR Advanced Terrain Gold Ink';
-    } else if (die.name.includes('Deadland')) {
+    } else if (die.name.includes('Deadland') && die.edition === 'SFR Terrain') {
         newEdition = 'SFR Deadlands Green Ink';
     }
 

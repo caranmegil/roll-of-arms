@@ -78,6 +78,9 @@ import {
   saveCollection,
   getEntireCollection,
 } from '@/firebase';
+import {
+  convertEditionForDie,
+} from '@/utils';
 
 export default {
     name: 'DiceBrowser',
@@ -162,6 +165,7 @@ export default {
       }
 
       this.dice = await getCollection('collections') || [];
+      this.dice.forEach( die => die.edition = convertEditionForDie(die));
 
       this.speciesFilter = '';
       this.sizeFilter = this.$store.state.filters.size;
