@@ -9,6 +9,7 @@ import VueTour from 'v3-tour';
 import 'v3-tour/dist/vue-tour.css';
 
 import { signIntoGoogle } from '@/firebase';
+import flagsmith from 'flagsmith';
 
 import App from './App.vue'
 
@@ -66,6 +67,13 @@ router.beforeEach( async (to, from, next) => {
     }
 });
 
+flagsmith.init({
+    environmentID: 'RKtUDQYH8AwxN9tc8pc99M',
+    api:"https://featureflags.nerderium.com/api/v1/",
+    cacheFlags: false,
+    enableAnalytics: false,
+    
+});
 
 const store = createStore({
     state() {
