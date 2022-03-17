@@ -60,8 +60,8 @@ export default {
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
-    async isForcesBuilderEnabled() {
-      return await flagsmith.hasFeature('forces_builder');
+    isForcesBuilderEnabled() {
+      return flagsmith.hasFeature('forces_builder');
     },
     changeEmail() {
       this.toggleMenu();
