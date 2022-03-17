@@ -211,27 +211,6 @@ export default {
 
     if (this.profile.isCollectionPublic) {
       this.sourceDice = await getEntireCollection('dice');
-
-      this.dice = await getCollectionByField('collections', uid) || [];
-
-      this.dice.forEach( die => die.edition = convertEditionForDie(die));
-
-      this.dice.sort((a,b) => {
-        let result = a.name.localeCompare(b.name);
-        if (result == 0) {
-          return a.edition.localeCompare(b.edition);
-        }
-
-        return result;
-      });
-
-      let species = [];
-      this.dice.forEach(die => species.push(die.species));
-
-      species = [...new Set(species)].sort();
-      this.species = species;
-
-      this.setSpeciesFilter();
     } else {
       this.isLoading = false;
     }
