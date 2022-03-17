@@ -66,7 +66,7 @@ router.beforeEach( async (to, from, next) => {
         next();
     }
 });
-console.log('env:', process.env)
+
 flagsmith.init({
     environmentID: process.env.VUE_APP_FLAGSMITH_ENV_ID,
     api:"https://featureflags.nerderium.com/api/v1/",

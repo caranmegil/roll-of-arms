@@ -1,5 +1,7 @@
 <template>
     <div class="collections">
+    <Loading v-model:active="isLoading"/>
+
       <div class="header">
         <span id="filters">
           <div class="element">
@@ -60,6 +62,7 @@
 </template>
 
 <script>
+import Loading from 'vue-loading-overlay';
 import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
@@ -72,6 +75,9 @@ import {
 export default {
     name: 'DiceCollectionWidget',
     props: ['sourceDice', 'profile', 'uid'],
+    components: {
+      Loading,
+    },
     data() {
         return {
             totalDice: 0,
@@ -88,6 +94,7 @@ export default {
             typeFilter: '',
             nameFilter: '',
             observer: null,
+            isLoading: true,
         };
     },
     async mounted() {
@@ -107,6 +114,7 @@ export default {
         this.$tours['collectionTour'].start();
       }
 
+      this.isLoading = true;
       this.dice = await getCollectionByField('collections', this.uid) || [];
       this.dice.forEach( die => die.edition = convertEditionForDie(die));
 
@@ -119,7 +127,7 @@ export default {
 
       species = [...new Set(species)].sort();
       this.species = species;
-
+      this.isLoading = false;
       this.setSpeciesFilter();
     },
     methods: {
