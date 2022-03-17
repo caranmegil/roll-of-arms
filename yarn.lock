@@ -4488,6 +4488,11 @@ firebase@^9.6.5:
     "@firebase/storage-compat" "0.1.10"
     "@firebase/util" "1.4.3"
 
+flagsmith@^2.0.0-beta.2:
+  version "2.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/flagsmith/-/flagsmith-2.0.0-beta.2.tgz#ff10d9678a0c8fb045f363b6651b8380ccaa3e1e"
+  integrity sha512-OBhQL2s5soir4Ldm1aQBCgk5klOd9lEBsjPaymI4lJ4PnRLm8G2qfbn6psl1etCjuqiBzHpaw/YZLQ1HNxuJtQ==
+
 flat-cache@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/flat-cache/-/flat-cache-2.0.1.tgz#5d296d6f04bda44a4630a301413bdbc2ec085ec0"

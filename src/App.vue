@@ -14,8 +14,10 @@
       <!-- <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div> -->
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
-      <div class="separator"></div>
-      <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
+      <div v-if="isForcesBuilderEnabled()">
+        <div class="separator"></div>
+        <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
+      </div>
       <div class="separator"></div>
       <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
     </div>
@@ -38,6 +40,7 @@
 
 <script>
 import { mapActions } from 'vuex';
+import flagsmith from 'flagsmith';
 import 'es6-promise/auto';
 import {
   signOutOfGoogle,
@@ -52,11 +55,14 @@ export default {
   },
   components: {
   },
-  async beforeMount() {
+  beforeMount() {
     this.isLoaded = true;
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
+    isForcesBuilderEnabled() {
+      return flagsmith.hasFeature('forces_builder');
+    },
     changeEmail() {
       this.toggleMenu();
       this.$router.push('/account-transfer');
