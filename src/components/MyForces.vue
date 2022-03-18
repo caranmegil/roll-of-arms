@@ -12,7 +12,7 @@
           </div>
         </div>
       </div>
-      <div class="header" v-if="myForces !== undefined && myForces[myForce] !== undefined">
+      <div class="header" v-if="myForces != null && myForce > -1">
         <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
         <div id="force-selector-expansion">
           <MyForcesSelector :my-force="myForce" :my-forces="this.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
@@ -236,7 +236,7 @@ export default {
           this.forceName = this.myForces[this.myForce].name;
           this.setForceName(this.myForces[this.myForce].name);
 
-          resetSlots(this.myForce);
+          resetSlots(this.myForces[this.myForce]);
 
           if (this.myForces[this.myForce].isPublic === undefined) {
             this.myForces[this.myForce].isPublic = false;
