@@ -48,14 +48,12 @@ export default {
     width: 15em;
   }
 
-
   button {
     width: 10em;
     height: 3em;
   }
 
   .collections {
-    width: 100%;
     display: grid;
     align-content: center;
     justify-items: center;
