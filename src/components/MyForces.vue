@@ -4,7 +4,7 @@
       <Loading v-model:active="isLoading"/>
       <div class="dialog" :style="{visibility: willShowConfirmation ? 'visible' : 'hidden'}">
         <div @click="onNo" class="modal-overlay"/>
-        <div class="modal">
+        <div class="modal yes-no">
           <div>Are you sure you want to delete?</div>
           <div class="element">
             <button id="noBtn" @click="onNo">No</button>
@@ -12,11 +12,14 @@
           </div>
         </div>
       </div>
+      <div class="dialog" :style="{visibility: willShowForcesSelector ? 'visible' : 'hidden'}">
+        <div @click="expandForcesSelector" class="modal-overlay"/>
+          <div class="modal">
+            <MyForcesSelector class="forces-selector" :my-force="myForce" :my-forces="this.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+          </div>
+      </div>
       <div class="header" v-if="myForces != null && myForce > -1">
-        <div @click="() => expandForcesSelector()" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
-        <div id="force-selector-expansion">
-          <MyForcesSelector :my-force="myForce" :my-forces="this.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
-        </div>
+        <div @click="expandForcesSelector" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
         <div class="element">
           <label for="forceName">Force Name</label>
           <input type="text" id="forceName" v-model="forceName" @change="saveTheForces"/>
@@ -75,7 +78,6 @@
 
 <script>
 import Loading from 'vue-loading-overlay';
-import Tether from 'tether';
 import 'vue-loading-overlay/dist/vue-loading.css';
 import {
   mapActions,
@@ -142,9 +144,9 @@ export default {
             forceSlot: 'Home',
             forceName: '',
             isLoading: true,
-            tether: null,
             observer: null,
             willShowConfirmation: false,
+            willShowForcesSelector: false,
         };
     },
     async unmounted() {
@@ -188,16 +190,6 @@ export default {
       getCollectionOn('forces', (forces) => {
         that.myForces = forces || [];
         that.loadForceData();
-      });
-      this.tether = new Tether( {
-        element: '#force-selector-expansion',
-        target: '.open-forces-selector',
-        attachment: 'top left',
-        targetAttachment: 'bottom left',
-      });
-
-      setTimeout(function() {
-        that.tether.position();
       });
 
       this.profile = await getCollection('profiles') || {};
@@ -292,16 +284,8 @@ export default {
           this.saveTheForces();
         },
         expandForcesSelector() {
-          let actionButton = document.getElementById('force-action-button');
-          let expansion = document.getElementById('force-selector-expansion');
-
-          if (window.getComputedStyle(expansion).display === 'none') {
-            expansion.style.display = 'block';
-            actionButton.innerText = 'expand_less';
-          } else {
-            expansion.style.display = 'none';
-            actionButton.innerText = 'expand_more';
-          }
+          this.willShowForcesSelector = !this.willShowForcesSelector;
+          console.log(this.willShowForcesSelector)
         },
         expand(die) {
           let row = document.getElementById(die.name);
@@ -660,29 +644,32 @@ export default {
     top: .3em;
   }
 
-  #force-selector-expansion {
-    display: none;
-    z-index: 2;
-    position: fixed;
-    background-color: ivory;
-    width: 100%;
-    padding: .5em;
-    border: 1px solid black;
+  .forces-selector {
+    height: 15em;
+  }
+
+  .yes-no {
+    height: 3.5em;
   }
 
   .dialog {
     display: grid;
+    width: 100%;
     align-items: center;
     justify-items: center;
   }
   .modal {
     display: grid;
+    justify-content: center;
+    justify-items: center;
     align-items: center;
     align-content: center;
     z-index: 2;
     position: fixed;
     background-color: ivory;
-    width: 30%;
+    margin: auto;
+    top: 10em;
+    width: 20em;
     padding: .5em;
     border: 1px solid black;
   }
