@@ -67,8 +67,9 @@ router.beforeEach( async (to, from, next) => {
     }
 });
 
+const FLAGSMITH_ENV_ID = import.meta.env.VITE_FLAGSMITH_ENV_ID;
 flagsmith.init({
-    environmentID: process.env.VUE_APP_FLAGSMITH_ENV_ID,
+    environmentID: FLAGSMITH_ENV_ID,
     api:"https://featureflags.nerderium.com/api/v1/",
     cacheFlags: false,
     enableAnalytics: false,

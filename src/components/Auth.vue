@@ -71,7 +71,7 @@ import {mapActions} from 'vuex';
 import 'es6-promise/auto';
 
 export default {
-    name: 'Auth',
+    name: 'AuthView',
     data() {
         return {
             password: null,

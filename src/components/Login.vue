@@ -33,7 +33,7 @@ import 'es6-promise/auto';
 import Map from './Map.vue';
 
 export default {
-  name: 'Login',
+  name: 'LoginView',
   props: {
   },
   components: {
