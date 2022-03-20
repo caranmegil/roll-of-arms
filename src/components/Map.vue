@@ -15,7 +15,7 @@ import {
 } from '@/firebase';
 
 export default {
-    name: 'Map',
+    name: 'MapView',
     data() {
         return {
             profile: null,

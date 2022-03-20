@@ -39,7 +39,7 @@ import { mapActions } from 'vuex';
 import Map from '@/components/Map.vue';
 
 export default {
-  name: 'Main',
+  name: 'MainView',
   props: {
   },
   components: {
