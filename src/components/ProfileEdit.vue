@@ -4,6 +4,14 @@
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
         <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
         <div class="element">
+            <label for="visibilitySelect">Profile Visiibity</label>
+            <select id="visibilitySelect" v-model="profile.visibility">
+                <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private (nobody)</option>
+                <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Semi-public (only Roll of Arms)</option>
+                <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Public (anybody)</option>
+            </select>
+        </div>
+        <div class="element">
             <label for="name">Name</label>
             <input id="name" v-model="profile.name" type="text"/>
         </div>
@@ -76,6 +84,9 @@ export default {
   },
   async mounted() {
     let profile = await getCollection('profiles') || {};
+    if (!profile.visibility) {
+      profile.visibility = '0';
+    }
     this.isLoading = true;
     const usernames = await getEntireCollection('usernames');
 
