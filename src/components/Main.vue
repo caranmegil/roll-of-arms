@@ -30,7 +30,7 @@
 <script>
 import {
   signIntoGoogle,
-  signInAgain,
+  getCurrentUser,
   getCollection,
   saveCollection,
 } from '@/firebase';
@@ -112,11 +112,10 @@ export default {
     }
   },
   async mounted() {
-    let that = this;
-
     // Find if there is this weird state happening
     // If so, kill the credentials and go to sign-in page.
-    if (this.$store.state.user == null) {
+    const user = getCurrentUser();
+    if (user == null) {
       if(this.$store.state.credentials != undefined && this.$store.state.credentials != null && this.$store.state.credentials.email != undefined) {
         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
         this.setUser(user);
@@ -135,19 +134,24 @@ export default {
         this.$router.push('/signin');
       }
     } else {
-      signInAgain(async function(user) {
-        that.profile = await getCollection('profiles') || null;
-        if (user.emailVerified) {
-          if (that.profile == null) {
-            that.$router.push('/profile');
-          } else {
-            that.correctProfile();
-          }
+      this.profile = await getCollection('profiles') || null;
+      if (user.emailVerified) {
+        if (this.profile == null) {
+          this.$router.push('/profile');
         } else {
-          that.$router.push('/verifywarn');
+          this.correctProfile();
         }
-      });
+      } else {
+        this.$router.push('/verifywarn');
+      }
     }
+
+    if (!this.profile.release_notes_2) {
+      this.profile.release_notes_2 = true;
+      saveCollection('profiles', this.profile);
+      this.$router.push('/releasenotes');
+    }
+
   },
 }
 </script>
