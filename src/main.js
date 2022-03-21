@@ -26,6 +26,7 @@ import MyForces from './components/MyForces.vue';
 import VerificationFailure from './components/VerificationFailure.vue';
 import AccountTransfer from './components/AccountTransfer.vue';
 import ForcesDiceBrowser from './components/ForcesDiceBrowser.vue';
+import ReleaseNotes from './components/ReleaseNotes.vue';
 
 const routes = [
     { path: '/', component: Main, meta: { requiresAuth: true } },
@@ -41,6 +42,7 @@ const routes = [
     { path: '/my-forces', component: MyForces, meta: { requiresAuth: true } },
     { path: '/verifywarn', component: VerificationFailure, meta: { requiresAuth: false } },
     { path: '/account-transfer', component: AccountTransfer, meta: { requiresAuth: true } },
+    { path: '/releasenotes', component: ReleaseNotes }
 ];
 
 const router = createRouter( {

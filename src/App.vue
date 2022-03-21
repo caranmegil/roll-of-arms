@@ -19,6 +19,8 @@
         <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
       </div>
       <div class="separator"></div>
+      <div @click="releaseNotes" class="menu-item"><span class="material-icons material-icons-outlined">note</span> Release Notes</div>
+      <div class="separator"></div>
       <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
     </div>
 
@@ -70,6 +72,10 @@ export default {
     resetPassword() {
       this.toggleMenu();
       this.$router.push('/reset');
+    },
+    releaseNotes() {
+      this.toggleMenu();
+      this.$router.push('/releasenotes');
     },
     closeMenu() {
       this.toggleMenu();
