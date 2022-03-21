@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vite preview --port 8080",
+    "serve": "vite --port 8080",
     "build": "vite build",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "deploy": "yarn build && firebase deploy"
   },
   "dependencies": {
-    "@vusion/md-vue-loader": "^1.4.1",
     "core-js": "^3.6.5",
     "es6-promise": "^4.2.8",
     "firebase": "^9.6.5",

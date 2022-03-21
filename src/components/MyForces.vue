@@ -57,7 +57,7 @@
         </span>
       </div>
       <div class="dice">
-        <div class="body" v-if="myForces !== undefined && myForces[myForce] !== undefined">
+        <div class="body" v-if="myForces !== undefined && myForce > -1 && myForces[myForce] !== undefined">
           <div v-for="die in myForces[myForce].slots[forceSlot]" :key="die.name" :id="die.name" class="row">
               <div @click="() => expand(die)" class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{die.amount}})</div></div>
               <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
