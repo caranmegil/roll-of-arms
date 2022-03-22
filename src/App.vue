@@ -128,7 +128,7 @@ export default {
 <style>
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #F8F6F0;
+    background-image: url('assets/background.webp');
 }
 
 @media screen and (max-width: 480px) {
@@ -230,7 +230,7 @@ button {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     grid-auto-flow: column;
-    border-bottom: 1px solid #D3D3D3;
+    border-bottom: 1px solid black;
 }
 
 .roll-of-arms-body > header > .title-bar-menu {
@@ -294,7 +294,7 @@ button {
 }
 
 .roll-of-arms-body > div#footer {
-    border-top: 1px solid #D3D3D3;
+    border-top: 1px solid black;
     grid-row: 3;
     grid-column: span 4;
     align-self: auto;

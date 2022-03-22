@@ -1,6 +1,6 @@
 <template>
   <div class="profiles">
-      <div class="collections">
+      <div v-if="isVisible" class="collections">
           <div class="header">
             <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
             <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
@@ -23,6 +23,7 @@
 import {
   getCollectionByField,
   getEntireCollection,
+  getCurrentUser,
 } from '@/firebase';
 import flagsmith from 'flagsmith';
 import 'es6-promise/auto';
@@ -53,6 +54,7 @@ export default {
       sizeFilter: '',
       types: [],
       typeFilter: '',
+      isVisible: false,
     };
   },
   methods: {
@@ -203,14 +205,24 @@ export default {
     const usernames = await getEntireCollection('usernames');
     this.uid = usernames[this.$route.params.id] || this.$route.params.id;
     this.profile = await getCollectionByField('profiles', this.uid);
-    this.profile.displayName = this.profile.name;
+    const currentUser = getCurrentUser();
 
-    if( this.profile.displayName === undefined || this.profile.displayName === '' ) {
-      this.profile.displayName = this.$route.params.id;
-    }
+    this.isVisible = this.profile.visibility === '2' 
+      || (currentUser != null && this.profile.visibility == '1')
+      || (currentUser != null && this.uid === currentUser.uid && this.profile.visibility === '0');
+  
+    if (this.isVisible) {
+      this.profile.displayName = this.profile.name;
 
-    if (this.profile.isCollectionPublic) {
-      this.sourceDice = await getEntireCollection('dice');
+      if( this.profile.displayName === undefined || this.profile.displayName === '' ) {
+        this.profile.displayName = this.$route.params.id;
+      }
+
+      if (this.profile.isCollectionPublic) {
+        this.sourceDice = await getEntireCollection('dice');
+      } else {
+        this.isLoading = false;
+      }
     } else {
       this.isLoading = false;
     }
