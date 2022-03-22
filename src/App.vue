@@ -128,6 +128,7 @@ export default {
 <style>
 body {
     font-family: 'Roboto', sans-serif;
+    background-color: #F8F6F0;
     background-image: url('assets/background.webp');
 }
 
