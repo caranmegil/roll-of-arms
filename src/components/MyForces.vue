@@ -244,7 +244,11 @@ export default {
           this.isLoading = true;
           const myForcesLen = this.myForces != null ? this.myForces.length + 1 : 1;
           const myForce = {isPublic: false, name: `Force #${myForcesLen}`}
-          this.forceName = this.myForces[this.myForce].name;
+
+          if (this.myForces !== undefined) {
+            this.forceName = this.myForces[this.myForce] || {name: ''}.name;
+
+          }
           this.myForces.push(myForce);
           this.setMyForces(this.myForces);
 
