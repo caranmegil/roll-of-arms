@@ -5,7 +5,7 @@
       <div class="header">
         <h1>My Collection</h1>
         <div class="element">
-          <label for="privacy">Make Public</label>
+          <label for="privacy">Show With Profile</label>
           <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
         </div>
         <button id="locate" @click="browseDice">Add Dice</button>

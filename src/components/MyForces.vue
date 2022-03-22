@@ -26,7 +26,7 @@
         </div>
         <button id="deleteBtn" @click="deleteCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">delete</span> Delete</button>
         <div class="element">
-          <label for="privacy">Make Public</label>
+          <label for="privacy">Show With Profile</label>
           <input type="checkbox" id="privacy" v-model="myForces[myForce].isPublic" @change="saveTheForces"/>
         </div>
         <span id="filters">
