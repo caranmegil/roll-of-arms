@@ -63,7 +63,7 @@ export default {
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
     isForcesBuilderEnabled() {
-      return flagsmith.hasFeature('forces_builder');
+      return true;//flagsmith.hasFeature('forces_builder');
     },
     changeEmail() {
       this.toggleMenu();

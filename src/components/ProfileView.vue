@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     isForcesBuilderEnabled() {
-      return flagsmith.hasFeature('forces_builder');
+      return true;//flagsmith.hasFeature('forces_builder');
     },
     getImageID(die) {
       const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
