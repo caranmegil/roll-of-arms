@@ -5,11 +5,11 @@ import {
     createWebHistory,
 } from 'vue-router';
 import VueTour from 'v3-tour';
+import * as LDClient from 'launchdarkly-js-client-sdk';
 
 import 'v3-tour/dist/vue-tour.css';
 
 import { signIntoGoogle } from '@/firebase';
-import flagsmith from 'flagsmith';
 
 import App from './App.vue'
 
@@ -60,22 +60,39 @@ router.beforeEach( async (to, from, next) => {
 
     if (to.meta && to.meta.requiresAuth) {
         if(store.state.user != null) {
+            // Set up the user properties. This user should appear on your LaunchDarkly users dashboard
+            // soon after you run the demo.
+            var user = {
+                key: credentials.email,
+            };
+            
+            // Create a single instance of the LaunchDarkly client
+            const ldClient = LDClient.initialize(import.meta.env.VITE_LD_ENV_ID, user);
+            await ldClient.waitUntilReady();
+            const forcesBuilderValue = ldClient.variation("forces_builder", false);
+            console.log(forcesBuilderValue)
+            store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+            
+            ldClient.close();
             next();
         } else {
             next({ path: '/signin'});
         }
     } else {
-        next();
+        var user = {
+            key: 'profile_view',
+        };
+        
+        // Create a single instance of the LaunchDarkly client
+        const ldClient = LDClient.initialize(import.meta.env.VITE_LD_ENV_ID, user);
+        await ldClient.waitUntilReady();
+        const forcesBuilderValue = ldClient.variation("forces_builder", false);
+        console.log(forcesBuilderValue)
+        store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+        
+        ldClient.close();
+    next();
     }
-});
-
-const FLAGSMITH_ENV_ID = import.meta.env.VITE_FLAGSMITH_ENV_ID;
-flagsmith.init({
-    environmentID: FLAGSMITH_ENV_ID,
-    api:"https://featureflags.nerderium.com/api/v1/",
-    cacheFlags: false,
-    enableAnalytics: false,
-    
 });
 
 const store = createStore({
@@ -89,6 +106,7 @@ const store = createStore({
             filters: {species: '', edition: '', size: '', type: '',},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
             myForces: null,
+            featureFlags: {},
         };
     },
     getters: {
@@ -133,6 +151,9 @@ const store = createStore({
         setMyForces(state, myForces) {
             state.myForces = myForces;
         },
+        setFeatureFlags(state, flagValue) {
+            state.featureFlags = flagValue;
+        },
         signOut(state) {
             state.user = null;
             state.credentials = {}
@@ -142,6 +163,7 @@ const store = createStore({
             state.forceName = null;
             state.bufferDie = null;
             state.myForces = [];
+            state.featureFlags = {};
             localStorage.setItem('credentials', JSON.stringify({}));
             localStorage.setItem('dice', JSON.stringify(null));
             localStorage.setItem('user', JSON.stringify(null));
@@ -174,6 +196,9 @@ const store = createStore({
         },
         setMyForces( { commit }, myForces) {
             commit('setMyForces', myForces);
+        },
+        setFeatureFlags({ commit }, flagValue) {
+            commit('setFeatureFlags', flagValue);
         },
         signOut({ commit }) {
             commit('signOut');
