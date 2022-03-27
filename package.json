@@ -13,6 +13,7 @@
     "es6-promise": "^4.2.8",
     "firebase": "^9.6.5",
     "flagsmith": "^2.0.0-beta.2",
+    "launchdarkly-js-client-sdk": "^2.21.0",
     "leaflet": "^1.7.1",
     "tether": "^2.0.0",
     "v3-tour": "^3.0.16",
