@@ -5,7 +5,7 @@ import {
     createWebHistory,
 } from 'vue-router';
 import VueTour from 'v3-tour';
-import * as LDClient from 'launchdarkly-js-client-sdk';
+import { UnleashClient } from 'unleash-proxy-client';
 
 import 'v3-tour/dist/vue-tour.css';
 
@@ -50,6 +50,13 @@ const router = createRouter( {
     routes,
 });
 
+const unleash = new UnleashClient({
+  url: 'https://featureflags.nerderium.com/proxy',
+  clientKey: import.meta.env.VITE_UNLEASH_TOKEN,
+  appName: import.meta.env.VITE_UNLEASH_APP_NAME,
+  environment: import.meta.env.VITE_UNLEASH_ENV,
+});
+
 router.beforeEach( async (to, from, next) => {
     const credentials = store.state.credentials;
 
@@ -60,38 +67,29 @@ router.beforeEach( async (to, from, next) => {
 
     if (to.meta && to.meta.requiresAuth) {
         if(store.state.user != null) {
-            // Set up the user properties. This user should appear on your LaunchDarkly users dashboard
-            // soon after you run the demo.
-            var user = {
-                key: credentials.email,
-            };
-            
-            // Create a single instance of the LaunchDarkly client
-            const ldClient = LDClient.initialize(import.meta.env.VITE_LD_ENV_ID, user);
-            await ldClient.waitUntilReady();
-            const forcesBuilderValue = ldClient.variation("forces_builder", false);
-            console.log(forcesBuilderValue)
+            // Used to set the context fields, shared with the Unleash Proxy
+            unleash.updateContext({ userId: credentials.email });
+
+            // Start the background polling
+            unleash.start();
+            const forcesBuilderValue = unleash.isEnabled('forces_builder');
             store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
-            
-            ldClient.close();
             next();
         } else {
             next({ path: '/signin'});
         }
     } else {
-        var user = {
-            key: 'profile_view',
-        };
+        // var user = {
+        //     anonymous: true,
+        // };
         
-        // Create a single instance of the LaunchDarkly client
-        const ldClient = LDClient.initialize(import.meta.env.VITE_LD_ENV_ID, user);
-        await ldClient.waitUntilReady();
-        const forcesBuilderValue = ldClient.variation("forces_builder", false);
-        console.log(forcesBuilderValue)
-        store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+        // // Create a single instance of the LaunchDarkly client
+        // const ldClient = LDClient.initialize(import.meta.env.VITE_LD_ENV_ID, user);
+        // await ldClient.waitUntilReady();
+        // const forcesBuilderValue = ldClient.variation("forces_builder", false);
+        // store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
         
-        ldClient.close();
-    next();
+        next();
     }
 });
 

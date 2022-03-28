@@ -42,7 +42,6 @@
 
 <script>
 import { mapActions } from 'vuex';
-import flagsmith from 'flagsmith';
 import 'es6-promise/auto';
 import {
   signOutOfGoogle,

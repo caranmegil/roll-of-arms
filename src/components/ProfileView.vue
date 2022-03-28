@@ -25,7 +25,6 @@ import {
   getEntireCollection,
   getCurrentUser,
 } from '@/firebase';
-import flagsmith from 'flagsmith';
 import 'es6-promise/auto';
 
 import ProfileForces from './ProfileForces.vue';
