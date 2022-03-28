@@ -79,15 +79,10 @@ router.beforeEach( async (to, from, next) => {
             next({ path: '/signin'});
         }
     } else {
-        // var user = {
-        //     anonymous: true,
-        // };
-        
-        // // Create a single instance of the LaunchDarkly client
-        // const ldClient = LDClient.initialize(import.meta.env.VITE_LD_ENV_ID, user);
-        // await ldClient.waitUntilReady();
-        // const forcesBuilderValue = ldClient.variation("forces_builder", false);
-        // store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+        // Start the background polling
+        unleash.start();
+        const forcesBuilderValue = unleash.isEnabled('forces_builder');
+        store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
         
         next();
     }
