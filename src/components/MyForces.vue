@@ -1,6 +1,6 @@
 <template>
     <v-tour name="forcesTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
-    <div class="collections">
+    <div class="collections" v-if="$store.state.featureFlags.forces_builder">
       <Loading v-model:active="isLoading"/>
       <div class="dialog" :style="{visibility: willShowConfirmation ? 'visible' : 'hidden'}">
         <div @click="onNo" class="modal-overlay"/>

@@ -68,12 +68,15 @@ router.beforeEach( async (to, from, next) => {
     if (to.meta && to.meta.requiresAuth) {
         if(store.state.user != null) {
             // Used to set the context fields, shared with the Unleash Proxy
-            unleash.updateContext({ userId: credentials.email });
+            unleash.updateContext({
+                userId: credentials.email,
+            });
 
             // Start the background polling
             unleash.start();
             const forcesBuilderValue = unleash.isEnabled('forces_builder');
             store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+            unleash.stop();
             next();
         } else {
             next({ path: '/signin'});
@@ -83,6 +86,7 @@ router.beforeEach( async (to, from, next) => {
         unleash.start();
         const forcesBuilderValue = unleash.isEnabled('forces_builder');
         store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+        unleash.stop();
         
         next();
     }
