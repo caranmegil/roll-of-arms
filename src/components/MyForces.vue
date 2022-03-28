@@ -289,7 +289,6 @@ export default {
         },
         expandForcesSelector() {
           this.willShowForcesSelector = !this.willShowForcesSelector;
-          console.log(this.willShowForcesSelector)
         },
         expand(die) {
           let row = document.getElementById(die.name);

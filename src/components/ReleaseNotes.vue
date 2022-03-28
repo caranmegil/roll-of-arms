@@ -9,7 +9,6 @@ import {
   getCollectionByField,
   getEntireCollection,
 } from '@/firebase';
-import flagsmith from 'flagsmith';
 import { VueComponent } from '../../public/release-notes.md';
 import 'es6-promise/auto';
 
