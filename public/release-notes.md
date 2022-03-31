@@ -4,7 +4,9 @@ Welcome to the second release of Roll of Arms! In the full release, we have the 
 * Release notes are being added from here on out.
 * Some layout now matches the rule book.
 * A Forces Builder that will allow you to create multiple forces that can be named and made public/private.
-* By default, profiles are private again.  However, we have created the opportunity to allow viewing from two additional sources: users of Roll of Arms only and anyone, regardless of their enrollment in the app.
+* By default, profiles are private again.  However, we have created the opportunity to allow viewing from two additional sources: "Users Only", which are users of Roll of Arms only, and "Anyone", regardless of their enrollment in the app the profile is viewable.
+* Updated the dice by changing Terrain die types and Dragon die sizes
+* New dice / new editions!
 
 ## Release "Adventurer"
 ### Release Date: 2022-02-23
