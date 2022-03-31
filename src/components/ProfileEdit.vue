@@ -6,9 +6,9 @@
         <div class="element">
             <label for="visibilitySelect">Profile Visiibity</label>
             <select id="visibilitySelect" v-model="profile.visibility">
-                <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private (nobody)</option>
-                <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Semi-public (only Roll of Arms)</option>
-                <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Public (anybody)</option>
+                <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private</option>
+                <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Users Only</option>
+                <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Anyone</option>
             </select>
         </div>
         <div class="element">
