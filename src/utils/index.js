@@ -3,22 +3,17 @@ export const sleep = (timeout) => new Promise(resolve => setTimeout(resolve, tim
 export const convertEditionForDie = die => {
     let newEdition = die.edition;
     if (die.edition === 'SFR Terrain' && die.rarity === 'Advanced Terrain') {
-        newEdition = 'SFR Advanced Terrain Gold Ink';
+        const name = die.name.split(' ')[0];
+        newEdition = `SFR ${name} 2010`;
     } else if (die.name.includes('Deadland') && die.edition === 'SFR Terrain') {
-        newEdition = 'SFR Deadlands Green Ink';
+        newEdition = 'SFR Deadlands (minor)';
     }
 
     return newEdition;
 };
 export const mergeMyForces = (myForcesA, myForcesB) => {
     return myForcesA.map( myForceA => {
-        // let myForceAP = resetSlots(myForceA);
         return {...myForceA, ...myForcesB.filter(myForceB => myForceB.name === myForceA.name)[0]};
-
-        // });
-        // Object.keys(myForceAP.slots).forEach(slotName => {
-        //     myForceAPCopy.slots[slotName] = [myForceAP.slots[slotName], myForcesB.filter(myForceB => myForceAP.name === slot)]
-        // })
     });
 }
 
