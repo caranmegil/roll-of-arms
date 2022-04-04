@@ -50,12 +50,12 @@ const router = createRouter( {
     routes,
 });
 
-const unleash = new UnleashClient({
-  url: 'https://featureflags.nerderium.com/proxy',
-  clientKey: import.meta.env.VITE_UNLEASH_TOKEN,
-  appName: import.meta.env.VITE_UNLEASH_APP_NAME,
-  environment: import.meta.env.VITE_UNLEASH_ENV,
-});
+// const unleash = new UnleashClient({
+//   url: 'https://featureflags.nerderium.com/proxy',
+//   clientKey: import.meta.env.VITE_UNLEASH_TOKEN,
+//   appName: import.meta.env.VITE_UNLEASH_APP_NAME,
+//   environment: import.meta.env.VITE_UNLEASH_ENV,
+// });
 
 router.beforeEach( async (to, from, next) => {
     const credentials = store.state.credentials;
@@ -68,25 +68,25 @@ router.beforeEach( async (to, from, next) => {
     if (to.meta && to.meta.requiresAuth) {
         if(store.state.user != null) {
             // Used to set the context fields, shared with the Unleash Proxy
-            unleash.updateContext({
-                userId: credentials.email,
-            });
+            // unleash.updateContext({
+            //     userId: credentials.email,
+            // });
 
             // Start the background polling
-            unleash.start();
-            const forcesBuilderValue = unleash.isEnabled('forces_builder');
-            store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
-            unleash.stop();
+            // unleash.start();
+            // const forcesBuilderValue = unleash.isEnabled('forces_builder');
+            // store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+            // unleash.stop();
             next();
         } else {
             next({ path: '/signin'});
         }
     } else {
         // Start the background polling
-        unleash.start();
-        const forcesBuilderValue = unleash.isEnabled('forces_builder');
-        store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
-        unleash.stop();
+        // unleash.start();
+        // const forcesBuilderValue = unleash.isEnabled('forces_builder');
+        // store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+        // unleash.stop();
         
         next();
     }

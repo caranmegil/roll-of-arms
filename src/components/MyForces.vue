@@ -2,10 +2,11 @@
     <v-tour name="forcesTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
       <Loading v-model:active="isLoading"/>
+      <div class="alert-box" :style="{visibility: willShowMessage ? 'visible' : 'hidden'}">{{message}}</div>
       <div class="dialog" :style="{visibility: willShowConfirmation ? 'visible' : 'hidden'}">
         <div @click="onNo" class="modal-overlay"/>
         <div class="modal yes-no">
-          <div>Are you sure you want to delete?</div>
+          <div>Are you sure you want to delete "{{this.myForces[this.myForce] ? this.myForces[this.myForce].name : ''}}"?</div>
           <div class="element">
             <button id="noBtn" @click="onNo">No</button>
             <button id="yesBtn" @click="onYes">Yes</button>
@@ -15,7 +16,7 @@
       <div class="dialog" :style="{visibility: willShowForcesSelector ? 'visible' : 'hidden'}">
         <div @click="expandForcesSelector" class="modal-overlay"/>
           <div class="modal">
-            <MyForcesSelector class="forces-selector" :my-force="myForce" :my-forces="this.myForces" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+            <MyForcesSelector class="forces-selector" :my-force="this.myForce" :my-forces="this.myForces || []" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
           </div>
       </div>
       <div class="header" v-if="myForces != null && myForce > -1">
@@ -147,6 +148,8 @@ export default {
             observer: null,
             willShowConfirmation: false,
             willShowForcesSelector: false,
+            willShowMessage: false,
+            message: '',
         };
     },
     async unmounted() {
@@ -207,7 +210,7 @@ export default {
           let newMyForces = this.myForces.filter( force => force.name !== that.myForces[that.myForce].name);
           if (!newMyForces) {
             newMyForces = [];
-            this.myForce = -1;
+            this.myForce = this.myForces.length > 0 ? 0 : -1;
           }
           this.setMyForces(newMyForces);
           saveCollection('forces', newMyForces);
@@ -243,15 +246,12 @@ export default {
         onNewForce() {
           this.isLoading = true;
           const myForcesLen = this.myForces != null ? this.myForces.length + 1 : 1;
-          const myForce = {isPublic: false, name: `Force #${myForcesLen}`}
+          const myForce = {isPublic: false, name: `New Force #${myForcesLen}`}
 
-          if (this.myForces !== undefined) {
-            this.forceName = this.myForces[this.myForce] || {name: ''}.name;
-
-          }
           this.myForces.push(myForce);
-          this.setMyForces(this.myForces);
+          this.myForce = this.myForces.length - 1;
 
+          this.setMyForces(this.myForces);
           this.loadForceData(myForce);
           this.saveTheForces();
         },
@@ -371,10 +371,17 @@ export default {
           return filteredDie.id; 
         },
         async saveTheForces() {
+          let that = this;
           if (this.forceName && this.forceName.trim() !== '') {
-            this.myForces[this.myForce].name = this.forceName;
-            this.setMyForces(this.myForces);
-            await saveCollection('forces', this.myForces);
+            this.willShowMessage = false;
+            if (this.myForces[this.myForce].name === this.forceName || this.myForces.filter(force => force.name === that.forceName).length == 0) {
+              this.myForces[this.myForce].name = this.forceName;
+              this.setMyForces(this.myForces);
+              await saveCollection('forces', this.myForces);
+            } else {
+              this.message = 'There is a force already with that name!';
+              this.willShowMessage = true;
+            }
           }
         },
         browseDice() {
