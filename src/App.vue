@@ -14,7 +14,7 @@
       <!-- <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div> -->
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
-      <div v-if="isForcesBuilderEnabled()">
+      <div>
         <div class="separator"></div>
         <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
       </div>
@@ -61,9 +61,6 @@ export default {
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
-    isForcesBuilderEnabled() {
-      return this.$store.state.featureFlags['forces_builder'];
-    },
     changeEmail() {
       this.toggleMenu();
       this.$router.push('/account-transfer');
@@ -309,6 +306,13 @@ button {
 
 .separator {
   border-bottom: 1px solid #D3D3D3;
+}
+
+.alert-box {
+  border: 1px solid black;
+  background: ivory;
+  padding: .75em;
+  border-radius: .25em;
 }
 
 a {

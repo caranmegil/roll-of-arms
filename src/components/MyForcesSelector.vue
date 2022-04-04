@@ -4,7 +4,10 @@
         <div class="element-horizontal">
             <label for="forcesFilter">Select Force</label>
             <select id="forcesFilter" v-model="forceName" size="5" @change="onChange()">
-                <option v-for="name in (myForces || []).map( force => force.name )" :key="name" :selected="myForce.name === name ? 'selected' : ''" :value="name">{{name}}</option>
+              <option v-for="force in myForces"
+                :key="force.name"
+                :selected="myForces[myForce] && force.name === myForces[myForce].name ? 'selected' : ''"
+                :value="force.name">{{force.name}}</option>
             </select>
         </div>
         <div class="element-horizontal"><label>OR</label></div>

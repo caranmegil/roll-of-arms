@@ -12,7 +12,7 @@
             <div v-if="profile.isCollectionPublic" class="body">
               <DiceCollectionWidget :sourceDice="sourceDice" :profile="profile" :uid="uid"/>
             </div>
-            <div v-if="isForcesBuilderEnabled()" class="body">
+            <div class="body">
               <ProfileForces :sourceDice="sourceDice" :uid="uid"/>
             </div>
           </div>
@@ -57,9 +57,6 @@ export default {
     };
   },
   methods: {
-    isForcesBuilderEnabled() {
-      return this.$store.state.featureFlags['forces_builder'];
-    },
     getImageID(die) {
       const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
       return dice[0].id; 
