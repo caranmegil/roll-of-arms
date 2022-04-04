@@ -2,7 +2,7 @@
     <div class="profiles">
       <h1>My Profile <span id="profileURL" class="material-icons material-icons-outlined" @click="getProfileLink">content_copy</span></h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
-        <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
+        <div v-if="hasProfileSaved" class="alert-box saved">You successfully saved your profile settings!</div>
         <div class="element">
             <label for="visibilitySelect">Profile Visiibity</label>
             <select id="visibilitySelect" v-model="profile.visibility">
