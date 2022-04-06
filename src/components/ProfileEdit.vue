@@ -4,8 +4,8 @@
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
         <div v-if="hasProfileSaved" class="alert-box saved">You successfully saved your profile settings!</div>
         <div class="element">
-            <label for="visibilitySelect">Profile Visiibity</label>
-            <select id="visibilitySelect" v-model="profile.visibility">
+            <label for="visibility">Visibility</label>
+            <select id="visibility" v-model="profile.visibility" style="width: 11.5em;">
                 <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private</option>
                 <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Users Only</option>
                 <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Anyone</option>
@@ -137,17 +137,16 @@ export default {
   }
 
   .profiles .element {
-    align-self: center;
     justify-self: center;
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
+    gap: .5em;
   }
 
   .profiles .element > label {
     font-weight: bold;
     justify-self: start;
-    align-self: start;
   }
 
   .separator {
