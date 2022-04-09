@@ -214,11 +214,8 @@ export default {
         this.profile.displayName = this.$route.params.id;
       }
 
-      if (this.profile.isCollectionPublic) {
-        this.sourceDice = await getEntireCollection('dice');
-      } else {
-        this.isLoading = false;
-      }
+      this.sourceDice = await getEntireCollection('dice');
+      this.isLoading = false;
     } else {
       this.isLoading = false;
     }

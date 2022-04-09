@@ -552,6 +552,7 @@ export default {
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
     padding-bottom: .5em;
+    gap: .75em;
   }
 
   .element > label {
@@ -680,7 +681,8 @@ export default {
     margin: auto;
     top: 10em;
     width: 20em;
-    padding: .5em;
+    padding: 1.5em;
+    border-radius: .25em;
     border: 1px solid black;
   }
   .modal-overlay {

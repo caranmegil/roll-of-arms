@@ -65,13 +65,17 @@ export default {
     // Convert profile privacy
     const user = this.$store.state.user;
     if (user != null) {
-      let profile = await getCollectionByField('profiles', user.uid);
-      console.log(profile);
-      if (profile.isPublic) {
-        profile.visibility = '1';
+      try {
+        let profile = await getCollectionByField('profiles', user.uid);
+
+        if (profile.isPublic) {
+          profile.visibility = '1';
+          profile.isPublic = null;
+          await saveCollectionByField('profiles', user.uid, profile);
+        }
+      } catch (e) {
+        console.error(e);
       }
-      profile.isPublic = null;
-      await saveCollectionByField('profiles', user.uid, profile);
     }
   },
   methods: {

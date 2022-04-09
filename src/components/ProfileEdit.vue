@@ -1,11 +1,11 @@
 <template>
     <div class="profiles">
-      <h1>My Profile <span id="profileURL" class="material-icons material-icons-outlined" @click="getProfileLink">content_copy</span></h1>
+      <h1>My Profile <a id="profileURL" class="material-icons material-icons-outlined" :href="`${getProfileLink()}`" target="_blank">link</a></h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
-        <div v-if="hasProfileSaved" class="alert-box saved">You successfully saved your profile settings!</div>
+        <div v-if="hasProfileSaved" class="alert-box saved">Profile updated!</div>
         <div class="element">
             <label for="visibility">Visibility</label>
-            <select id="visibility" v-model="profile.visibility" style="width: 11.5em;">
+            <select id="visibility" v-model="profile.visibility" @click="() => hasProfileSaved = false" style="width: 11.5em;">
                 <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private</option>
                 <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Users Only</option>
                 <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Anyone</option>
@@ -13,21 +13,21 @@
         </div>
         <div class="element">
             <label for="name">Name</label>
-            <input id="name" v-model="profile.name" type="text"/>
+            <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text"/>
         </div>
         <div class="element">
             <label for="facebook">Facebook User ID</label>
-            <input id="facebook" v-model="profile.facebook" type="text"/>
+            <input id="facebook" v-model="profile.facebook"  @click="() => hasProfileSaved = false" type="text"/>
         </div>
         <h3>Discord Information (<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID" target="_blank">Where can I find it?</a>)</h3>
         <div class="social">
             <div class="element">
                 <label for="discord">Handle</label>
-                <input id="discord" v-model="profile.discord" type="text"/>
+                <input id="discord" v-model="profile.discord" @click="() => hasProfileSaved = false" type="text"/>
             </div>
             <div class="element">
                 <label for="discordNum">ID</label>
-                <input id="discordNum" v-model="profile.discord_number" type="text"/>
+                <input id="discordNum" v-model="profile.discord_number" @click="() => hasProfileSaved = false" type="text"/>
             </div>
         </div>
         <button @click="save">Save!</button>
@@ -62,7 +62,7 @@ export default {
       this.$router.go(-1);
     },
     getProfileLink() {
-      navigator.clipboard.writeText(`${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}/profile/${this.username}/`);
+      return `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}/profile/${this.username}/`;
     },
     async save() {
       let that = this;
