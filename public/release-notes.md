@@ -5,7 +5,7 @@ Welcome to the second release of Roll of Arms! In the full release, we have the 
 * Release notes are being added from here on out.
 * Some layout now matches the rule book.
 * A Forces Builder that will allow you to create multiple forces that can be named and made public/private.
-* By default, profiles are private again.  However, we have created the opportunity to allow viewing from two additional sources: "Users Only", which are users of Roll of Arms only, and "Anyone", regardless of their enrollment in the app the profile is viewable.
+* We have created the opportunity to allow viewing from two additional sources of privacy outside the blanket "private": "Users Only", which are users of Roll of Arms only, and "Anyone", regardless of their enrollment in the app the profile is viewable. All previously public profiles will become "Users Only".
 * Updated the dice by changing Terrain die types and Dragon die sizes
 * New dice
 * New editions (thanks, D. Scott O'Brien!)
