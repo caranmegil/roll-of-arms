@@ -46,7 +46,7 @@
               </div>
           </div>
           <div class="body">
-              <div v-for="die in filteredDice" :key="die.name" class="row"  :id="die.name">
+              <div v-for="die in filteredDice" :key="die.sfrID" class="row"  :id="die.sfrID">
                 <div class="die-id"><img @click="() => expand(die)" :src="die.id"/><div>{{die.name}}</div></div>
                 <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
                 <div @click="() => expand(die)" class="type">{{die.type}}</div>
@@ -287,6 +287,7 @@ export default {
             let newDie = {...die};
             delete newDie.editions;
             delete newDie.id;
+            delete newDie.sfrID;
             this.capAmount(edAmnt);
             if(edAmnt.value > 0) {
               newDie.edition = edAmnt.edition;

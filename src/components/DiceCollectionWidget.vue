@@ -44,7 +44,7 @@
       </div>
       <div class="dice">
         <div id="dice-body" class="body">
-          <div v-for="(die) in filteredDice" :key="die.name" :id="die.name" class="row">
+          <div v-for="(die) in filteredDice" :key="die.sfrID" :id="die.sfrID" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
               <div class="size">{{die.rarity}}</div>
               <div class="type">{{die.type}}</div>
