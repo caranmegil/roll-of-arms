@@ -60,7 +60,7 @@ const router = createRouter( {
 router.beforeEach( async (to, from, next) => {
     const credentials = store.state.credentials;
 
-    if ( credentials && credentials.email && credentials.password ) {
+    if ( credentials && credentials.email && credentials.password && store.state.user == null ) {
       let user = await signIntoGoogle(credentials.email, credentials.password);
       store.commit('setUser', user);
     }

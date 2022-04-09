@@ -6,7 +6,7 @@
       <div class="dialog" :style="{visibility: willShowConfirmation ? 'visible' : 'hidden'}">
         <div @click="onNo" class="modal-overlay"/>
         <div class="modal yes-no">
-          <div>Are you sure you want to delete "{{this.myForces[this.myForce] ? this.myForces[this.myForce].name : ''}}"?</div>
+          <div>Are you sure you want to delete "{{this.myForce > -1 && this.myForces[this.myForce] ? this.myForces[this.myForce].name : ''}}"?</div>
           <div class="element">
             <button id="noBtn" @click="onNo">No</button>
             <button id="yesBtn" @click="onYes">Yes</button>

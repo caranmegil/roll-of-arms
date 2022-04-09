@@ -45,6 +45,8 @@ import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
   signOutOfGoogle,
+  getCollectionByField,
+  saveCollectionByField,
 } from '@/firebase';
 
 export default {
@@ -58,6 +60,19 @@ export default {
   },
   beforeMount() {
     this.isLoaded = true;
+  },
+  async mounted() {
+    // Convert profile privacy
+    const user = this.$store.state.user;
+    if (user != null) {
+      let profile = await getCollectionByField('profiles', user.uid);
+      console.log(profile);
+      if (profile.isPublic) {
+        profile.visibility = '1';
+      }
+      profile.isPublic = null;
+      await saveCollectionByField('profiles', user.uid, profile);
+    }
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
