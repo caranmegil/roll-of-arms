@@ -28,7 +28,7 @@
 
         <div class="dice">
             <div class="body" v-if="myForce != null">
-                <div v-for="die in myForce.slots[forceSlot]" :key="`force-${die.name}`" :id="die.name" class="row">
+                <div v-for="die in myForce.slots[forceSlot]" :key="`force-${die.name}`" :id="die.sfrID" class="row">
                     <div @click="() => expand(die)" class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{die.amount}})</div></div>
                     <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
                     <div @click="() => expand(die)" class="type">{{die.type}}</div>
