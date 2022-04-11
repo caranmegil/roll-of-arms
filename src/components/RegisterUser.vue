@@ -2,7 +2,7 @@
   <div class="login">
     <h1>Hey, Dragon Dicer!</h1>
     <section class="welcome-msg">Time to register!</section>
-    <div v-if="hasError" class="error">{{message}}</div>
+    <div v-if="hasError" class="alert-box error">{{message}}</div>
     <div class="login-form">
         <div class="element">
             <label for="username">username</label>

@@ -14,7 +14,12 @@
       <!-- <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div> -->
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
-      <!-- <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div> -->
+      <div>
+        <div class="separator"></div>
+        <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
+      </div>
+      <div class="separator"></div>
+      <div @click="releaseNotes" class="menu-item"><span class="material-icons material-icons-outlined">note</span> Release Notes</div>
       <div class="separator"></div>
       <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
     </div>
@@ -40,6 +45,8 @@ import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
   signOutOfGoogle,
+  getCollectionByField,
+  saveCollectionByField,
 } from '@/firebase';
 
 export default {
@@ -51,8 +58,25 @@ export default {
   },
   components: {
   },
-  async beforeMount() {
+  beforeMount() {
     this.isLoaded = true;
+  },
+  async mounted() {
+    // Convert profile privacy
+    const user = this.$store.state.user;
+    if (user != null) {
+      try {
+        let profile = await getCollectionByField('profiles', user.uid);
+
+        if (profile.isPublic) {
+          profile.visibility = '1';
+          profile.isPublic = null;
+          await saveCollectionByField('profiles', user.uid, profile);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
@@ -63,6 +87,10 @@ export default {
     resetPassword() {
       this.toggleMenu();
       this.$router.push('/reset');
+    },
+    releaseNotes() {
+      this.toggleMenu();
+      this.$router.push('/releasenotes');
     },
     closeMenu() {
       this.toggleMenu();
@@ -116,6 +144,7 @@ export default {
 body {
     font-family: 'Roboto', sans-serif;
     background-color: #F8F6F0;
+    background-image: url('assets/background.webp');
 }
 
 @media screen and (max-width: 480px) {
@@ -217,7 +246,7 @@ button {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     grid-auto-flow: column;
-    border-bottom: 1px solid #D3D3D3;
+    border-bottom: 1px solid black;
 }
 
 .roll-of-arms-body > header > .title-bar-menu {
@@ -281,7 +310,7 @@ button {
 }
 
 .roll-of-arms-body > div#footer {
-    border-top: 1px solid #D3D3D3;
+    border-top: 1px solid black;
     grid-row: 3;
     grid-column: span 4;
     align-self: auto;
@@ -296,6 +325,13 @@ button {
 
 .separator {
   border-bottom: 1px solid #D3D3D3;
+}
+
+.alert-box {
+  border: 1px solid black;
+  background: ivory;
+  padding: .75em;
+  border-radius: .25em;
 }
 
 a {

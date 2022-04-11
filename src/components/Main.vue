@@ -1,36 +1,39 @@
 <template>
+    <v-tour name="mainTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
   <div class="main">
       <header>
         <h2>Welcome to Roll of Arms!</h2>
       </header>
-      <div id="location-info-collapsed" @click="toggleExpand"><div class="expander"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_more</span></div></div>
-      <div id="location-info-expanded" class="profiles" v-if="profile.location">
-        <div class="expander" @click="toggleExpand"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_less</span></div>
-        <div class="error" v-if="hasError">Please make sure that every field is filled out for your location!</div>
-        <div class="element">
-          <label for="city">City</label>
-          <input type="text" v-model="profile.location.city"/>
+      <span id="location">
+        <div id="location-info-collapsed" @click="toggleExpand"><div class="expander"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_more</span></div></div>
+        <div id="location-info-expanded" class="profiles" v-if="profile.location">
+          <div class="expander" @click="toggleExpand"><div class="spacer"></div><h3>My Location Details</h3><span class="material-icons material-icons-outlined">expand_less</span></div>
+          <div class="error" v-if="hasError">Please make sure that every field is filled out for your location!</div>
+          <div class="element">
+            <label for="city">City</label>
+            <input type="text" v-model="profile.location.city"/>
+          </div>
+          <div class="element">
+            <label for="region">State/Province/Region</label>
+            <input type="text" v-model="profile.location.region"/>
+          </div>
+          <div class="element">
+            <label for="region">Country</label>
+            <input type="text" v-model="profile.location.country"/>
+          </div>
+          <button @click="save">Add to Map</button>
+          <button @click="emptyFields">Remove from Map</button>
         </div>
-        <div class="element">
-          <label for="region">State/Province/Region</label>
-          <input type="text" v-model="profile.location.region"/>
-        </div>
-        <div class="element">
-          <label for="region">Country</label>
-          <input type="text" v-model="profile.location.country"/>
-        </div>
-        <button @click="save">Add to Map</button>
-        <button @click="emptyFields">Remove from Map</button>
-      </div>
+      </span>
     <div class="heading">Use the map below to find players in your area and connect on <a href="https://discord.gg/dragondice" target="_blank">Discord</a>!</div>
-    <Map/>
+    <Map id="mainMap"/>
   </div>
 </template>
 
 <script>
 import {
   signIntoGoogle,
-  signInAgain,
+  getCurrentUser,
   getCollection,
   saveCollection,
 } from '@/firebase';
@@ -39,7 +42,7 @@ import { mapActions } from 'vuex';
 import Map from '@/components/Map.vue';
 
 export default {
-  name: 'Main',
+  name: 'MainView',
   props: {
   },
   components: {
@@ -50,10 +53,35 @@ export default {
       map: null,
       hasError: false,
       profile: {},
+      tourCallbacks: {
+        onSkip: this.noMoreTours,
+        onFinish: this.noMoreTours,
+      },
+      steps: [
+        {
+          target: '#location',
+          header: {
+            title: 'Your Location Info!',
+          },
+          content: 'Press the arrow to open up or close the location info editor.',
+        },
+        {
+          target: '#mainMap',
+          header: {
+            title: 'The map!',
+          },
+          content: 'This is where all the players that have registered their relative locations are pinned including links to their all visible profile information!',
+        },
+      ],
     };
   },
   methods: {
     ...mapActions(['setCredentials',]),
+    async noMoreTours() {
+      let profile = await getCollection('profiles');
+      profile.mainTour = false;
+      saveCollection('profiles', profile);
+    },
     toggleExpand() {
       let collapsed = document.getElementById('location-info-collapsed');
       let expanded = document.getElementById('location-info-expanded');
@@ -112,11 +140,10 @@ export default {
     }
   },
   async mounted() {
-    let that = this;
-
     // Find if there is this weird state happening
     // If so, kill the credentials and go to sign-in page.
-    if (this.$store.state.user == null) {
+    const user = getCurrentUser();
+    if (user == null) {
       if(this.$store.state.credentials != undefined && this.$store.state.credentials != null && this.$store.state.credentials.email != undefined) {
         const user = await signIntoGoogle(this.$store.state.credentials.email, this.$store.state.credentials.password);
         this.setUser(user);
@@ -135,18 +162,25 @@ export default {
         this.$router.push('/signin');
       }
     } else {
-      signInAgain(async function(user) {
-        that.profile = await getCollection('profiles') || null;
-        if (user.emailVerified) {
-          if (that.profile == null) {
-            that.$router.push('/profile');
-          } else {
-            that.correctProfile();
-          }
+      this.profile = await getCollection('profiles') || null;
+      if (user.emailVerified) {
+        if (this.profile == null) {
+          this.$router.push('/profile');
         } else {
-          that.$router.push('/verifywarn');
+          this.correctProfile();
         }
-      });
+      } else {
+        this.$router.push('/verifywarn');
+      }
+    }
+
+    if (!this.profile.release_notes_2) {
+      this.profile.release_notes_2 = true;
+      saveCollection('profiles', this.profile);
+      this.$router.push('/releasenotes');
+    }
+    if (this.profile.mainTour || this.profile.mainTour === undefined) {
+      this.$tours['mainTour'].start();
     }
   },
 }

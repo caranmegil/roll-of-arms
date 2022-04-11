@@ -1,25 +1,34 @@
 <template>
+    <v-tour name="profileTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="profiles">
-      <h1>My Profile <span id="profileURL" class="material-icons material-icons-outlined" @click="getProfileLink">content_copy</span></h1>
+      <h1>My Profile <a id="profileURL" class="material-icons material-icons-outlined" :href="`${getProfileLink()}`" target="_blank">link</a></h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
-        <div v-if="hasProfileSaved" class="saved">You successfully saved your profile settings!</div>
+        <div v-if="hasProfileSaved" class="alert-box saved">Profile updated!</div>
+        <div class="element">
+            <label for="visibility">Visibility</label>
+            <select id="visibility" v-model="profile.visibility" @click="() => hasProfileSaved = false" style="width: 11.5em;">
+                <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private</option>
+                <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Users Only</option>
+                <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Anyone</option>
+            </select>
+        </div>
         <div class="element">
             <label for="name">Name</label>
-            <input id="name" v-model="profile.name" type="text"/>
+            <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text"/>
         </div>
         <div class="element">
             <label for="facebook">Facebook User ID</label>
-            <input id="facebook" v-model="profile.facebook" type="text"/>
+            <input id="facebook" v-model="profile.facebook"  @click="() => hasProfileSaved = false" type="text"/>
         </div>
         <h3>Discord Information (<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID" target="_blank">Where can I find it?</a>)</h3>
         <div class="social">
             <div class="element">
                 <label for="discord">Handle</label>
-                <input id="discord" v-model="profile.discord" type="text"/>
+                <input id="discord" v-model="profile.discord" @click="() => hasProfileSaved = false" type="text"/>
             </div>
             <div class="element">
                 <label for="discordNum">ID</label>
-                <input id="discordNum" v-model="profile.discord_number" type="text"/>
+                <input id="discordNum" v-model="profile.discord_number" @click="() => hasProfileSaved = false" type="text"/>
             </div>
         </div>
         <button @click="save">Save!</button>
@@ -46,15 +55,61 @@ export default {
       hasError: false,
       profile: {},
       username: null,
+      tourCallbacks: {
+        onSkip: this.noMoreTours,
+        onFinish: this.noMoreTours,
+      },
+      steps: [
+        {
+          target: '#profileURL',
+          header: {
+            title: 'Your Profile!',
+          },
+          content: 'Press this to open up the profile as it would appear either to other Roll of Arms users or to the public.',
+        },
+        {
+          target: '#visibility',
+          header: {
+            title: 'Visibility!',
+          },
+          content: 'Change how visible your profile is, whether nobody, only Roll of Arms users, or the entire world can view it.',
+        },
+        {
+          target: '#name',
+          header: {
+            title: 'Your name!',
+          },
+          content: 'This is your public name!',
+        },
+        {
+          target: '#facebook',
+          header: {
+            title: 'Facebook!',
+          },
+          content: 'Your Facebook information!',
+        },
+        {
+          target: '.social',
+          header: {
+            title: 'Discord!',
+          },
+          content: 'Your discord information!',
+        },
+      ],
     };
   },
   methods: {
+    async noMoreTours() {
+      let profile = await getCollection('profiles');
+      profile.profileTour = false;
+      saveCollection('profiles', profile);
+    },
     async changePassword() {
       await resetPasswordInGoogle(this.$store.state.credentials.email);
       this.$router.go(-1);
     },
     getProfileLink() {
-      navigator.clipboard.writeText(`${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}/profile/${this.username}/`);
+      return `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}/profile/${this.username}/`;
     },
     async save() {
       let that = this;
@@ -76,6 +131,9 @@ export default {
   },
   async mounted() {
     let profile = await getCollection('profiles') || {};
+    if (!profile.visibility) {
+      profile.visibility = '0';
+    }
     this.isLoading = true;
     const usernames = await getEntireCollection('usernames');
 
@@ -93,6 +151,10 @@ export default {
     }
     this.profile = profile;
     this.isLoading = false;
+
+    if (profile.profileTour || profile.profileTour === undefined) {
+      this.$tours['profileTour'].start();
+    }
   }
 }
 </script>
@@ -126,17 +188,16 @@ export default {
   }
 
   .profiles .element {
-    align-self: center;
     justify-self: center;
     display: grid;
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
+    gap: .5em;
   }
 
   .profiles .element > label {
     font-weight: bold;
     justify-self: start;
-    align-self: start;
   }
 
   .separator {

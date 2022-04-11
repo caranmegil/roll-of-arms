@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, get } from "firebase/database";
+import { getDatabase, ref, set, get, onValue } from "firebase/database";
 import {
     getAuth,
     signInWithEmailAndPassword,
@@ -24,11 +24,16 @@ import { getAnalytics } from "firebase/analytics";
 import firebaseConfig from './firebaseConfig.json';
 
 const app = initializeApp(firebaseConfig)
+let store = null;
 const analytics = getAnalytics(app)
 let auth = null;
 let user = null;
 // utils
 const db = getDatabase(app);
+
+const setStore = ($store) => {
+    store = $store;
+}
 
 // generic collection actions
 const saveCollectionByField = async (collectionName, fieldName, data) => {
@@ -45,7 +50,7 @@ const saveCollectionByField = async (collectionName, fieldName, data) => {
 const saveCollection = async (collectionName, data) => {
     try {
         auth = getAuth();
-        const user = auth.currentUser;
+        const user = getCurrentUser();
         const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
         await set(collectionNameUserRef, data);
         return true;
@@ -58,7 +63,7 @@ const saveCollection = async (collectionName, data) => {
 const getCollection = async (collectionName) => {
     try {
         auth = getAuth();
-        const user = auth.currentUser;
+        const user = getCurrentUser();
         if (user != null) {
             const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
             const snapshot = await get(collectionNameUserRef)
@@ -66,14 +71,31 @@ const getCollection = async (collectionName) => {
             if (snapshot.exists()) {
                 return snapshot.val();
             } else {
+                console.error('snapshot does not exist');
                 return null;
             }
         } else {
+            console.error('user is ', user);
             return null;
         }
     } catch (e) {
         console.error(e);
         return null;
+    }
+}
+
+const getCollectionOn = (collectionName, callback) => {
+    try {
+        auth = getAuth();
+        const user = getCurrentUser();
+        if (user != null) {
+            const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
+            onValue(collectionNameUserRef, (snapshot) => {
+                callback(snapshot.val());
+            });
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 
@@ -137,15 +159,12 @@ const confirmPassword = async (authCode, password) => {
 
 const signIntoGoogle = async (email, password) => {
     auth = getAuth();
-    if (user == null) {
-        user = auth.currentUser;
-        if (user != null) {
-            return user;
-        }
-    }
+    user = getCurrentUser();
 
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    return userCredential.user;
+    if (!user) {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        return userCredential.user;
+    }
 };
 
 const signInAgain = async (func) => {
@@ -220,6 +239,10 @@ const getCurrentUser = () => {
         auth = getAuth();
     }
     user = auth.currentUser;
+
+    if (user == null) {
+        user = store.state.user;
+    }
     return user;
 }
 
@@ -227,7 +250,7 @@ const changeEmail = async (newEmail, oldEmail, password) => {
     auth = getAuth();
 
     const emailAuthCredential = await EmailAuthProvider.credential(oldEmail, password);
-    await reauthenticateWithCredential(auth.currentUser, emailAuthCredential).then(async userCredential => {
+    await reauthenticateWithCredential(getCurrentUser(), emailAuthCredential).then(async userCredential => {
         await updateEmail(userCredential.user, newEmail);
     })
 
@@ -249,11 +272,13 @@ const recoverEmail = async (email, actionCode) => {
 export {
   app,
   analytics,
+  setStore,
   confirmPassword,
   getCurrentUser,
   saveCollection,
   saveCollectionByField,
   getCollection,
+  getCollectionOn,
   getCollectionByField,
   getEntireCollection,
   resetPasswordInGoogle,

@@ -1,37 +1,51 @@
 <template>
-    <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
+    <v-tour name="forcesTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
-      <div class="header">
-        <h1>My Collection</h1>
-        <div class="element">
-          <label for="privacy">Make Public</label>
-          <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
+      <Loading v-model:active="isLoading"/>
+      <div class="alert-box" :style="{visibility: willShowMessage ? 'visible' : 'hidden'}">{{message}}</div>
+      <div class="dialog" :style="{visibility: willShowConfirmation ? 'visible' : 'hidden'}">
+        <div @click="onNo" class="modal-overlay"/>
+        <div class="modal yes-no">
+          <div>Are you sure you want to delete "{{this.myForce > -1 && this.myForces[this.myForce] ? this.myForces[this.myForce].name : ''}}"?</div>
+          <div class="element">
+            <button id="noBtn" @click="onNo">Cancel</button>
+            <button id="yesBtn" @click="onYes">Delete</button>
+          </div>
         </div>
-        <button id="locate" @click="browseDice">Add Dice</button>
+      </div>
+      <div class="dialog" :style="{visibility: willShowForcesSelector ? 'visible' : 'hidden'}">
+        <div @click="expandForcesSelector" class="modal-overlay"/>
+          <div class="modal">
+            <MyForcesSelector class="forces-selector" :my-force="this.myForce" :my-forces="this.myForces || []" @onNewForce="() => { onNewForce(); expandForcesSelector(); }" @onForceChanged="(forceName) => { loadForce(forceName); expandForcesSelector(); }"/>
+          </div>
+      </div>
+      <div class="header" v-if="myForces != null && myForce > -1">
+        <div @click="expandForcesSelector" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
+        <div class="element">
+          <label for="forceName">Force Name</label>
+          <input type="text" id="forceName" v-model="forceName" @change="saveTheForces"/>
+        </div>
+        <button id="deleteBtn" @click="deleteCurrentForce"><span class="material-icons material-icons-outlined" style="font-size: 16px !important;">delete</span> Delete</button>
+        <div class="element">
+          <label for="privacy">Show With Profile</label>
+          <input type="checkbox" id="privacy" v-model="myForces[myForce].isPublic" @change="saveTheForces"/>
+        </div>
         <span id="filters">
           <div class="element">
-              <label for="speciesFilter">Species/Set</label>
-              <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
-                  <option value="">All</option>
-                  <option v-for="option in species" :key="option" :value="option">{{option}}</option>
+              <label for="forceFilter">Dice Group</label>
+              <select id="forceFilter" v-model="forceSlot" @change="setForcesSlot">
+                  <option value="Home" selected="selected">Home Army</option>
+                  <option value="Home Terrain">Home Terrain</option>
+                  <option value="Horde">Horde Army</option>
+                  <option value="Campaign">Campaign Army</option>
+                  <option value="Frontier Terrain">Frontier Terrain</option>
+                  <option value="Summoning">Summoning Pool</option>
               </select>
           </div>
-          <div class="element">
-              <label for="sizeFilter">Size</label>
-              <select id="sizeFilter" v-model="sizeFilter" @change="setSizeFilter">
-                  <option value="" selected="true">All</option>
-                  <option v-for="option in sizes" :key="option" :value="option">{{option}}</option>
-              </select>
-          </div>
-          <div class="element">
-              <label for="typeFilter">Type</label>
-              <select id="typeFilter" v-model="typeFilter" @change="setTypeFilter">
-                  <option value="" selected="true">All</option>
-                  <option v-for="option in types" :key="option" :value="option">{{option}}</option>
-              </select>
-          </div>
-          <div class="element"><label for="totalDice">Total Dice</label><div id="totalDice">{{totalDice}}</div></div>
+          <div class="element"><label for="totalPoints">Total Points</label><div id="totalPoints">{{totalPoints}}</div></div>
         </span>
+
+        <button id="locate" @click="browseDice">Add Dice</button>
 
         <div class="separator"></div>
         <span class="dice">
@@ -44,20 +58,19 @@
         </span>
       </div>
       <div class="dice">
-        <div class="body">
-          <div v-for="(die) in filteredDice" :key="die.name" :id="die.name" class="row">
-              <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
-              <div class="size">{{die.rarity}}</div>
-              <div class="type">{{die.type}}</div>
-                <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
-                <div id="expansion">
-                  <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
-                    <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
-                    <span @click="() => decr(grDie)" class="material-icons material-icons-outlined">remove</span>
-                    <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
-                    <span @click="() => incr(grDie)" class="material-icons material-icons-outlined">add</span>
-                  </div>
+        <div class="body" v-if="myForces !== undefined && myForce > -1 && myForces[myForce] !== undefined">
+          <div v-for="die in myForces[myForce].slots[forceSlot]" :key="die.sfrID" :id="die.sfrID" class="row">
+              <div @click="() => expand(die)" class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{die.amount}})</div></div>
+              <div @click="() => expand(die)" class="size">{{die.rarity}}</div>
+              <div @click="() => expand(die)" class="type">{{die.type}}</div>
+              <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+              <div id="expansion">
+                <div class="add-die">
+                  <span @click="() => decr(die)" class="material-icons material-icons-outlined">remove</span>
+                  <div class="amount"><input type="number" v-model="die.amount" @keyup="() => changeAmount(die)" @change="() => changeAmount(die)"></div>
+                  <span @click="() => incr(die)" class="material-icons material-icons-outlined">add</span>
                 </div>
+              </div>
           </div>
         </div>
       </div>
@@ -65,19 +78,33 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import Loading from 'vue-loading-overlay';
+import 'vue-loading-overlay/dist/vue-loading.css';
+import {
+  mapActions,
+  mapGetters,
+} from 'vuex';
+import {
+  resetSlots,
+} from '@/utils';
 import 'es6-promise/auto';
+import MyForcesSelector from '@/components/MyForcesSelector.vue';
 import {
   getCollection,
   saveCollection,
   getEntireCollection,
+  getCollectionOn,
 } from '@/firebase';
 
 export default {
-    name: 'DiceBrowser',
+    name: 'MyForces',
+    components: {
+      Loading,
+      MyForcesSelector,
+    },
     data() {
         return {
-            totalDice: 0,
+            totalPoints: '0 / 0',
             sortColumn: 0,
             sortDirection: 1,
             profile: {},
@@ -91,164 +118,210 @@ export default {
                 header: {
                   title: 'Filters!',
                 },
-                content: 'Set your species/set and edition filters here.',
+                content: 'Set your area of forces filters here.',
               },
               {
                 target: '#locate',
                 header: {
-                  title: 'Locate Die!',
+                  title: 'Add Die!',
                 },
-                content: 'Press this button to locate dice to add using the dice browser.',
+                content: 'Press this button to locate dice to add using the forces dice browser.',
               },
               {
                 target: '.body',
                 header: {
                   title: 'The Dice!',
                 },
-                content: 'Scroll through this list and locate the die you want and modify your collection.  Changing the amount to 0 removes it.',
+                content: 'Scroll through this list and locate the die you want and modify your forces.  Changing the amount to 0 removes it.',
                 params: {
                   placement: 'auto',
                 },
               },
             ],
             sourceDice: [],
-            dice: [],
-            diceGroupedByEdition: {},
+            myForce: -1,
+            myForces: [],
             filteredDice: [],
-            speciesFilter: '',
-            species: [],
-            sizes: [],
-            sizeFilter: '',
-            types: [],
-            typeFilter: '',
-            timerHandle: null,
+            forceSlot: 'Home',
+            forceName: '',
+            isLoading: true,
+            observer: null,
+            willShowConfirmation: false,
+            willShowForcesSelector: false,
+            willShowMessage: false,
+            message: '',
         };
     },
+    async unmounted() {
+      this.setMyForces(this.myForces);
+    },
     async mounted() {
+      let that = this;
+
+      let options = {
+        root: document.querySelector('.body'),
+        rootMargin: '0px',
+        threshold: 1.0
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach( entry => {
+          entry.target.parentNode.scrollIntoView({behavior: 'smooth', block: 'start'});
+        })
+      }, options);
+
       this.sourceDice = await getEntireCollection('dice');
-      this.profile = await getCollection('profiles') || {};
-      if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
-        this.$tours['collectionTour'].start();
+      this.myForces = this.getMyForces();
+      if (this.myForces == null) {
+        this.myForces = await getCollection('forces') || [];
+      }
+      
+      if (this.myForces == null) {
+        this.myForces = [];
       }
 
-      if (this.profile.isCollectionPublic === undefined) {
-        this.profile.isCollectionPublic = false;
-      }
+      this.setMyForces(this.myForces);
 
-      this.dice = await getCollection('collections') || [];
-      this.dice = this.dice.map(die => {
-          let newDie = {...die};
-          delete newDie['faces'];
-          if (die.species === 'Eldarim') {
-              newDie.species = 'Eldarim, White';
-          }
-          if (die.species === 'Item' && die.name.startsWith('Gold')) {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Eldarim, Gold') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-              newDie.species = 'Eldarim, Yellow';
-          }
-          if (die.species === 'Dragon') {
-              if (!newDie.name.includes('/')) {
-                  newDie.type = 'Elemental';
-                  newDie.rarity = 'Elemental';
-              } else if (newDie.name.includes('White')) {
-                  newDie.type = 'White';
-                  newDie.rarity = 'White';
-              } else if (newDie.name.includes('Ivory')) {
-                  newDie.type = 'Ivory Hybrid';
-                  newDie.rarity = 'Ivory Hybrid';
-              } else {
-                  newDie.type = 'Hybrid';
-                  newDie.rarity = 'Hybrid';
-              }
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Dragonkin') {
-              newDie.name = die.name.replace('Gold', 'Yellow');
-          }
-          if (die.species === 'Equipment') {
-            newDie.species = 'Items';
-          }
-          if (die.species === 'Item') {
-              if (die.rarity !== 'Artifact') {
-                  newDie.rarity = `${die.rarity} Equipment`
-              }
-              newDie.species = 'Item';
-          }
-          if (die.species === 'Medallion') {
-              newDie.species = 'Item';
-          }
-          if (die.species === 'Relic') {
-              newDie.species = 'Item';
-          }
-          if (die.species.endsWith('Terrain')) {
-              newDie.species = 'Terrain';
-              const nameSplit = die.name.split(' ');
-              if (nameSplit.length == 2) {
-                newDie.type = `${nameSplit[1]} ${nameSplit[0]}`;
-              } else {
-                newDie.type = `${nameSplit[1]} ${nameSplit[2]} ${nameSplit[0]}`;
-              }
-          }
-          if (newDie.species === 'Terrain') {
-              if (newDie.name.match(/^.+ (Castle|(?:Dragon Lair)|Grove|Vortex)$/)) {
-                  newDie.rarity = 'Advanced Terrain';
-              } else if (newDie.name.match(/^.+ (Tower|City|(?:Standing Stones)|Temple)$/)) {
-                  newDie.rarity = 'Basic Terrain';
-              }
-          }
-          return newDie;
+      if (this.getForceName() && this.getForceName() !== '') {
+        this.loadForce(this.getForceName());
+      } else if (this.myForces == null || this.myForces.length == 0) {
+        this.onNewForce();
+      } else {
+        this.loadForce();
+      }
+      this.isLoading = false;
+      getCollectionOn('forces', (forces) => {
+        that.myForces = forces || [];
+        that.loadForceData();
       });
 
-      this.speciesFilter = '';
-      this.sizeFilter = this.$store.state.filters.size;
-      this.typeFilter = this.$store.state.filters.type;
-      
-      let species = [];
-      this.dice.forEach(die => species.push(die.species));
-
-      species = [...new Set(species)].sort();
-      this.species = species;
-
-      this.setSpeciesFilter();
-      this.timerHandle = setInterval(this.saveAndClear, 5000);
-    },
-    unmounted() {
-      this.saveAndClear();
-      clearInterval(this.timerHandle);
+      this.profile = await getCollection('profiles') || {};
+      if (this.profile.forcesTour || this.profile.forcesTour === undefined) {
+        this.$tours['forcesTour'].start();
+      }
     },
     methods: {
-        ...mapActions(['setCollectionDie', 'setFilters']),
+        ...mapActions(['setForceSlot', 'setFilters', 'setMyForces', 'setForceName']),
+        ...mapGetters(['getMyForces', 'getForceName']),
+        async onYes() {
+          this.willShowConfirmation = false;
+
+          let that = this;
+          let newMyForces = this.myForces.filter( force => force.name !== that.myForces[that.myForce].name);
+          if (!newMyForces) {
+            newMyForces = [];
+            this.myForce = this.myForces.length > 0 ? 0 : -1;
+          }
+          this.setMyForces(newMyForces);
+          saveCollection('forces', newMyForces);
+
+          if (newMyForces.length == 0) {
+            this.onNewForce();
+          } else {
+            this.loadForce();
+          }
+        },
+        onNo() {
+          this.willShowConfirmation = false;
+        },
+        deleteCurrentForce() {
+          this.willShowConfirmation = true;
+        },
+        loadForceData() {
+          this.forceName = this.myForces[this.myForce].name;
+          this.setForceName(this.myForces[this.myForce].name);
+
+          resetSlots(this.myForces[this.myForce]);
+
+          if (this.myForces[this.myForce].isPublic === undefined) {
+            this.myForces[this.myForce].isPublic = false;
+          }
+
+          this.forceSlot = this.$store.state.forceSlot || 'Home';
+
+          this.recalcTotals();
+
+          this.isLoading = false;
+        },
+        onNewForce() {
+          this.isLoading = true;
+          const myForcesLen = this.myForces != null ? this.myForces.length + 1 : 1;
+          const myForce = {isPublic: false, name: `New Force #${myForcesLen}`}
+
+          this.myForces.push(myForce);
+          this.myForce = this.myForces.length - 1;
+
+          this.setMyForces(this.myForces);
+          this.loadForceData(myForce);
+          this.saveTheForces();
+        },
+        async loadForce(name) {
+          let that = this;
+          this.myForce = -1;
+          if (name !== undefined) {
+            this.myForces.forEach( (force, index) => {
+              if (force.name === name) {
+                that.myForce = index;
+              }
+            });
+          } else {
+            this.myForce = 0;
+          }
+
+          this.loadForceData();
+          this.saveTheForces();
+        },
         decr(die) {
           if (die.amount > 0) {
             die.amount--;
+            this.recalcTotals();
+            this.saveTheForces();
           }
         },
         incr(die) {
-          die.amount++;
+          if (die.rarity.includes('Terrain')) {
+            die.amount = 1;
+          } else {
+            die.amount++;
+          }
+          this.recalcTotals();
+          this.saveTheForces();
         },
-        expand(id) {
-          let row = document.getElementById(id);
+        expandForcesSelector() {
+          this.willShowForcesSelector = !this.willShowForcesSelector;
+        },
+        expand(die) {
+          let row = document.getElementById(die.name);
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
+          let allExpansions = document.querySelectorAll('#expansion');
+          this.edAmnt = 0;
+
           if (window.getComputedStyle(expansion).display === 'none') {
-            let expansions = document.querySelectorAll('#expansion');
-            [...expansions].forEach((dieExpansion) => dieExpansion.style.display = 'none');
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
             expansion.style.display = 'grid';
             actionButton.innerText = 'expand_less';
+            this.observer.observe(expansion);
           } else {
-            expansion.style.display = 'none';
-            actionButton.innerText = 'expand_more';
+            allExpansions.forEach(expansion => {
+              let actionButton = expansion.parentNode.querySelector('#action-button');
+              expansion.style.display = 'none';
+              actionButton.innerText = 'expand_more';
+            });
           }
         },
-        saveAndClear() {
-          this.dice = this.dice.filter(die => die.amount > 0);
-          this.filteredDice = this.applyFiltersAndSort();
-          this.recalcTotals();
-          saveCollection('collections', this.dice);
-        },
+        // exportCurrentForce() {
+        //   if (this.myForce !== undefined && this.myForce.name !== undefined) {
+        //     const a = document.createElement('a');
+        //     a.href = URL.createObjectURL( new Blob([JSON.stringify(this.myForce)], { type: 'text/json' }) );
+        //     a.download = `${encodeURI(this.myForce.name)}.json`;
+        //     a.click();
+        //   }
+        // },
         changeNameDirection() {
           if (this.sortColumn != 0) {
             this.sortColumn = 0;
@@ -278,43 +351,9 @@ export default {
         },
         applyFiltersAndSort() {
           let that = this;
-          let dice = this.dice.filter( die => that.speciesFilter === '' || die.species === that.speciesFilter );
 
-          let sizes = [];
-          let types = [];
-          dice.forEach( die => {
-            sizes.push(die.rarity);
-            types.push(die.type);
-          });
+          let dice = this.myForces[this.myForce][this.forceSlot];
 
-          sizes = [...new Set(sizes)];
-          sizes.sort();
-          types = [...new Set(types)];
-          types.sort();
-
-          this.sizes = sizes;
-          this.types = types;
-
-          this.setFilters({species: this.speciesFilter, edition: this.editionFilter, size: this.sizeFilter, type: this.typeFilter});
-
-          dice = dice.filter( die =>
-                              (that.typeFilter === '' || die.type === that.typeFilter)
-                              && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
-                            );
-          dice.sort( (a, b) => {
-            if (that.sortColumn == 0) {
-              return that.sortDirection * a.name.localeCompare(b.name);
-            } else if (that.sortColumn == 1) {
-              return that.sortDirection * a.rarity.localeCompare(b.rarity);
-            } else if (that.sortColumn == 2) {
-              return that.sortDirection * a.type.localeCompare(b.type);
-            } else if (that.sortColumn == 3) {
-              return that.sortDirection * a.edition.localeCompare(b.edition);
-            }
-
-          });
-
-          this.diceGroupedByEdition = {};
           dice.forEach(die => {
             let namesArr = that.diceGroupedByEdition[die.name];
             if (namesArr === undefined) {
@@ -328,18 +367,32 @@ export default {
           return dice;
         },
         getImageID(die) {
-          const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
-          return dice[0].id; 
+          const filteredDie = this.sourceDice.filter(sourceDie => sourceDie.name === die.name)[0] || {};
+          return filteredDie.id; 
         },
-        saveTheProfile() {
-          saveCollection('profiles', this.profile);
+        async saveTheForces() {
+          let that = this;
+          if (this.forceName && this.forceName.trim() !== '') {
+            this.willShowMessage = false;
+            if (this.myForces[this.myForce].name === this.forceName || this.myForces.filter(force => force.name === that.forceName).length == 0) {
+              this.myForces[this.myForce].name = this.forceName;
+              this.setMyForces(this.myForces);
+              await saveCollection('forces', this.myForces);
+            } else {
+              this.message = 'There is a force already with that name!';
+              this.willShowMessage = true;
+            }
+          }
         },
         browseDice() {
-          this.$router.push('/dicebrowser');
+          this.setForceSlot(this.forceSlot);
+          if (this.myForces[this.myForce].name !== undefined && this.myForces[this.myForce].name !== '') {
+            this.$router.push('/forcesdicebrowser');
+          }
         },
         changeAmount(grDie) {
           if (!isNaN(grDie.amount)) {
-            this.dice.map(die => {
+            this.myForces[this.myForce][this.forceSlot].map(die => {
               let newDie = {...die};
 
               if (die.name === grDie.name && die.edition === grDie.edition) {
@@ -348,38 +401,112 @@ export default {
 
               return newDie;
             });
+
+            this.recalcTotals();
+            this.saveTheForces();
           }
         },
-        recalcSubTotals(die) {
-          if (this.diceGroupedByEdition[die.name] === undefined) {
-            return 0;
+        weightDie(die, isSummoning) {
+          let pointValue = 0;
+
+          if (isSummoning) {
+            if (die.species === 'Dragonkin') {
+              switch (die.rarity) {
+                case 'Small':
+                  pointValue = 1;
+                  break;
+                case 'Medium':
+                  pointValue = 2;
+                  break;
+                case 'Large':
+                  pointValue = 3;
+                  break;
+                default:
+                  pointValue = 4;
+                  break;
+              }
+            } else {
+              pointValue = 1;
+            }
+          } else {
+            if (die.species === 'Items') {
+              switch (die.type) {
+                case 'Relic':
+                  pointValue = 4;
+                  break;
+                case 'Medallion':
+                  pointValue = 3;
+                  break;
+                default:
+                  if (die.rarity === 'Large Equipment') {
+                    pointValue = 2;
+                  } else if (die.rarity == 'Small Equipment') {
+                    pointValue = 1;
+                  }
+                  break;
+              }
+            } else if (die.species === 'Dragons' || die.species === 'Dragonkin' || die.species === 'Terrain') {
+              pointValue = 0;
+            } else {
+              switch (die.rarity) {
+                case 'Small':
+                  pointValue = 1;
+                  break;
+                case 'Medium':
+                  pointValue = 2;
+                  break;
+                case 'Large':
+                  pointValue = 3;
+                  break;
+                default:
+                  pointValue = 4;
+                  break;
+              }
+            }
           }
-          return this.diceGroupedByEdition[die.name].reduce( (previousValue, currentValue) => previousValue += currentValue.amount, 0);
+
+          return pointValue;
+        },
+        flattenForce() {
+          let dice = []
+          Object.keys(this.myForces[this.myForce].slots).forEach( slotName => slotName !== 'Summoning' ? dice = [...dice, ...this.myForces[this.myForce].slots[slotName]] : dice);
+          return dice;
+        },
+        calcMediumEquipment() {
+          let dice = this.flattenForce();
+          const totalMediumEquipment = dice.filter(die => die.species === 'Items' && die.rarity === 'Medium Equipment').reduce( (total, die) => total + die.amount, 0);
+
+          return Math.floor(totalMediumEquipment / 2) * 3 + ( (totalMediumEquipment % 2) * 2);
+        },
+        calcSlotTotal(slot, isSummoning) {
+          let that = this;
+          let totals = slot.reduce( (prev, current) => prev + that.weightDie(current, isSummoning) * current.amount, 0);
+          return totals;
         },
         recalcTotals() {
-            this.totalDice = this.filteredDice.reduce((previousValue, currentValue) => previousValue += currentValue.amount, 0);
-        },
-        setCurrentDie(die) {
-          this.setCollectionDie(die);
+          let that = this;
+          if (this.myForces[this.myForce] !== undefined) {
+            this.myForces[this.myForce].slots[this.forceSlot] = this.myForces[this.myForce].slots[this.forceSlot].filter(die => die.amount > 0);
+          }
+          const myForce = this.myForces[this.myForce];
+          if (this.forceSlot === 'Summoning') {
+            const totalDKPoints = myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(myForce.slots[this.forceSlot].filter(die => die.species === 'Dragonkin'), true) : 0;
+            const totalDragons = myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(myForce.slots[this.forceSlot].filter(die => die.species === 'Dragons'), true) : 0;
+            const totalMTs = this.myForce.slots[this.forceSlot] !== undefined ? this.calcSlotTotal(myForce.slots[this.forceSlot].filter(die => die.rarity === 'Minor Terrain'), true) : 0;
+            this.totalPoints = `Dragons ${totalDragons} / Kin: ${totalDKPoints} / Minors: ${totalMTs}`;
+          } else {
+            const forceTotal = (this.myForces[this.myForce] !== undefined) ? Object.keys(myForce.slots).reduce( (total, slotName) => total + that.calcSlotTotal(myForce.slots[slotName]), 0) + this.calcMediumEquipment() : 0;
+            const slotTotal =  (this.myForces[this.myForce] !== undefined) ? this.calcSlotTotal(myForce.slots[this.forceSlot], false) : 0;
+            this.totalPoints = `${slotTotal} / ${forceTotal}`;
+          }
         },
         async noMoreTours() {
           let profile = await getCollection('profiles');
-          profile.collectionTour = false;
+          profile.forcesTour = false;
           saveCollection('profiles', profile);
         },
-        setSpeciesFilter: function() {
-            this.sizeFilter = '';
-            this.typeFilter = '';
-            this.filteredDice = this.applyFiltersAndSort();
-            this.recalcTotals();
-        },
-        setSizeFilter: function() {
-            this.filteredDice = this.applyFiltersAndSort();
-            this.recalcTotals();
-        },
-        setTypeFilter: function() {
-            this.filteredDice = this.applyFiltersAndSort();
-            this.recalcTotals();
+        setForcesSlot() {
+          this.recalcTotals();
         },
     },
 };
@@ -390,9 +517,18 @@ export default {
     width: 5em;
   }
 
+  input#forceName {
+    width: 15em;
+  }
+
+  button#export {
+    width: 32px;
+  }
+
   button {
     width: 10em;
   }
+
   .collections {
     width: 100%;
     display: grid;
@@ -416,6 +552,7 @@ export default {
     grid-auto-flow: column;
     grid-template-columns: 1fr 1fr;
     padding-bottom: .5em;
+    gap: .75em;
   }
 
   .element > label {
@@ -449,7 +586,7 @@ export default {
   .body .row {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-rows: 1fr auto;
     justify-items: center;
     align-items: center;
     gap: .25em;
@@ -506,6 +643,57 @@ export default {
     align-items: center;
     gap: .5em;
     padding-left: 1.0em;
+  }
+
+  .open-forces-selector {
+    width: 100%;
+    text-align: center;
+  }
+
+  #force-action-button {
+    position: relative;
+    top: .3em;
+  }
+
+  .forces-selector {
+    height: 15em;
+  }
+
+  .yes-no {
+    height: 3.5em;
+  }
+
+  .dialog {
+    display: grid;
+    width: 100%;
+    align-items: center;
+    justify-items: center;
+  }
+  .modal {
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    align-content: center;
+    z-index: 2;
+    position: fixed;
+    background-color: ivory;
+    margin: auto;
+    top: 10em;
+    width: 20em;
+    padding: 1.5em;
+    border-radius: .25em;
+    border: 1px solid black;
+  }
+  .modal-overlay {
+    background-color: #D3D3D3;
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: .5;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
   }
 
   #expansion {

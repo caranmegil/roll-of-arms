@@ -1,14 +1,8 @@
 <template>
-    <v-tour name="collectionTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="collections">
-      <Loading v-model:active="isLoading"/>
+    <Loading v-model:active="isLoading"/>
+
       <div class="header">
-        <h1>My Collection</h1>
-        <div class="element">
-          <label for="privacy">Show With Profile</label>
-          <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
-        </div>
-        <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
               <label for="speciesFilter">Species/Set</label>
@@ -49,7 +43,7 @@
         </span>
       </div>
       <div class="dice">
-        <div class="body">
+        <div id="dice-body" class="body">
           <div v-for="(die) in filteredDice" :key="die.sfrID" :id="die.sfrID" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
               <div class="size">{{die.rarity}}</div>
@@ -57,10 +51,8 @@
                 <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
                   <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
-                    <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
-                    <span @click="() => decr(grDie)" class="material-icons material-icons-outlined">remove</span>
-                    <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
-                    <span @click="() => incr(grDie)" class="material-icons material-icons-outlined">add</span>
+                    <span>{{ grDie.edition }}</span>
+                    <div class="amount">{{grDie.amount}}</div>
                   </div>
                 </div>
           </div>
@@ -70,82 +62,47 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
 import Loading from 'vue-loading-overlay';
+import { mapActions } from 'vuex';
 import 'es6-promise/auto';
 import {
-  getCollection,
-  saveCollection,
-  getEntireCollection,
+  getCollectionByField,
 } from '@/firebase';
 import {
   convertEditionForDie,
 } from '@/utils';
 
 export default {
-    name: 'DiceBrowser',
+    name: 'DiceCollectionWidget',
+    props: ['sourceDice', 'profile', 'uid'],
     components: {
       Loading,
     },
-
     data() {
         return {
-            observer: null,
             totalDice: 0,
             sortColumn: 0,
             sortDirection: 1,
-            profile: {},
-            tourCallbacks: {
-              onSkip: this.noMoreTours,
-              onFinish: this.noMoreTours,
-            },
-            steps: [
-              {
-                target: '#filters',
-                header: {
-                  title: 'Filters!',
-                },
-                content: 'Set your species/set and edition filters here.',
-              },
-              {
-                target: '#locate',
-                header: {
-                  title: 'Locate Die!',
-                },
-                content: 'Press this button to locate dice to add using the dice browser.',
-              },
-              {
-                target: '.body',
-                header: {
-                  title: 'The Dice!',
-                },
-                content: 'Scroll through this list and locate the die you want and modify your collection.  Changing the amount to 0 removes it.',
-                params: {
-                  placement: 'auto',
-                },
-              },
-            ],
-            sourceDice: [],
             dice: [],
             diceGroupedByEdition: {},
             filteredDice: [],
-            nameFilter: '',
             speciesFilter: '',
             species: [],
             sizes: [],
             sizeFilter: '',
             types: [],
             typeFilter: '',
-            timerHandle: null,
+            nameFilter: '',
+            observer: null,
             isLoading: true,
         };
     },
     async mounted() {
       let options = {
-        root: document.querySelector('.body'),
+        root: document.getElementById('dice-body'),
         rootMargin: '0px',
         threshold: 1.0
-      }
+      };
 
       this.observer = new IntersectionObserver((entries) => {
         entries.forEach( entry => {
@@ -153,18 +110,12 @@ export default {
         })
       }, options);
 
-
-      this.sourceDice = await getEntireCollection('dice');
-      this.profile = await getCollection('profiles') || {};
       if (this.profile.collectionTour || this.profile.collectionTour === undefined) {
         this.$tours['collectionTour'].start();
       }
 
-      if (this.profile.isCollectionPublic === undefined) {
-        this.profile.isCollectionPublic = false;
-      }
-
-      this.dice = await getCollection('collections') || [];
+      this.isLoading = true;
+      this.dice = await getCollectionByField('collections', this.uid) || [];
       this.dice.forEach( die => die.edition = convertEditionForDie(die));
 
       this.speciesFilter = '';
@@ -176,24 +127,11 @@ export default {
 
       species = [...new Set(species)].sort();
       this.species = species;
-
+      this.isLoading = false;
       this.setSpeciesFilter();
-      this.timerHandle = setInterval(this.saveAndClear, 5000);
-    },
-    unmounted() {
-      this.saveAndClear();
-      clearInterval(this.timerHandle);
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-        decr(die) {
-          if (die.amount > 0) {
-            die.amount--;
-          }
-        },
-        incr(die) {
-          die.amount++;
-        },
         expand(id) {
           let row = document.getElementById(id);
           let actionButton = row.querySelector('#action-button');
@@ -216,14 +154,6 @@ export default {
               actionButton.innerText = 'expand_more';
             });
           }
-
-          row.classList.toggle('highlight');
-        },
-        saveAndClear() {
-          this.dice = this.dice.filter(die => die.amount > 0);
-          this.filteredDice = this.applyFiltersAndSort();
-          this.recalcTotals();
-          saveCollection('collections', this.dice);
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {
@@ -232,9 +162,7 @@ export default {
           } else {
             this.sortDirection *= -1;
           }
-          this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
-          this.isLoading=false;
         },
         changeSizeDirection() {
           if (this.sortColumn != 1) {
@@ -243,9 +171,7 @@ export default {
           } else {
             this.sortDirection *= -1;
           }
-          this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
-          this.isLoading=false;
         },
         changeTypeDirection() {
           if (this.sortColumn != 2) {
@@ -254,9 +180,7 @@ export default {
           } else {
             this.sortDirection *= -1;
           }
-          this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
-          this.isLoading=false;
         },
         applyFiltersAndSort() {
           let that = this;
@@ -316,25 +240,6 @@ export default {
           const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
           return dice[0].id; 
         },
-        saveTheProfile() {
-          saveCollection('profiles', this.profile);
-        },
-        browseDice() {
-          this.$router.push('/dicebrowser');
-        },
-        changeAmount(grDie) {
-          if (!isNaN(grDie.amount)) {
-            this.dice.map(die => {
-              let newDie = {...die};
-
-              if (die.name === grDie.name && die.edition === grDie.edition) {
-                newDie.amount = grDie.amount;
-              }
-
-              return newDie;
-            });
-          }
-        },
         recalcSubTotals(die) {
           if (this.diceGroupedByEdition[die.name] === undefined) {
             return 0;
@@ -349,35 +254,24 @@ export default {
         setCurrentDie(die) {
           this.setCollectionDie(die);
         },
-        async noMoreTours() {
-          let profile = await getCollection('profiles');
-          profile.collectionTour = false;
-          saveCollection('profiles', profile);
-        },
         setNameFilter() {
             this.isLoading=true;
             this.filteredDice = this.applyFiltersAndSort();
             this.isLoading=false;
         },
         setSpeciesFilter() {
-            this.isLoading = true;
             this.sizeFilter = '';
             this.typeFilter = '';
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
-            this.isLoading = false;
         },
         setSizeFilter() {
-            this.isLoading = true;
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
-            this.isLoading = false;
         },
         setTypeFilter() {
-            this.isLoading = true;
             this.filteredDice = this.applyFiltersAndSort();
             this.recalcTotals();
-            this.isLoading = false;
         },
     },
 };
@@ -514,11 +408,6 @@ export default {
     grid-area: 2 / 1 / 2 / 5;
     width: 100%;
     border: 1px dashed black;
-  }
-
-  .highlight {
-    background-color: #fff;
-    border: 1pt solid black;
   }
 
   .add-button {

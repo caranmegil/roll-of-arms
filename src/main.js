@@ -5,10 +5,14 @@ import {
     createWebHistory,
 } from 'vue-router';
 import VueTour from 'v3-tour';
+import { UnleashClient } from 'unleash-proxy-client';
 
 import 'v3-tour/dist/vue-tour.css';
 
-import { signIntoGoogle } from '@/firebase';
+import {
+    setStore,
+    signIntoGoogle,
+} from '@/firebase';
 
 import App from './App.vue'
 
@@ -24,6 +28,8 @@ import DiceCollection from './components/DiceCollection.vue';
 import MyForces from './components/MyForces.vue';
 import VerificationFailure from './components/VerificationFailure.vue';
 import AccountTransfer from './components/AccountTransfer.vue';
+import ForcesDiceBrowser from './components/ForcesDiceBrowser.vue';
+import ReleaseNotes from './components/ReleaseNotes.vue';
 
 const routes = [
     { path: '/', component: Main, meta: { requiresAuth: true } },
@@ -34,48 +40,88 @@ const routes = [
     { path: '/profile/:id', component: ProfileView },
     { path: '/auth', component: Auth },
     { path: '/dicebrowser', component: DiceBrowser, meta: { requiresAuth: true } },
+    { path: '/forcesdicebrowser', component: ForcesDiceBrowser, meta: { requiresAuth: true } },
     { path: '/my-collection', component: DiceCollection, meta: { requiresAuth: true } },
     { path: '/my-forces', component: MyForces, meta: { requiresAuth: true } },
     { path: '/verifywarn', component: VerificationFailure, meta: { requiresAuth: false } },
     { path: '/account-transfer', component: AccountTransfer, meta: { requiresAuth: true } },
+    { path: '/releasenotes', component: ReleaseNotes }
 ];
 
 const router = createRouter( {
-    history: createWebHistory(process.env.BASE_URL),
+    history: createWebHistory('/'),
     routes,
 });
+
+// const unleash = new UnleashClient({
+//   url: 'https://featureflags.nerderium.com/proxy',
+//   clientKey: import.meta.env.VITE_UNLEASH_TOKEN,
+//   appName: import.meta.env.VITE_UNLEASH_APP_NAME,
+//   environment: import.meta.env.VITE_UNLEASH_ENV,
+// });
 
 router.beforeEach( async (to, from, next) => {
     const credentials = store.state.credentials;
 
-    if ( credentials && credentials.email && credentials.password ) {
+    if ( credentials && credentials.email && credentials.password && store.state.user == null ) {
       let user = await signIntoGoogle(credentials.email, credentials.password);
       store.commit('setUser', user);
     }
 
     if (to.meta && to.meta.requiresAuth) {
         if(store.state.user != null) {
+            // Used to set the context fields, shared with the Unleash Proxy
+            // unleash.updateContext({
+            //     userId: credentials.email,
+            // });
+
+            // Start the background polling
+            // unleash.start();
+            // const forcesBuilderValue = unleash.isEnabled('forces_builder');
+            // store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+            // unleash.stop();
             next();
         } else {
             next({ path: '/signin'});
         }
     } else {
+        // Start the background polling
+        // unleash.start();
+        // const forcesBuilderValue = unleash.isEnabled('forces_builder');
+        // store.commit('setFeatureFlags', {forces_builder: forcesBuilderValue,});
+        // unleash.stop();
+        
         next();
     }
 });
-
 
 const store = createStore({
     state() {
         return {
             user: JSON.parse(localStorage.getItem('user') || null),
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
-            collectionDie: null,
+            bufferDie: null,
+            forceName: null,
             forceSlot: 'Home',
-            filters: {species: '', edition: '', size: '', type: ''},
+            filters: {species: '', edition: '', size: '', type: '',},
             dice: JSON.parse(localStorage.getItem('dice') || 'null'),
-            forcesDice: [],
+            myForces: null,
+            featureFlags: {},
         };
+    },
+    getters: {
+        getMyForces(state) {
+            let myForce = state.myForces;
+
+            if (myForce != null) {
+                myForce.sort( (a,b) => a.name.localeCompare(b.name));
+            }
+
+            return myForce;
+        },
+        getForceName(state) {
+            return state.forceName;
+        },
     },
     mutations: {
         setUser(state, user) {
@@ -86,8 +132,8 @@ const store = createStore({
             state.credentials = credentials;
             localStorage.setItem('credentials', JSON.stringify(credentials))
         },
-        setCollectionDie(state, collectionDie) {
-            state.collectionDie = collectionDie;
+        setBufferDie(state, die) {
+            state.bufferDie = die;
         },
         setFilters(state, filters) {
             state.filters = filters;
@@ -96,19 +142,28 @@ const store = createStore({
             state.dice = dice;
             localStorage.setItem('dice', JSON.stringify(dice));
         },
-        setForcesDice(state, dice) {
-            state.forcesDice = dice;
-        },
         setForceSlot(state, slot) {
             state.forceSlot = slot;
+        },
+        setForceName(state, forceName) {
+            state.forceName = forceName;
+        },
+        setMyForces(state, myForces) {
+            state.myForces = myForces;
+        },
+        setFeatureFlags(state, flagValue) {
+            state.featureFlags = flagValue;
         },
         signOut(state) {
             state.user = null;
             state.credentials = {}
-            state.filters = {species: '', edition: '', size: '', type: ''}
+            state.filters = {species: '', edition: '', size: '', type: '',}
             state.dice = [];
-            state.forcesDice = [];
             state.forceSlot = 'Home';
+            state.forceName = null;
+            state.bufferDie = null;
+            state.myForces = [];
+            state.featureFlags = {};
             localStorage.setItem('credentials', JSON.stringify({}));
             localStorage.setItem('dice', JSON.stringify(null));
             localStorage.setItem('user', JSON.stringify(null));
@@ -121,26 +176,37 @@ const store = createStore({
         setCredentials({ commit }, credentials) {
             commit('setCredentials', credentials);
         },
-        setCollectionDie({ commit }, collectionDie) {
-            commit('setCollectionDie', collectionDie);
+        setBufferDie({ commit }, die) {
+            commit('setBufferDie', die);
         },
         setFilters({ commit }, filters) {
+            commit('setFilters', filters);
+        },
+        setAreaFilters({ commit }, filters) {
             commit('setFilters', filters);
         },
         setDice({ commit }, dice) {
             commit('setDice', dice);
         },
-        setForcesDice({ commit }, dice) {
-            commit('setForcesDice', dice);
-        },
         setForceSlot({ commit }, slot) {
             commit('setForceSlot', slot);
+        },
+        setForceName( { commit }, forceName) {
+            commit( 'setForceName', forceName);
+        },
+        setMyForces( { commit }, myForces) {
+            commit('setMyForces', myForces);
+        },
+        setFeatureFlags({ commit }, flagValue) {
+            commit('setFeatureFlags', flagValue);
         },
         signOut({ commit }) {
             commit('signOut');
         },
     },
 });
+
+setStore(store);
 
 createApp(App)
     .use(store)

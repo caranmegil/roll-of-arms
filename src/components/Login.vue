@@ -2,7 +2,7 @@
   <div class="login">
     <h1>Welcome, kindly Dragon Dicer!</h1>
     <section class="welcome-msg">This is the Roll of Arms for the game <a href="https://www.sfr-inc.com/dragondice.php" target="_blank">Dragon Dice <sup>TM</sup></a> by <a href="https://sfr-inc.com" target="_blank">SFR, Inc.</a>  It is a magnificent system for player and collection management with many more features to come!  Locate us on <a href="https://discord.gg/dragondice" target="_blank">Discord</a> for exciting games!</section>
-    <div v-if="hasError" class="error">Please make sure your email and password are correct!</div>
+    <div v-if="hasError" class="alert-box error">Please make sure your email and password are correct!</div>
     <div class="login-form">
         <div class="element">
             <label for="email">email</label>
@@ -33,7 +33,7 @@ import 'es6-promise/auto';
 import Map from './Map.vue';
 
 export default {
-  name: 'Login',
+  name: 'LoginView',
   props: {
   },
   components: {
@@ -53,17 +53,13 @@ export default {
     ...mapActions(['setUser', 'setCredentials']),
     async signIn() {
         let user = null;
+        this.hasError = false;
         try {
           user = await signIntoGoogle(this.email, this.password);
           this.setUser(user);
         } catch (e) {
-          switch (e.code) {
-            case 'auth/wrong-password':
-              user = getCurrentUser();
-              break;
-            default:
-              console.error(e);
-          }
+          this.hasError = true;
+          console.error(e);
         }
 
         if(user != null) {

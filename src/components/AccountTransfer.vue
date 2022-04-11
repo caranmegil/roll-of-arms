@@ -2,8 +2,8 @@
   <div class="login">
     <h1>Hey, Dragon Dicer!</h1>
     <section class="welcome-msg">Want to change email?  No problem!</section>
-    <div v-if="hasError" class="error">{{message}}</div>
-    <div v-if="hasSuccess" class="success">Please, check your email account and spam/junk folder for a confirmation!</div>
+    <div v-if="hasError" class="alert-box error">{{message}}</div>
+    <div v-if="hasSuccess" class="alert-box success">Please, check your email account and spam/junk folder for a confirmation!</div>
     <div class="login-form">
         <div class="element">
             <label for="email">new email</label>
@@ -75,8 +75,6 @@ export default {
                     this.hasSuccess = true;
                     this.hasError = false;
                     this.$router.push('/');
-                } else {
-                    console.log('what a test!');
                 }
             } else {
                 this.message = 'Please make sure your password is correct!';
