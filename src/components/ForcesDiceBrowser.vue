@@ -286,7 +286,7 @@ export default {
           this.isLoading=false;
         },
         expand(die) {
-          let row = document.getElementById(die.name);
+          let row = document.getElementById(die.sfrID);
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
           let allExpansions = document.querySelectorAll('#expansion');
