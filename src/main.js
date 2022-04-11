@@ -9,7 +9,10 @@ import { UnleashClient } from 'unleash-proxy-client';
 
 import 'v3-tour/dist/vue-tour.css';
 
-import { signIntoGoogle } from '@/firebase';
+import {
+    setStore,
+    signIntoGoogle,
+} from '@/firebase';
 
 import App from './App.vue'
 
@@ -202,6 +205,8 @@ const store = createStore({
         },
     },
 });
+
+setStore(store);
 
 createApp(App)
     .use(store)
