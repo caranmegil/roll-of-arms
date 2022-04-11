@@ -1,4 +1,5 @@
 <template>
+    <v-tour name="profileTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="profiles">
       <h1>My Profile <a id="profileURL" class="material-icons material-icons-outlined" :href="`${getProfileLink()}`" target="_blank">link</a></h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
@@ -54,9 +55,56 @@ export default {
       hasError: false,
       profile: {},
       username: null,
+      tourCallbacks: {
+        onSkip: this.noMoreTours,
+        onFinish: this.noMoreTours,
+      },
+      steps: [
+        {
+          target: '#profileURL',
+          header: {
+            title: 'Your Profile!',
+          },
+          content: 'Press this to open up the profile as it would appear either to other Roll of Arms users or to the public.',
+        },
+        {
+          target: '#visibility',
+          header: {
+            title: 'Visibility!',
+          },
+          content: 'Change how visible your profile is, whether nobody, only Roll of Arms users, or the entire world can view it.',
+        },
+        {
+          target: '#name',
+          header: {
+            title: 'Your name!',
+          },
+          content: 'This is your public name!',
+        },
+        {
+          target: '#facebook',
+          header: {
+            title: 'Facebook!',
+          },
+          content: 'Your Facebook information!',
+        },
+        {
+          target: '.social',
+          header: {
+            title: 'Discord!',
+          },
+          content: 'Your discord information!',
+        },
+      ],
     };
   },
   methods: {
+    async noMoreTours() {
+      let profile = await getCollection('profiles');
+      profile.profileTour = false;
+      saveCollection('profiles', profile);
+    },
+
     async changePassword() {
       await resetPasswordInGoogle(this.$store.state.credentials.email);
       this.$router.go(-1);
@@ -104,6 +152,10 @@ export default {
     }
     this.profile = profile;
     this.isLoading = false;
+
+    if (profile.profileTour || profile.profileTour === undefined) {
+      this.$tours['profileTour'].start();
+    }
   }
 }
 </script>
