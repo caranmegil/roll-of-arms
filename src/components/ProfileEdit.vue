@@ -104,7 +104,6 @@ export default {
       profile.profileTour = false;
       saveCollection('profiles', profile);
     },
-
     async changePassword() {
       await resetPasswordInGoogle(this.$store.state.credentials.email);
       this.$router.go(-1);
