@@ -1,6 +1,6 @@
 # Roll Of Arms Release Notes
 ## Release "Bog Runner"
-### Release Date: TBD
+### Release Date: 2022-04-11
 Welcome to the second release of Roll of Arms! In the full release, we have the following features available for your enjoyment:
 * Release notes are being added from here on out.
 * Some layout now matches the rule book.
