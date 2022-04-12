@@ -5,6 +5,8 @@ export const convertEditionForDie = die => {
     if (die.edition === 'SFR Terrain' && die.rarity === 'Advanced Terrain') {
         const name = die.name.split(' ')[0];
         newEdition = `SFR ${name} 2010`;
+    } else if (die.edition === 'SFR Eldarim' && die.type === 'Champion') {
+        newEdition = 'No Edition'
     } else if (die.name.includes('Deadland') && die.edition === 'SFR Terrain') {
         newEdition = 'SFR Deadlands (minor)';
     }

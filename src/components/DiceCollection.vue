@@ -50,7 +50,7 @@
       </div>
       <div class="dice">
         <div class="body">
-          <div v-for="(die) in filteredDice" :key="die.sfrID" :id="die.sfrID" class="row">
+          <div v-for="(die) in filteredDice" :key="die.sfrID" :id="die.name" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
               <div class="size">{{die.rarity}}</div>
               <div class="type">{{die.type}}</div>
@@ -314,7 +314,11 @@ export default {
         },
         getImageID(die) {
           const dice = this.sourceDice.filter(sourceDie => sourceDie.name === die.name && sourceDie.editions.includes(die.edition));
-          return dice[0].id; 
+          if (dice.length == 0) {
+            return '';
+          }
+
+          return dice[0].id;
         },
         saveTheProfile() {
           saveCollection('profiles', this.profile);
