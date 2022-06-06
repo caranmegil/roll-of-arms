@@ -20,8 +20,17 @@ import {
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
-
-import firebaseConfig from './firebaseConfig.json';
+console.log( process.env);
+const firebaseConfig = {
+    "apiKey": process.env.VITE_apiKey,
+    "authDomain": process.env.VITE_authDomain,
+    "databaseURL": process.env.VITE_databaseURL,
+    "projectId": process.env.VITE_projectId,
+    "storageBucket": process.env.VITE_storageBucket,
+    "messagingSenderId": process.env.VITE_messagingSenderId,
+    "appId": process.env.VITE_appId,
+    "measurementId": process.env.VITE_measurementId
+};
 
 const app = initializeApp(firebaseConfig)
 let store = null;
