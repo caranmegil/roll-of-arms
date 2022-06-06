@@ -435,7 +435,7 @@ export default {
                   pointValue = 4;
                   break;
                 case 'Medallion':
-                  pointValue = 3;
+                  pointValue = 4;
                   break;
                 default:
                   if (die.rarity === 'Large Equipment') {
