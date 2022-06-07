@@ -1,5 +1,4 @@
 # The configuration for the `remote` backend.
-terraform {
     resource "roll_of_arms_vpc" "primary_vpc" {
         name       = "Primary VPC"
         cidr_block = "0.0.0.0/1"
@@ -13,6 +12,7 @@ terraform {
         vpc  = roll_of_arms_vpc.primary_vpc.name
     }
 
+terraform {
     backend "remote" {
         organization = "Nerderium"
 
