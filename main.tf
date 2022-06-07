@@ -12,7 +12,7 @@ provider "docker" {}
 resource "docker_image" "rollofarms" {
   name         = "rollofarms"
   keep_locally = true
-  state = "present"
+  state        = "present"
 }
 
 resource "docker_container" "rollofarms" {
