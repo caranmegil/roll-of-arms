@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "npx vite --port 8080 --host",
+    "start": "npx vite --port $PORT --host",
     "build": "run-p type-check build-only",
     "build-only": "npx vite build",
     "type-check": "npx vue-tsc --noEmit",
