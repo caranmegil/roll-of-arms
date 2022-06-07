@@ -10,7 +10,7 @@ terraform {
 provider "docker" {}
 
 resource "docker_image" "rollofarms" {
-  name         = "roll-of-arms_roll-of-arms"
+  name         = "rollofarms"
   keep_locally = true
 }
 
