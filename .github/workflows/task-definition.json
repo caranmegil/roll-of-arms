@@ -17,9 +17,9 @@
         "entryPoint": null,
         "portMappings": [
             {
-                "ContainerPort": 8080,
-                "HostPort": 80,
-                "Protocol": "tcp"
+                "containerPort": 8080,
+                "hostPort": 80,
+                "protocol": "tcp"
             }
         ],
         "command": null,
