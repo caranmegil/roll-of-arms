@@ -20,7 +20,7 @@ import {
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
-console.log( process.env);
+
 const firebaseConfig = {
     "apiKey": process.env.VITE_apiKey,
     "authDomain": process.env.VITE_authDomain,
