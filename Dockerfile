@@ -4,4 +4,4 @@ EXPOSE 3000
 WORKDIR /app/roll-of-arms
 COPY . /app/roll-of-arms
 RUN npm ci && npm run build
-CMD ["npm", "run", "serve"]
+CMD ["npm", "start"]
