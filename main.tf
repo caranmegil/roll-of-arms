@@ -7,12 +7,13 @@ terraform {
   }
 }
 
-provider "docker" {}
+provider "docker" {
+  host = "unix:///var/run/docker.sock"
+}
 
 resource "docker_image" "rollofarms" {
   name         = "rollofarms"
   keep_locally = true
-  state        = "present"
 }
 
 resource "docker_container" "rollofarms" {
