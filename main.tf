@@ -1,18 +1,18 @@
 resource "null_resource" "example" {
-    triggers = {
-        value = "A example resource that does nothing!"
-    }
+  triggers = {
+    value = "A example resource that does nothing!"
+  }
 }
 
 terraform {
 
-    backend "remote" {
-        organization = "Nerderium"
+  backend "remote" {
+    organization = "Nerderium"
 
-        workspaces {
-            name = "rollofarms"
-        }
+    workspaces {
+      name = "rollofarms"
     }
+  }
 
-    required_version = ">= 0.13.0"
+  required_version = ">= 0.13.0"
 }
