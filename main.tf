@@ -12,7 +12,7 @@ provider "docker" {
 }
 
 resource "docker_image" "rollofarms" {
-  name         = "rollofarms"
+  name         = "roll-of-arms_roll-of-arms"
   keep_locally = true
 }
 
