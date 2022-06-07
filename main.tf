@@ -12,13 +12,10 @@ provider "docker" {}
 resource "docker_image" "rollofarms" {
   name         = "rollofarms"
   keep_locally = true
+  state = "present"
 }
 
 resource "docker_container" "rollofarms" {
-  image = docker_image.rollofarms
+  image = docker_image.rollofarms.name
   name  = "rollofarms"
-  ports {
-    internal = 8080
-    external = 8080
-  }
 }
