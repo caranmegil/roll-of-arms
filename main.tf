@@ -1,25 +1,24 @@
-resource "rollofarms_vpc" "primary_vpc" {
-  name       = "Primary VPC"
-  cidr_block = "0.0.0.0/1"
-}
-
-resource "rollofarms_server" "servers" {
-  count = 1
-
-  name = "Server ${count.index + 1}"
-  type = "t2.micro"
-  vpc  = rollofarms_vpc.primary_vpc.name
-}
-
 terraform {
-
-  backend "remote" {
-    organization = "Nerderium"
-
-    workspaces {
-      name = "rollofarms"
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 2.13.0"
     }
   }
+}
 
-  required_version = ">= 0.13.0"
+provider "docker" {}
+
+resource "docker_image" "roll-of-arms" {
+  name         = "roll-of-arms_roll-of-arms"
+  keep_locally = true
+}
+
+resource "docker_container" "roll-of-arms" {
+  image = docker_image.roll-of-arms.latest
+  name  = "roll-of-arms"
+  ports {
+    internal = 8080
+    external = 8080
+  }
 }
