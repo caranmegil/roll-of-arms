@@ -9,14 +9,14 @@ terraform {
 
 provider "docker" {}
 
-resource "docker_image" "roll-of-arms" {
+resource "docker_image" "rollofarms" {
   name         = "roll-of-arms_roll-of-arms"
   keep_locally = true
 }
 
-resource "docker_container" "roll-of-arms" {
-  image = docker_image.roll-of-arms.latest
-  name  = "roll-of-arms"
+resource "docker_container" "rollofarms" {
+  image = docker_image.rollofarms.latest
+  name  = "rollofarms"
   ports {
     internal = 8080
     external = 8080
