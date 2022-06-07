@@ -15,7 +15,7 @@ resource "docker_image" "rollofarms" {
 }
 
 resource "docker_container" "rollofarms" {
-  image = docker_image.rollofarms.name
+  image = docker_image.rollofarms
   name  = "rollofarms"
   ports {
     internal = 8080
