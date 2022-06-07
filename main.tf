@@ -17,7 +17,7 @@ terraform {
         organization = "Nerderium"
 
         workspaces {
-            name = "caranmegil/roll-of-arms"
+            name = "roll-of-arms"
         }
     }
 
