@@ -27,6 +27,7 @@
                 <input id="discordNum" v-model="profile.discord_number" @click="() => hasProfileSaved = false" type="text"/>
             </div>
         </div>
+        <button @click="resetPassword">Reset Password!</button>
         <button @click="save">Save!</button>
     </div>
 </template>
@@ -99,6 +100,9 @@ export default {
     },
     getProfileLink() {
       return `${location.protocol}//${location.hostname}${(location.port) ? ':' + location.port : ''}/profile/${this.username}/`;
+    },
+    resetPassword() {
+      this.$router.push('/reset');
     },
     async save() {
       let that = this;

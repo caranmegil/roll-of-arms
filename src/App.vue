@@ -10,7 +10,6 @@
       <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">public</span> Player Map</div>
       <div class="separator"></div>
       <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
-      <div @click="resetPassword" class="menu-item"><span class="material-icons material-icons-outlined">lock</span> Reset Password</div>
       <!-- <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div> -->
       <div class="separator"></div>
       <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
@@ -83,10 +82,6 @@ export default {
     changeEmail() {
       this.toggleMenu();
       this.$router.push('/account-transfer');
-    },
-    resetPassword() {
-      this.toggleMenu();
-      this.$router.push('/reset');
     },
     releaseNotes() {
       this.toggleMenu();
