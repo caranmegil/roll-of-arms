@@ -9,6 +9,8 @@
 <script>
 import L from 'leaflet';
 
+import discord from '@/assets/discord.png';
+
 import {
   getCollection,
   getEntireCollection,
@@ -72,8 +74,10 @@ export default {
 
             profiles.sort((a,b) => a.name.localeCompare(b.name));
 
-            const names = profiles.reduce( (previousValue, currentValue) => (previousValue == null) ? `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, <a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`,  null)
-
+            const names = profiles.reduce( (previousValue, currentValue) => {
+                const discordLink = ((currentValue.discord_number) ? `<a href="https://discordapp.com/users/${currentValue.discord_number}" target="_blank"><img height="15px" src="${discord}"/></a>` : '');
+                return (previousValue == null) ? discordLink + `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, ` + discordLink + `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`;
+            },  null);
             L.marker(geolocation).addTo(this.map)
                 .bindPopup(names)
                 .openPopup();
