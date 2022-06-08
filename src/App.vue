@@ -2,7 +2,7 @@
     <div @click="toggleMenu" class="menu-overlay"></div>
       <div class="dialog" :style="{visibility: (profile && profile.proposedDiscord) ? 'visible' : 'hidden'}">
         <div class="modal">
-          <div>Would you like to link the Discord handle "{{ (profile && profile.proposedDiscord) ? profile.proposedDiscord.handle : ''}}"?</div>
+          <div>Would you like to approve the Discord link request from "{{ (profile && profile.proposedDiscord) ? profile.proposedDiscord.handle : ''}}"?</div>
           <div class="element">
             <button id="noBtn" @click="onNo">No</button>
             <button id="yesBtn" @click="onYes">Yes</button>
@@ -399,6 +399,7 @@ a:hover {
     padding: 1.5em;
     border-radius: .25em;
     border: 1px solid black;
+    z-index: 999999;
   }
   .modal-overlay {
     background-color: #D3D3D3;
@@ -409,6 +410,23 @@ a:hover {
     width: 100%;
     height: 100%;
     z-index: 1;
+  }
+
+  .element {
+    align-self: center;
+    justify-self: center;
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr 1fr;
+    padding-bottom: .5em;
+    gap: .75em;
+  }
+
+  .element > label {
+    font-weight: bold;
+    justify-self: end;
+    align-self: center;
+    padding-right: .5em;
   }
 
 </style>
