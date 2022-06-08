@@ -16,10 +16,6 @@
             <label for="name">Name</label>
             <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text"/>
         </div>
-        <div class="element">
-            <label for="facebook">Facebook User ID</label>
-            <input id="facebook" v-model="profile.facebook"  @click="() => hasProfileSaved = false" type="text"/>
-        </div>
         <h3>Discord Information (<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID" target="_blank">Where can I find it?</a>)</h3>
         <div class="social">
             <div class="element">
@@ -80,13 +76,6 @@ export default {
             title: 'Your name!',
           },
           content: 'This is your public name!',
-        },
-        {
-          target: '#facebook',
-          header: {
-            title: 'Facebook!',
-          },
-          content: 'Your Facebook information!',
         },
         {
           target: '.social',

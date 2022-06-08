@@ -10,7 +10,6 @@ import {babel} from '@rollup/plugin-babel';
 // https://vitejs.dev/config/
 export default defineConfig( ({ command, mode }) => {
   const env = loadEnv(mode, process.cwd())
-  console.log(env);
   return {
     define: {
       global: {
