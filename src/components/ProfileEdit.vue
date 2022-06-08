@@ -16,15 +16,15 @@
             <label for="name">Name</label>
             <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text"/>
         </div>
-        <h3>Discord Information (<a href="https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID" target="_blank">Where can I find it?</a>)</h3>
+        <h3>Discord Information (<span class="material-icons material-icons-outlined">help</span> To link your Discord account, message @tarvenehl on Discord with /rollofarms link &lt;roll of arms handle&gt;)</h3>
         <div class="social">
             <div class="element">
                 <label for="discord">Handle</label>
-                <input id="discord" v-model="profile.discord" @click="() => hasProfileSaved = false" type="text"/>
+                <div>{{profile.discord}}</div>
             </div>
             <div class="element">
                 <label for="discordNum">ID</label>
-                <input id="discordNum" v-model="profile.discord_number" @click="() => hasProfileSaved = false" type="text"/>
+                <div>{{profile.discord_number}}</div>
             </div>
         </div>
         <button @click="resetPassword">Reset Password!</button>
@@ -189,8 +189,11 @@ export default {
   }
 
   .profiles .element > label {
-    font-weight: bold;
-    justify-self: start;
+    font-weight: bolder;
+    justify-self: end;
+  }
+  .profiles .element > div {
+    text-decoration: underline;
   }
 
   .separator {
