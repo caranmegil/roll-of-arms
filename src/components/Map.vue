@@ -74,12 +74,36 @@ export default {
 
             profiles.sort((a,b) => a.name.localeCompare(b.name));
 
-            const names = profiles.reduce( (previousValue, currentValue) => {
+            const names = profiles.reduce( async (previousValue, currentValue) => {
+                const prevVal = await previousValue;
                 const discordLink = ((currentValue.discord_number) ? `<a href="https://discordapp.com/users/${currentValue.discord_number}" target="_blank"><img height="15px" src="${discord}"/></a>` : '');
-                return (previousValue == null) ? discordLink + `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>` : `${previousValue}, ` + discordLink + `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}</a>`;
+                let rank = null;
+
+                // if(currentValue.discord_number) {
+                //     console.log(`https://sfr-inc.ddns.net/api/v1/user/${currentValue.discord_number}/rank`);
+                //     const response = await fetch(`https://sfr-inc.ddns.net/api/v1/user/${currentValue.discord_number}/rank`, { 
+                //         mode: 'cors',
+                //     });
+                //     console.log(response);
+                //     if (response.status == 200) {
+                //         const json = await response.json();
+                //         const rankNumber = parseInt(json.rank);
+                //         console.log(rankNumber);
+
+                //         const rankValuesResponse = await fetch('https://sfr-inc.ddns.net/api/v1/rank', { 
+                //             mode: 'no-cors',
+                //         });
+                //         const rankValuesJSON = await rankValuesResponse.json();
+                //         const tier = rankValuesJSON.ranks.filter( tier => tier.rank == rankNumber)[0];
+                //         rank = tier.Name;
+                //     }
+                // }
+
+                return (prevVal == null) ? discordLink + `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}${(rank) ? ' ' + rank : ''}</a>` : `${prevVal}, ` + discordLink + `<a href="./profile/${currentValue.username}/" target="_blank"/>${currentValue.name}${(rank) ? ' ' + rank : ''}</a>`;
             },  null);
+
             L.marker(geolocation).addTo(this.map)
-                .bindPopup(names)
+                .bindPopup(await names)
                 .openPopup();
         }
         this.recenterMap();

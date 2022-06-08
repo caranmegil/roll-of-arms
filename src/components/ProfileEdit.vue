@@ -16,7 +16,8 @@
             <label for="name">Name</label>
             <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text"/>
         </div>
-        <h3>Discord Information (<span class="material-icons material-icons-outlined">help</span> To link your Discord account, message @tarvenehl on Discord with /rollofarms link &lt;roll of arms handle&gt;)</h3>
+        <h3>Discord Information</h3>
+        <div>To link your Discord account, message <a href="https://discordapp.com/users/946727276706418688" target="_blank">tarvenehl#2963</a> on <a href="https://discord.gg/dragondice">Discord</a> with <span class="tarvenehl-message">/rollofarms link {{username}} <span @click="copyTextToClipboard" class="material-icons material-icons-outlined">copy_all</span></span></div>
         <div class="social">
             <div class="element">
                 <label for="discord">Handle</label>
@@ -103,6 +104,9 @@ export default {
     },
     resetPassword() {
       this.$router.push('/reset');
+    },
+    copyTextToClipboard() {
+      navigator.clipboard.writeText(`/rollofarms link ${this.username}`);
     },
     async save() {
       let that = this;
@@ -210,5 +214,10 @@ export default {
       align-self: center;
       justify-self: center;
       color: red;
+  }
+
+  .tarvenehl-message {
+    background-color: #D3D3D3;
+    color: black;
   }
 </style>
