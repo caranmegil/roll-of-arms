@@ -1,6 +1,17 @@
 <template>
     <div @click="toggleMenu" class="menu-overlay"></div>
+      <div class="dialog" :style="{visibility: (profile && profile.proposedDiscord) ? 'visible' : 'hidden'}">
+        <div class="modal">
+          <div>Would you like to link the Discord handle "{{ (profile && profile.proposedDiscord) ? profile.proposedDiscord.handle : ''}}"?</div>
+          <div class="element">
+            <button id="noBtn" @click="onNo">No</button>
+            <button id="yesBtn" @click="onYes">Yes</button>
+          </div>
+        </div>
+      </div>
   <div v-if="isLoaded" class="roll-of-arms-body">
+
+
     <header>
       <div class="menu-button" @click="toggleMenu" v-if="$store.state.user != null && $store.state.user.emailVerified"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
       <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
@@ -52,6 +63,7 @@ export default {
   name: 'App',
   data() {
     return {
+      profile: undefined,
       isLoaded: false,
     }
   },
@@ -65,12 +77,18 @@ export default {
     const user = this.$store.state.user;
     if (user != null) {
       try {
-        let profile = await getCollectionByField('profiles', user.uid);
+        this.profile = await getCollectionByField('profiles', user.uid);
 
-        if (profile.isPublic) {
-          profile.visibility = '1';
-          profile.isPublic = null;
-          await saveCollectionByField('profiles', user.uid, profile);
+        if (this.profile.isPublic) {
+          this.profile.visibility = '1';
+          this.profile.isPublic = null;
+          await saveCollectionByField('profiles', user.uid, this.profile);
+        }
+
+        const now = new Date();
+        if (this.profile.proposedDiscord && this.profile.proposedDiscord.timestamp <= now.getTime()) {
+          this.profile.proposedDiscord = null;
+          await saveCollectionByField('profiles', user.uid, this.profile);
         }
       } catch (e) {
         console.error(e);
@@ -93,6 +111,24 @@ export default {
     goHome() {
       this.toggleMenu();
       this.$router.push('/');
+    },
+    async onNo() {
+      const user = this.$store.state.user;
+      if (user != null) {
+        this.profile.proposedDiscord = null;
+        await saveCollectionByField('profiles', user.uid, this.profile);
+        this.$router.go();
+      }
+    },
+    async onYes() {
+      const user = this.$store.state.user;
+      if (user != null) {
+        this.profile.discord_number = this.profile.proposedDiscord.id;
+        this.profile.discord = this.profile.proposedDiscord.handle;
+        this.profile.proposedDiscord = null;
+        await saveCollectionByField('profiles', user.uid, this.profile);
+        this.$router.go();
+      }
     },
     toggleMenu() {
       let menuElem = document.getElementById('menu');
@@ -340,4 +376,39 @@ a:link, a:visited {
 a:hover {
   color: red;
 }
+
+
+  .dialog {
+    display: grid;
+    width: 100%;
+    align-items: center;
+    justify-items: center;
+  }
+  .modal {
+    display: grid;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    align-content: center;
+    z-index: 2;
+    position: fixed;
+    background-color: ivory;
+    margin: auto;
+    top: 10em;
+    width: 20em;
+    padding: 1.5em;
+    border-radius: .25em;
+    border: 1px solid black;
+  }
+  .modal-overlay {
+    background-color: #D3D3D3;
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: .5;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
 </style>
