@@ -4,7 +4,6 @@
           <div class="header">
             <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
             <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`http://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
-            <div v-if="profile.facebook && profile.facebook !== ''" class="element"><label for="facebook">Facebook</label><a id="facebook" :href="`https://facebook.com/${profile.facebook}`" target="_blank">{{profile.facebook}}</a></div>
             <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
             <span v-if="profile.isCollectionPublic" id="filters">
             </span>
