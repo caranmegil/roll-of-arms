@@ -44,15 +44,16 @@
       </div>
       <div class="dice">
         <div id="dice-body" class="body">
-          <div v-for="(die) in filteredDice" :key="die.sfrID" :id="die.sfrID" class="row">
+          <div v-for="(die) in filteredDice" :key="die.sfrID" :id="die.name" class="row">
               <div class="die-id"><img :src="getImageID(die)"/><div>{{die.name}} ({{recalcSubTotals(die)}})</div></div>
               <div class="size">{{die.rarity}}</div>
               <div class="type">{{die.type}}</div>
-                <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
+                <div @click="() => expand(die)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
                   <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
                     <span>{{ grDie.edition }}</span>
-                    <div class="amount">{{grDie.amount}}</div>
+                    <div class="amount">Have: {{grDie.amount}}</div>
+                    <div class="wanted" :style="{visibility: (grDie.wanted > 0) ? 'visible' : 'hidden'}">Want: {{grDie.wanted}}</div>
                   </div>
                 </div>
           </div>
@@ -132,8 +133,9 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-        expand(id) {
-          let row = document.getElementById(id);
+        expand(die) {
+          let row = document.getElementById(die.name);
+          console.log(row);
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
           let allExpansions = document.querySelectorAll('#expansion');
@@ -386,6 +388,10 @@ export default {
     grid-column: 3;
     grid-row: 1;
     width: 25%;
+  }
+
+  .wanted {
+    color: #AA4A44;
   }
 
   .add-die {
