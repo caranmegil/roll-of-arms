@@ -56,11 +56,19 @@
               <div class="type">{{die.type}}</div>
                 <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
-                  <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
-                    <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
-                    <span @click="() => decr(grDie)" class="material-icons material-icons-outlined">remove</span>
-                    <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
-                    <span @click="() => incr(grDie)" class="material-icons material-icons-outlined">add</span>
+                  <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition">
+                    <div class="add-die">
+                      <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
+                      <span @click="() => decr(grDie)" class="material-icons material-icons-outlined">remove</span>
+                      <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
+                      <span @click="() => incr(grDie)" class="material-icons material-icons-outlined">add</span>
+                    </div>
+                    <div class="wanted-die">
+                      <div class="wanted"><span class="material-icons material-icons-outlined">chevron_right</span><span>Wanted</span></div>
+                      <span @click="() => decrWanted(grDie)" class="material-icons material-icons-outlined">remove</span>
+                      <div class="amount"><input type="number" v-model="grDie.wanted" @keyup="() => changeWantedAmount(grDie)" @change="() => changeWantedAmount(grDie)"></div>
+                      <span @click="() => incrWanted(grDie)" class="material-icons material-icons-outlined">add</span>
+                    </div>
                   </div>
                 </div>
           </div>
@@ -165,7 +173,13 @@ export default {
       }
 
       this.dice = await getCollection('collections') || [];
-      this.dice.forEach( die => die.edition = convertEditionForDie(die));
+      this.dice = this.dice.map( die => {
+        if (!die.wanted) {
+          die.wanted = 0;
+        }
+        die.edition = convertEditionForDie(die);
+        return die;
+      });
 
       this.speciesFilter = '';
       this.sizeFilter = this.$store.state.filters.size;
@@ -193,6 +207,14 @@ export default {
         },
         incr(die) {
           die.amount++;
+        },
+        decrWanted(die) {
+          if (die.wanted > 0) {
+            die.wanted--;
+          }
+        },
+        incrWanted(die) {
+          die.wanted++;
         },
         expand(id) {
           let row = document.getElementById(id);
@@ -333,6 +355,19 @@ export default {
 
               if (die.name === grDie.name && die.edition === grDie.edition) {
                 newDie.amount = grDie.amount;
+              }
+
+              return newDie;
+            });
+          }
+        },
+        changeWantedAmount(grDie) {
+          if (!isNaN(grDie.wanted)) {
+            this.dice.map(die => {
+              let newDie = {...die};
+
+              if (die.name === grDie.name && die.edition === grDie.edition) {
+                newDie.wanted = grDie.wanted;
               }
 
               return newDie;
@@ -508,12 +543,23 @@ export default {
     align-items: center;
     gap: .5em;
     padding-left: 1.0em;
+    font-weight: bolder;
   }
-  .add-die:nth-child(even) {
+  .wanted-die {
+    grid-auto-flow: column;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    justify-content: center;
+    align-content: center;
+    justify-items: start;
+    align-items: center;
+    gap: .5em;
+    padding-left: 1.0em;
     background-color: #CCC;
+    color: #AA4A44;
   }
 
-  #expansion {
+#expansion {
     display: none;
     grid-area: 2 / 1 / 2 / 5;
     width: 100%;
@@ -530,6 +576,12 @@ export default {
     grid-row: 1;
     font-size: 24px;
     width: 25%;
+  }
+
+  .wanted {
+    display: grid;
+    grid-auto-flow: column;
+    align-items: center;
   }
 
   @media screen and (max-width: 480px) {
