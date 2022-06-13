@@ -1,4 +1,11 @@
 # Roll Of Arms Release Notes
+## Release "Charioteer"
+### Release Date: 
+Welcome to the third release of Roll of Arms! In the full release, we have the following features available for your enjoyment:
+* Added ability to connect your Discord account information in your Roll of Arms account through Tarvenehl, the father of all.  Note: for this feature to work fully, all accounts will need to link up!
+* Added ability to see who is on Discord on the player map and contact them through it.
+* Cleaned up the interface somewhat.
+* Added the ability to do "wanted" lists.
 ## Release "Bog Runner"
 ### Release Date: 2022-04-11
 Welcome to the second release of Roll of Arms! In the full release, we have the following features available for your enjoyment:
