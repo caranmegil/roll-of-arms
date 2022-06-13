@@ -1,9 +1,10 @@
 <template>
     <v-tour name="diceBrowserTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
     <div class="dice-browser">
-          <Loading v-model:active="isLoading"/>
+      <Loading v-model:active="isLoading"/>
       <div id="dice">
           <div class="header">
+              <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
               <h1>Dice Browser - {{this.$store.state.forceSlot}}</h1>
               <div v-if="hasError" class="error">{{message}}</div>
               <span id="filters">
@@ -192,6 +193,9 @@ export default {
           if (this.dieAmnt < 0) {
             this.dieAmnt = 0;
           }
+        },
+        rerunTour() {
+          this.$tours['diceBrowserTour'].start();
         },
         decr() {
           if (this.dieAmnt > 0) {

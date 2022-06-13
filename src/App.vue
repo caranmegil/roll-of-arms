@@ -29,6 +29,8 @@
         <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
       </div>
       <div class="separator"></div>
+      <div @click="resources" class="menu-item"><span class="material-icons material-icons-outlined">downloading</span> Resources</div>
+      <div class="separator"></div>
       <div @click="releaseNotes" class="menu-item"><span class="material-icons material-icons-outlined">note</span> Release Notes</div>
       <div class="separator"></div>
       <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
@@ -104,6 +106,10 @@ export default {
     releaseNotes() {
       this.toggleMenu();
       this.$router.push('/releasenotes');
+    },
+    resources() {
+      this.toggleMenu();
+      this.$router.push('/resources');
     },
     closeMenu() {
       this.toggleMenu();
@@ -427,6 +433,13 @@ a:hover {
     justify-self: end;
     align-self: center;
     padding-right: .5em;
+  }
+
+  .rerun-tour {
+    font-size: 2em !important;
+    position: absolute;
+    right: 0px;
+    z-index: 1;
   }
 
 </style>

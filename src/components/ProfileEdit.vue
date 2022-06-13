@@ -1,5 +1,6 @@
 <template>
     <v-tour name="profileTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
+      <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
     <div class="profiles">
       <h1>My Profile <a id="profileURL" class="material-icons material-icons-outlined" :href="`${getProfileLink()}`" target="_blank">link</a></h1>
         <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
@@ -17,7 +18,7 @@
             <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text"/>
         </div>
         <h3>Discord Information</h3>
-        <div>To link your Discord account, message <a href="https://discordapp.com/users/946727276706418688" target="_blank">tarvenehl#2963</a> on <a href="https://discord.gg/dragondice">Discord</a> with <span class="tarvenehl-message">/rollofarms link {{username}} <span @click="copyTextToClipboard" class="material-icons material-icons-outlined">copy_all</span></span></div>
+        <div class="tarvenehl">To link your Discord account, message <a href="https://discordapp.com/users/946727276706418688" target="_blank">tarvenehl#2963</a> on <a href="https://discord.gg/dragondice">Discord</a> with <span class="tarvenehl-message">/rollofarms link {{username}} <span @click="copyTextToClipboard" class="material-icons material-icons-outlined">copy_all</span></span></div>
         <div class="social">
             <div class="element">
                 <label for="discord">Handle</label>
@@ -80,6 +81,13 @@ export default {
           content: 'This is your public name!',
         },
         {
+          target: '.tarvenehl',
+          header: {
+            title: 'Tarvenehl!',
+          },
+          content: 'This is how to contact Tarvenehl for discord linking!',
+        },
+        {
           target: '.social',
           header: {
             title: 'Discord!',
@@ -107,6 +115,9 @@ export default {
     },
     copyTextToClipboard() {
       navigator.clipboard.writeText(`/rollofarms link ${this.username}`);
+    },
+    rerunTour() {
+      this.$tours['profileTour'].start();
     },
     async save() {
       let that = this;

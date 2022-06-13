@@ -20,6 +20,7 @@
           </div>
       </div>
       <div class="header" v-if="myForces != null && myForce > -1">
+        <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
         <div @click="expandForcesSelector" class="open-forces-selector"><h2>Forces <div id="force-action-button" class="material-icons material-icons-outlined">expand_more</div></h2></div>
         <div class="element">
           <label for="forceName">Force Name</label>
@@ -270,6 +271,9 @@ export default {
 
           this.loadForceData();
           this.saveTheForces();
+        },
+        rerunTour() {
+          this.$tours['forcesTour'].start();
         },
         decr(die) {
           if (die.amount > 0) {
