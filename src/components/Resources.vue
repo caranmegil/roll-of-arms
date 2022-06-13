@@ -1,11 +1,11 @@
 <template>
-    <div class="release-notes">
+    <div class="resources">
         <VueComponent/>
     </div>
 </template>
 
 <script>
-import { VueComponent } from '../../public/release-notes.md';
+import { VueComponent } from '../../public/resources.md';
 import 'es6-promise/auto';
 
 
@@ -18,7 +18,7 @@ export default {
 </script>
 
 <style scoped>
-  .release-notes {
+  .resources {
     width: 50%;
     margin: auto;
   }
