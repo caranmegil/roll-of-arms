@@ -1,7 +1,6 @@
 <template>
     <div class="collections">
     <Loading v-model:active="isLoading"/>
-
       <div class="header">
         <span id="filters">
           <div class="element">
@@ -156,6 +155,9 @@ export default {
               actionButton.innerText = 'expand_more';
             });
           }
+        },
+        rerunTour() {
+          this.$tours['collectionTour'].start();
         },
         changeNameDirection() {
           if (this.sortColumn != 0) {

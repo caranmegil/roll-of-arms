@@ -429,4 +429,11 @@ a:hover {
     padding-right: .5em;
   }
 
+  .rerun-tour {
+    font-size: 2em !important;
+    position: absolute;
+    right: 0px;
+    z-index: 1;
+  }
+
 </style>

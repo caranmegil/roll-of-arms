@@ -4,6 +4,7 @@
       <div id="dice">
           <Loading v-model:active="isLoading"/>
           <div class="header">
+              <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
               <h1>Dice Browser</h1>
               <span id="filters">
                 <div class="element">
@@ -163,6 +164,9 @@ export default {
           if (edAmnt.value < 0) {
             edAmnt.value = 0;
           }
+        },
+        rerunTour() {
+          this.$tours['diceBrowserTour'].start();
         },
         decr(edAmnt) {
           if (edAmnt.value > 0) {

@@ -2,6 +2,7 @@
     <v-tour name="mainTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
   <div class="main">
       <header>
+        <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
         <h2>Welcome to Roll of Arms!</h2>
       </header>
       <span id="location">
@@ -129,6 +130,9 @@ export default {
       if (typeof this.profile.location !== 'object') {
         this.profile.location = {city: '', region: '', country: ''}
       }
+    },
+    rerunTour() {
+      this.$tours['mainTour'].start();
     },
     genDefaultProfile() {
       return {location: {city: '', region: '', country: ''}};

@@ -3,6 +3,7 @@
     <div class="collections">
       <Loading v-model:active="isLoading"/>
       <div class="header">
+        <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
         <h1>My Collection</h1>
         <div class="element">
           <label for="privacy">Show With Profile</label>
@@ -200,10 +201,14 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
+        
         decr(die) {
           if (die.amount > 0) {
             die.amount--;
           }
+        },
+        rerunTour() {
+          this.$tours['collectionTour'].start();
         },
         incr(die) {
           die.amount++;
