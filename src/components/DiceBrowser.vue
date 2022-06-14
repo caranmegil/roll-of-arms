@@ -293,7 +293,7 @@ export default {
             delete newDie.id;
             delete newDie.sfrID;
             this.capAmount(edAmnt);
-            if(edAmnt.value > 0) {
+            if(edAmnt.value >= 0) {
               newDie.edition = edAmnt.edition;
               newDie.amount = edAmnt.value;
               let dieForEdition = that.myCollection.filter(die => die.name === newDie.name && die.edition === newDie.edition);
