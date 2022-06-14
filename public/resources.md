@@ -1,5 +1,5 @@
 # Resources
-* <a href="http://dragondice.com/" target="_blank">Official Website (Rules PDF's & FAQ, Species Browser, Player Tools</a>
+* <a href="http://dragondice.com/" target="_blank">Official Website (Rules PDF's & FAQ, Species Browser, Player Tools)</a>
 * <a href="https://www.sfr-inc.com/ocart3/index.php" target="_blank">Online Store (USA)</a>
 * <a href="https://au.sfr-inc.com/" target="_blank">Online Store (AU)</a>
 * <a href="https://rules.dragondice.com/" target="_blank">Rules Wiki</a>
