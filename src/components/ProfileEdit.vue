@@ -31,6 +31,7 @@
         </div>
         <button @click="resetPassword">Reset Password!</button>
         <button @click="save">Save!</button>
+        <button @click="deleteProfile">Delete Profile!</button>
     </div>
 </template>
 
@@ -40,6 +41,7 @@ import {
   getCollection,
   getEntireCollection,
   resetPasswordInGoogle,
+  deleteProfile,
 } from '@/firebase';
 import 'es6-promise/auto';
 
@@ -102,6 +104,13 @@ export default {
       let profile = await getCollection('profiles');
       profile.profileTour = false;
       saveCollection('profiles', profile);
+    },
+    async deleteProfile() {
+      let profile = await getCollection('profiles');
+      profile.isActive = false;
+      saveCollection('profiles', profile);
+      await deleteProfile(this.$store.state.credentials.email);
+      this.$router.push('/signin');
     },
     async changePassword() {
       await resetPasswordInGoogle(this.$store.state.credentials.email);
