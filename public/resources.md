@@ -11,6 +11,8 @@
 * <a href="https://discord.gg/dragondice" target="_blank"><img src="@/assets/discord.png" height="20" width="20"> Discord</a></a>
 * <a href="https://www.youtube.com/c/SFRInc" target="_blank"><img src="@/assets/youtube.png" height="20" width="20"> YouTube</a>
 * <a href="https://www.twitch.tv/sfrinc" target="_blank"><img src="@/assets/twitch.png" height="20" width="20"> Twitch</a>
+* <a href="https://boardgamegeek.com/boardgame/320502/dragon-dice-fourth-edition" target="_blank"><img src="@/assets/bgg.png" height="20" width="20"> Board Game Geek</a>
+* <a href="https://tabletopia.com/games/dragondice" target="_blank"><img src="@/assets/tabletopia.png" height="20" width="20"> Tabletopia</a>
 ## Community Links
 * <a href="https://www.facebook.com/groups/418460488199950" target="_blank"><img src="@/assets/facebook.png" height="20" width="20"> Dragon Dice Player's Community</a>
 * <a href="https://www.facebook.com/groups/2049708365359306" target="_blank"><img src="@/assets/facebook.png" height="20" width="20"> Dragon Dice Buy & Sell</a>
