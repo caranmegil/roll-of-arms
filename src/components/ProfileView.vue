@@ -1,7 +1,7 @@
 <template>
   <div class="profiles">
       <div v-if="isVisible" class="collections">
-          <div class="header">
+          <div class="header" v-if="isVisible">
             <h1>Profile for {{(profile != null) ? profile.displayName : ''}}</h1>
             <div v-if="profile.discord_number && profile.discord_number !== ''" class="element"><label for="discord">Discord</label><div id="discord"><a :href="`https://discordapp.com/users/${profile.discord_number}`" target="_blank">{{(profile.discord && profile.discord !== '') ? profile.discord : 'ID'}}</a></div></div>
             <h1 v-if="profile.isCollectionPublic">Their Dice Collection</h1>
@@ -202,9 +202,12 @@ export default {
     this.profile = await getCollectionByField('profiles', this.uid);
     const currentUser = getCurrentUser();
 
-    this.isVisible = this.profile.visibility === '2' 
-      || (currentUser != null && this.profile.visibility == '1')
-      || (currentUser != null && this.uid === currentUser.uid && this.profile.visibility === '0');
+    this.isVisible = this.profile.isActive != false
+      && (
+        this.profile.visibility === '2' 
+        || (currentUser != null && this.profile.visibility == '1')
+        || (currentUser != null && this.uid === currentUser.uid && this.profile.visibility === '0')
+      );
   
     if (this.isVisible) {
       this.profile.displayName = this.profile.name;

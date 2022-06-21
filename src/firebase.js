@@ -17,6 +17,7 @@ import {
     signInWithEmailLink,
     updatePassword,
     linkWithCredential,
+    deleteUser,
 } from "firebase/auth";
 
 import { getAnalytics } from "firebase/analytics";
@@ -138,6 +139,12 @@ const getEntireCollection = async (collectionName) => {
         console.error(e);
         return null;
     }
+}
+
+const deleteProfile = async (email) => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    await deleteUser(user);
 }
 
 const createUserInGoogle = async (email, password) => {
@@ -301,4 +308,5 @@ export {
   changeEmail,
   recoverEmail,
   verifyAndChangeEmail,
+  deleteProfile,
 };
