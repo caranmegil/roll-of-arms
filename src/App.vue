@@ -29,7 +29,7 @@
         <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
       </div>
       <div class="separator"></div>
-      <div @click="resources" class="menu-item"><span class="material-icons material-icons-outlined">downloading</span> Resources</div>
+      <div @click="resources" class="menu-item"><span class="material-icons material-icons-outlined">link</span> Links</div>
       <div class="separator"></div>
       <div @click="releaseNotes" class="menu-item"><span class="material-icons material-icons-outlined">note</span> Release Notes</div>
       <div class="separator"></div>
