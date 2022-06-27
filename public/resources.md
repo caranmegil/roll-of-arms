@@ -8,7 +8,7 @@
 * <a href="https://www.instagram.com/sfr_inc/" target="_blank"><img src="@/assets/instagram.png" height="20" width="20"> Instagram</a>
 * <a href="https://twitter.com/sfr_inc" target="_blank"><img src="@/assets/twitter.png" height="20" width="20"> Twitter</a>
 * <a href="https://www.tiktok.com/@sfr_inc" target="_blank"><img src="@/assets/tiktok.png" height="20" width="20"> Tik Tok</a>
-* <a href="https://discord.gg/dragondice" target="_blank"><img src="@/assets/discord.png" height="20" width="20"> Discord</a></a>
+* <a href="https://discord.gg/dragondice" target="_blank"><img src="@/assets/discord.png" height="20" width="20"> Discord</a>
 * <a href="https://www.youtube.com/c/SFRInc" target="_blank"><img src="@/assets/youtube.png" height="20" width="20"> YouTube</a>
 * <a href="https://www.twitch.tv/sfrinc" target="_blank"><img src="@/assets/twitch.png" height="20" width="20"> Twitch</a>
 * <a href="https://boardgamegeek.com/boardgame/320502/dragon-dice-fourth-edition" target="_blank"><img src="@/assets/bgg.png" height="20" width="20"> Board Game Geek</a>
