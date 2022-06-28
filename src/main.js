@@ -100,7 +100,7 @@ router.beforeEach( async (to, from, next) => {
 const store = createStore({
     state() {
         return {
-            user: JSON.parse(localStorage.getItem('user') || null),
+            user: (localStorage.getItem('user')) ? JSON.parse(localStorage.getItem('user')) : null,
             credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
             bufferDie: null,
             forceName: null,
