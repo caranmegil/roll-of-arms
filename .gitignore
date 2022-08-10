@@ -22,5 +22,4 @@ pnpm-debug.log*
 *.sln
 *.sw?
 auth_config.json
-firebaseConfig.json
 dist
