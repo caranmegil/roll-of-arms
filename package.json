@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start": "vite --port 8080 --host",
     "serve": "vite --port 8080",
-    "build": "vite build",
+    "build": "vite build --base=/dist",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "deploy": "yarn build && firebase deploy"
   },
