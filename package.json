@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    
     "start": "npx vite --port $PORT --host",
     "serve": "vite --port 8080",
     "build": "vite build --base=/dist",
