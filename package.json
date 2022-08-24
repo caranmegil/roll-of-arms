@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "npx vite --port $PORT --host",
+    "start": "npx serve --listen 8080 dist",
     "dev": "npx vite --port 8080",
     "build": "run-p type-check build-only",
     "build-only": "npx vite build",
@@ -44,6 +44,7 @@
     "eslint-plugin-vue": "^8.0.3",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.6.0",
+    "serve": "^14.0.1",
     "typescript": "^4.7.3",
     "vite": "^2.8.6",
     "vite-plugin-markdown": "^2.0.2",
