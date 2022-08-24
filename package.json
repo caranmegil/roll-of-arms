@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npx serve --listen 8080 dist",
     "serve": "vite --port 8080",
-    "build": "vite build --base=/dist",
+    "build": "vite build",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
     "deploy": "yarn build && firebase deploy"
   },
