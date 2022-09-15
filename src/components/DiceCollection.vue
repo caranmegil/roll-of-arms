@@ -9,6 +9,10 @@
           <label for="privacy">Show With Profile</label>
           <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
         </div>
+        <div class="element">
+          <label for="privacy">Show Only Wanted</label>
+          <input type="checkbox" v-model="showOnlyWanted" @change="changeWantedDisplay"/>
+        </div>
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
           <div class="element">
@@ -104,6 +108,7 @@ export default {
             sortColumn: 0,
             sortDirection: 1,
             profile: {},
+            showOnlyWanted: false,
             tourCallbacks: {
               onSkip: this.noMoreTours,
               onFinish: this.noMoreTours,
@@ -201,7 +206,9 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-        
+        changeWantedDisplay() {
+          this.applyFiltersAndSort();
+        },
         decr(die) {
           if (die.amount > 0) {
             die.amount--;
@@ -286,6 +293,7 @@ export default {
           this.isLoading=false;
         },
         applyFiltersAndSort() {
+          this.isLoading = true;
           let that = this;
 
           let dice = this.dice.filter(die => (that.speciesFilter === '' || die.species === that.speciesFilter) && die.name.toLowerCase().includes(that.nameFilter.toLowerCase()));
@@ -310,7 +318,12 @@ export default {
           dice = dice.filter( die =>
                               (that.typeFilter === '' || die.type === that.typeFilter)
                               && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
-                            );
+          );
+
+          if (this.showOnlyWanted) {
+            dice = dice.filter(die => die.wanted && die.wanted > 0);
+          }
+
           dice.sort( (a, b) => {
             if (that.sortColumn == 0) {
               return that.sortDirection * a.name.localeCompare(b.name);
@@ -337,6 +350,7 @@ export default {
 
           dice = Object.keys(this.diceGroupedByEdition).map(name => this.diceGroupedByEdition[name][0]);
 
+          this.isLoading = false;
           return dice;
         },
         getImageID(die) {
