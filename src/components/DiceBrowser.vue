@@ -3,6 +3,7 @@
     <div class="dice-browser">
       <div id="dice">
           <Loading v-model:active="isLoading"/>
+          <div v-if="hasDiceBeenAdded" class="alert-box saved">Added to your collection:{{addedDiceMessage}} <button @click="dismissDiceBeenAdded">Dismiss</button></div>
           <div class="header">
               <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
               <h1>Dice Browser</h1>
@@ -84,47 +85,49 @@ export default {
       Loading,
     },
     data() {
-        return {
-            observer: null,
-            dice: [],
-            tourCallbacks: {
-              onSkip: this.noMoreTours,
-              onFinish: this.noMoreTours,
+      return {
+        hasDiceBeenAdded: false,
+        addedDiceMessage: '',
+        observer: null,
+        dice: [],
+        tourCallbacks: {
+          onSkip: this.noMoreTours,
+          onFinish: this.noMoreTours,
+        },
+        sortColumn: 0,
+        sortDirection: 1,
+        myCollection: [],
+        amount: {},
+        openedId: null,
+        nameFilter: '',
+        sizes: [],
+        sizeFilter: '',
+        types: [],
+        typeFilter: '',
+        steps: [
+          {
+            target: '#filters',
+            header: {
+              title: 'Filters!',
             },
-            sortColumn: 0,
-            sortDirection: 1,
-            myCollection: [],
-            amount: {},
-            openedId: null,
-            nameFilter: '',
-            sizes: [],
-            sizeFilter: '',
-            types: [],
-            typeFilter: '',
-            steps: [
-              {
-                target: '#filters',
-                header: {
-                  title: 'Filters!',
-                },
-                content: 'Set your species/set and edition filters here.',
-              },
-              {
-                target: '.body',
-                header: {
-                  title: 'The Dice!',
-                },
-                content: 'Scroll through this list and locate the die you want to add to your collection and select the "+" to add.',
-                params: {
-                  placement: 'auto',
-                },
-              },
-            ],
-            filteredDice: [],
-            speciesFilter: '',
-            species: [],
-            isLoading: true,
-        };
+            content: 'Set your species/set and edition filters here.',
+          },
+          {
+            target: '.body',
+            header: {
+              title: 'The Dice!',
+            },
+            content: 'Scroll through this list and locate the die you want to add to your collection and select the "+" to add.',
+            params: {
+              placement: 'auto',
+            },
+          },
+        ],
+        filteredDice: [],
+        speciesFilter: '',
+        species: [],
+        isLoading: true,
+      };
     },
     async mounted() {
       let options = {
@@ -160,6 +163,9 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
+        dismissDiceBeenAdded() {
+          this.hasDiceBeenAdded = false;
+        },
         capAmount(edAmnt) {
           if (edAmnt.value < 0) {
             edAmnt.value = 0;
@@ -287,13 +293,20 @@ export default {
         },
         async addDie(die) {
           let that = this;
+          let addedDiceMessage = '';
           this.amount.forEach( async edAmnt => {
             let newDie = {...die};
             delete newDie.editions;
             delete newDie.id;
             delete newDie.sfrID;
             this.capAmount(edAmnt);
-            if(edAmnt.value >= 0) {
+            if (edAmnt.value > 0) {
+              if (addedDiceMessage.length > 0) {
+                addedDiceMessage = `${addedDiceMessage}, `
+              }
+              addedDiceMessage = `${addedDiceMessage}${edAmnt.value} ${die.name} (${edAmnt.edition})`
+            }
+            if (edAmnt.value >= 0) {
               newDie.edition = edAmnt.edition;
               newDie.amount = edAmnt.value;
               let dieForEdition = that.myCollection.filter(die => die.name === newDie.name && die.edition === newDie.edition);
@@ -305,6 +318,8 @@ export default {
               }
             }
           });
+          this.hasDiceBeenAdded = true;
+          this.addedDiceMessage = addedDiceMessage;
           await saveCollection('collections', that.myCollection);
           that.expand(die);
           this.amount = {};

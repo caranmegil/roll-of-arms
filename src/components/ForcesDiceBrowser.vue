@@ -3,6 +3,7 @@
     <div class="dice-browser">
       <Loading v-model:active="isLoading"/>
       <div id="dice">
+          <div v-if="hasDiceBeenAdded" class="alert-box saved">Added {{addedDiceMessage}} <button @click="dismissDiceBeenAdded">Dismiss</button></div>
           <div class="header">
               <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
               <h1>Dice Browser - {{this.$store.state.forceSlot}}</h1>
@@ -91,50 +92,52 @@ export default {
       Loading,
     },
     data() {
-        return {
-            dice: [],
-            tourCallbacks: {
-              onSkip: this.noMoreTours,
-              onFinish: this.noMoreTours,
+      return {
+        hasDiceBeenAdded: false,
+        addedDiceMessage: '',
+          dice: [],
+          tourCallbacks: {
+            onSkip: this.noMoreTours,
+            onFinish: this.noMoreTours,
+          },
+          sortColumn: 0,
+          sortDirection: 1,
+          myForces: [],
+          myForce: {},
+          openedId: null,
+          sizes: [],
+          sizeFilter: '',
+          types: [],
+          typeFilter: '',
+          steps: [
+            {
+              target: '#filters',
+              header: {
+                title: 'Filters!',
+              },
+              content: 'Set your species/set and edition filters here.',
             },
-            sortColumn: 0,
-            sortDirection: 1,
-            myForces: [],
-            myForce: {},
-            openedId: null,
-            sizes: [],
-            sizeFilter: '',
-            types: [],
-            typeFilter: '',
-            steps: [
-              {
-                target: '#filters',
-                header: {
-                  title: 'Filters!',
-                },
-                content: 'Set your species/set and edition filters here.',
+            {
+              target: '.body',
+              header: {
+                title: 'The Dice!',
               },
-              {
-                target: '.body',
-                header: {
-                  title: 'The Dice!',
-                },
-                content: 'Scroll through this list and locate the die you want to add to your collection and select the "+" to add.',
-                params: {
-                  placement: 'auto',
-                },
+              content: 'Scroll through this list and locate the die you want to add to your collection and select the "+" to add.',
+              params: {
+                placement: 'auto',
               },
-            ],
-            filteredDice: [],
-            speciesFilter: '',
-            species: [],
-            nameFilter: '',
-            dieAmnt: 0,
-            hasError: false,
-            message: '',
-            isLoading: true,
-            observer: null,
-        };
+            },
+          ],
+          filteredDice: [],
+          speciesFilter: '',
+          species: [],
+          nameFilter: '',
+          dieAmnt: 0,
+          hasError: false,
+          message: '',
+          isLoading: true,
+          observer: null,
+      };
     },
     async mounted() {
       this.dice = await getEntireCollection('dice');
@@ -184,6 +187,9 @@ export default {
     methods: {
         ...mapActions(['setFilters', 'setMyForces']),
         ...mapGetters(['getMyForces']),
+        dismissDiceBeenAdded() {
+          this.hasDiceBeenAdded = false;
+        },
         capAmount() {
           if (this.$store.state.forceSlot.includes('Terrain')) {
             if (this.dieAmnt > 1) {
@@ -315,6 +321,7 @@ export default {
         },
         async addDie(die) {
           let added = false;
+          let addedDiceMessage = '';
           let newDie = {...die};
           delete newDie.editions;
           delete newDie.id;
@@ -323,6 +330,9 @@ export default {
           this.expand(die);
           this.hasError = false;
           this.message = '';
+          if (newDie.amount > 0) {
+            addedDiceMessage = `${newDie.amount} ${newDie.name} to ${this.$store.state.forceSlot}`
+          }
           if (newDie.rarity.includes('Terrain')) {
             if (this.myForce.slots[this.$store.state.forceSlot].length > 0) {
               this.hasError = true;
@@ -347,6 +357,8 @@ export default {
             this.myForce.slots[this.$store.state.forceSlot].push(newDie);
           }
 
+          this.hasDiceBeenAdded = true;
+          this.addedDiceMessage = addedDiceMessage;
           saveCollection('forces', mergeMyForces(this.myForces, this.getMyForces()));
         },
         async noMoreTours() {
