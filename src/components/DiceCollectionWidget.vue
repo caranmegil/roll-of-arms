@@ -4,6 +4,10 @@
       <div class="header">
         <span id="filters">
           <div class="element">
+            <label for="privacy">Show Only Wanted</label>
+            <input type="checkbox" v-model="showOnlyWanted" @change="changeWantedDisplay"/>
+          </div>
+          <div class="element">
               <label for="speciesFilter">Species/Set</label>
               <select id="speciesFilter" v-model="speciesFilter" @change="setSpeciesFilter">
                   <option value="">All</option>
@@ -79,7 +83,8 @@ export default {
       Loading,
     },
     data() {
-        return {
+      return {
+            showOnlyWanted: false,
             totalDice: 0,
             sortColumn: 0,
             sortDirection: 1,
@@ -132,9 +137,14 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
+        changeWantedDisplay() {
+          this.isLoading = true;
+          this.filteredDice = this.applyFiltersAndSort();
+          this.recalcTotals();
+          this.isLoading = false;
+        },
         expand(die) {
           let row = document.getElementById(die.name);
-          console.log(row);
           let actionButton = row.querySelector('#action-button');
           let expansion = row.querySelector('#expansion');
           let allExpansions = document.querySelectorAll('#expansion');
@@ -212,7 +222,12 @@ export default {
                               (that.typeFilter === '' || die.type === that.typeFilter)
                               && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
                             );
-          dice.sort( (a, b) => {
+
+          if (this.showOnlyWanted) {
+            dice = dice.filter(die => die.wanted && die.wanted > 0);
+          }
+
+          dice.sort((a, b) => {
             if (that.sortColumn == 0) {
               return that.sortDirection * a.name.localeCompare(b.name);
             } else if (that.sortColumn == 1) {

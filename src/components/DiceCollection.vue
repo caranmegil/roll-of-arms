@@ -207,7 +207,10 @@ export default {
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
         changeWantedDisplay() {
+          this.isLoading = true;
           this.applyFiltersAndSort();
+          this.recalcTotals();
+          this.isLoading = false;
         },
         decr(die) {
           if (die.amount > 0) {
@@ -268,7 +271,7 @@ export default {
           }
           this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
-          this.isLoading=false;
+          this.isLoading = false;
         },
         changeSizeDirection() {
           if (this.sortColumn != 1) {
@@ -279,7 +282,7 @@ export default {
           }
           this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
-          this.isLoading=false;
+          this.isLoading = false;
         },
         changeTypeDirection() {
           if (this.sortColumn != 2) {
@@ -290,10 +293,9 @@ export default {
           }
           this.isLoading=true;
           this.filteredDice = this.applyFiltersAndSort();
-          this.isLoading=false;
+          this.isLoading = false;
         },
         applyFiltersAndSort() {
-          this.isLoading = true;
           let that = this;
 
           let dice = this.dice.filter(die => (that.speciesFilter === '' || die.species === that.speciesFilter) && die.name.toLowerCase().includes(that.nameFilter.toLowerCase()));
@@ -350,7 +352,6 @@ export default {
 
           dice = Object.keys(this.diceGroupedByEdition).map(name => this.diceGroupedByEdition[name][0]);
 
-          this.isLoading = false;
           return dice;
         },
         getImageID(die) {
@@ -413,9 +414,9 @@ export default {
           saveCollection('profiles', profile);
         },
         setNameFilter() {
-            this.isLoading=true;
+            this.isLoading = true;
             this.filteredDice = this.applyFiltersAndSort();
-            this.isLoading=false;
+            this.isLoading = false;
         },
         setSpeciesFilter() {
             this.isLoading = true;
