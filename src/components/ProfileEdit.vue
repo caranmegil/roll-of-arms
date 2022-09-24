@@ -1,38 +1,54 @@
 <template>
-    <v-tour name="profileTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
-      <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
-    <div class="profiles">
-      <h1>My Profile <a id="profileURL" class="material-icons material-icons-outlined" :href="`${getProfileLink()}`" target="_blank">link</a></h1>
-        <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
-        <div v-if="hasProfileSaved" class="alert-box saved">Profile updated!</div>
+  <v-tour name="profileTour" :steps="steps" :callbacks="tourCallbacks"></v-tour>
+  <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
+  <div class="profiles">
+    <div class="dialog" :style="{visibility: willShowConfirmation ? 'visible' : 'hidden'}">
+      <div @click="onNo" class="modal-overlay" />
+      <div class="modal yes-no">
+        <div>Are you sure you want to delete your profile?</div>
         <div class="element">
-            <label for="visibility">Visibility</label>
-            <select id="visibility" v-model="profile.visibility" @click="() => hasProfileSaved = false" style="width: 11.5em;">
-                <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private</option>
-                <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Users Only</option>
-                <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Anyone</option>
-            </select>
+          <button id="noBtn" @click="onNo">Cancel</button>
+          <button id="yesBtn" @click="onYes">Delete</button>
         </div>
-        <div class="element">
-            <label for="name">Name</label>
-            <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text"/>
-        </div>
-        <h3>Discord Information</h3>
-        <div class="tarvenehl">To link your Discord account, message <a href="https://discordapp.com/users/946727276706418688" target="_blank">tarvenehl#2963</a> on <a href="https://discord.gg/dragondice">Discord</a> with <span class="tarvenehl-message">/rollofarms link {{username}} <span @click="copyTextToClipboard" class="material-icons material-icons-outlined">copy_all</span></span></div>
-        <div class="social">
-            <div class="element">
-                <label for="discord">Handle</label>
-                <div>{{profile.discord}}</div>
-            </div>
-            <div class="element">
-                <label for="discordNum">ID</label>
-                <div>{{profile.discord_number}}</div>
-            </div>
-        </div>
-        <button @click="resetPassword">Reset Password!</button>
-        <button @click="save">Save!</button>
-        <button @click="deleteProfile">Delete Profile!</button>
+      </div>
     </div>
+    <h1>My Profile <a id="profileURL" class="material-icons material-icons-outlined" :href="`${getProfileLink()}`"
+        target="_blank">link</a></h1>
+    <div v-if="hasError" class="error">Please make sure the form is filled out correctly!</div>
+    <div v-if="hasProfileSaved" class="alert-box saved">Profile updated!</div>
+    <div class="element">
+      <label for="visibility">Visibility</label>
+      <select id="visibility" v-model="profile.visibility" @click="() => hasProfileSaved = false"
+        style="width: 11.5em;">
+        <option value="0" :selected="(profile.visibility === '0') ?  'selected' : ''">Private</option>
+        <option value="1" :selected="(profile.visibility === '1') ?  'selected' : ''">Users Only</option>
+        <option value="2" :selected="(profile.visibility === '2') ?  'selected' : ''">Anyone</option>
+      </select>
+    </div>
+    <div class="element">
+      <label for="name">Name</label>
+      <input id="name" v-model="profile.name" @click="() => hasProfileSaved = false" type="text" />
+    </div>
+    <h3>Discord Information</h3>
+    <div class="tarvenehl">To link your Discord account, message <a
+        href="https://discordapp.com/users/946727276706418688" target="_blank">tarvenehl#2963</a> on <a
+        href="https://discord.gg/dragondice">Discord</a> with <span class="tarvenehl-message">/rollofarms link
+        {{username}} <span @click="copyTextToClipboard"
+          class="material-icons material-icons-outlined">copy_all</span></span></div>
+    <div class="social">
+      <div class="element">
+        <label for="discord">Handle</label>
+        <div>{{profile.discord}}</div>
+      </div>
+      <div class="element">
+        <label for="discordNum">ID</label>
+        <div>{{profile.discord_number}}</div>
+      </div>
+    </div>
+    <button @click="resetPassword">Reset Password!</button>
+    <button @click="save">Save!</button>
+    <button @click="deleteProfile">Delete Profile!</button>
+  </div>
 </template>
 
 <script>
@@ -52,6 +68,7 @@ export default {
   data() {
     return {
       isLoading: false,
+      willShowConfirmation: false,
       hasProfileSaved: false,
       hasError: false,
       profile: {},
@@ -105,12 +122,21 @@ export default {
       profile.profileTour = false;
       saveCollection('profiles', profile);
     },
-    async deleteProfile() {
+    onNo() {
+      this.willShowConfirmation = false;
+    },
+    async onYes() {
+      this.willShowConfirmation = false;
       let profile = await getCollection('profiles');
-      profile.isActive = false;
-      saveCollection('profiles', profile);
+      if (profile) {
+        profile.isActive = false;
+        saveCollection('profiles', profile);
+      }
       await deleteProfile(this.$store.state.credentials.email);
       this.$router.push('/signin');
+    },
+    async deleteProfile() {
+      this.willShowConfirmation = true;
     },
     async changePassword() {
       await resetPasswordInGoogle(this.$store.state.credentials.email);

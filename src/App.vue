@@ -1,52 +1,62 @@
 <template>
-    <div @click="toggleMenu" class="menu-overlay"></div>
-      <div class="dialog" :style="{visibility: (profile && profile.proposedDiscord) ? 'visible' : 'hidden'}">
-        <div class="modal">
-          <div>Would you like to approve the Discord link request from "{{ (profile && profile.proposedDiscord) ? profile.proposedDiscord.handle : ''}}"?</div>
-          <div class="element">
-            <button id="noBtn" @click="onNo">No</button>
-            <button id="yesBtn" @click="onYes">Yes</button>
-          </div>
-        </div>
+  <div @click="toggleMenu" class="menu-overlay"></div>
+  <div class="dialog"
+    :style="{visibility: ($store.state.user && profile && profile.proposedDiscord) ? 'visible' : 'hidden'}">
+    <div class="modal">
+      <div>Would you like to approve the Discord link request from "{{ (profile && profile.proposedDiscord) ?
+        profile.proposedDiscord.handle : ''}}"?</div>
+      <div class="element">
+        <button id="noBtn" @click="onNo">No</button>
+        <button id="yesBtn" @click="onYes">Yes</button>
       </div>
+    </div>
+  </div>
   <div v-if="isLoaded" class="roll-of-arms-body">
 
 
     <header>
-      <div class="menu-button" @click="toggleMenu" v-if="$store.state.user != null && $store.state.user.emailVerified"><span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
-      <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp"/></span>
+      <div class="menu-button" @click="toggleMenu" v-if="$store.state.user != null && $store.state.user.emailVerified">
+        <span id="menu-button" class="title-bar-menu material-icons material-icons-outlined">menu</span> Menu</div>
+      <span class="title-bar-banner"><img class="banner-img" src="./assets/banner.webp" /></span>
     </header>
     <div id="menu" class="menu-container">
       <div @click="closeMenu" class="menu-item"><span class="material-icons material-icons-outlined">close</span></div>
-      <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">public</span> Player Map</div>
+      <div @click="goHome" class="menu-item"><span class="material-icons material-icons-outlined">public</span> Player
+        Map</div>
       <div class="separator"></div>
-      <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span> My Profile</div>
+      <div @click="openProfileEdit" class="menu-item"><span class="material-icons material-icons-outlined">person</span>
+        My Profile</div>
       <!-- <div @click="changeEmail" class="menu-item"><span class="material-icons material-icons-outlined">email</span> Change Email</div> -->
       <div class="separator"></div>
-      <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My Collection</div>
+      <div @click="editCollection" class="menu-item"><span class="material-icons material-icons-outlined">list</span> My
+        Collection</div>
       <div>
         <div class="separator"></div>
-        <div @click="editForces" class="menu-item"><span class="material-icons material-icons-outlined">construction</span> My Forces</div>
+        <div @click="editForces" class="menu-item"><span
+            class="material-icons material-icons-outlined">construction</span> My Forces</div>
       </div>
       <div class="separator"></div>
-      <div @click="resources" class="menu-item"><span class="material-icons material-icons-outlined">link</span> Links</div>
+      <div @click="resources" class="menu-item"><span class="material-icons material-icons-outlined">link</span> Links
+      </div>
       <div class="separator"></div>
-      <div @click="releaseNotes" class="menu-item"><span class="material-icons material-icons-outlined">note</span> Release Notes</div>
+      <div @click="releaseNotes" class="menu-item"><span class="material-icons material-icons-outlined">note</span>
+        Release Notes</div>
       <div class="separator"></div>
-      <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off</div>
+      <div @click="logoff" class="menu-item"><span class="material-icons material-icons-outlined">logout</span> Sign Off
+      </div>
     </div>
 
     <main>
       <section id="content">
         <router-view v-slot="{ Component }">
-            <component :is="Component" :key="$route.path"/> 
+          <component :is="Component" :key="$route.path" />
         </router-view>
       </section>
     </main>
 
     <div id="footer">
       <footer>
-        <a href="https://www.sfr-inc.com/dragondice.php" target="_blank"><img src="./assets/dr-logo-large.webp"/></a>
+        <a href="https://www.sfr-inc.com/dragondice.php" target="_blank"><img src="./assets/dr-logo-large.webp" /></a>
       </footer>
     </div>
   </div>
@@ -74,31 +84,37 @@ export default {
   beforeMount() {
     this.isLoaded = true;
   },
+  async updated() {
+    this.loadDiscordProfile();
+  },
   async mounted() {
-    // Convert profile privacy
-    const user = this.$store.state.user;
-    if (user != null) {
-      try {
-        this.profile = await getCollectionByField('profiles', user.uid);
-
-        if (this.profile.isPublic) {
-          this.profile.visibility = '1';
-          this.profile.isPublic = null;
-          await saveCollectionByField('profiles', user.uid, this.profile);
-        }
-
-        const now = new Date();
-        if (this.profile.proposedDiscord && this.profile.proposedDiscord.timestamp <= now.getTime()) {
-          this.profile.proposedDiscord = null;
-          await saveCollectionByField('profiles', user.uid, this.profile);
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    this.loadDiscordProfile();
   },
   methods: {
     ...mapActions(['setUser', 'signOut', 'setDice', 'setForcesDice',]),
+    async loadDiscordProfile() {
+      // Convert profile privacy
+      const user = this.$store.state.user;
+      if (user != null) {
+        try {
+          this.profile = await getCollectionByField('profiles', user.uid);
+
+          if (this.profile.isPublic) {
+            this.profile.visibility = '1';
+            this.profile.isPublic = null;
+            await saveCollectionByField('profiles', user.uid, this.profile);
+          }
+
+          const now = new Date();
+          if (this.profile.proposedDiscord && this.profile.proposedDiscord.timestamp <= now.getTime()) {
+            this.profile.proposedDiscord = null;
+            await saveCollectionByField('profiles', user.uid, this.profile);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    },
     changeEmail() {
       this.toggleMenu();
       this.$router.push('/account-transfer');
@@ -168,6 +184,7 @@ export default {
       const isSignedOut = await signOutOfGoogle();
 
       if (isSignedOut) {
+        this.profile = null;
         this.toggleMenu();
         this.signOut();
         this.$router.push('/signin');
