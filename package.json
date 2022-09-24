@@ -22,7 +22,7 @@
     "unleash-proxy-client": "^1.11.0",
     "v3-tour": "^3.0.16",
     "vue": "^3.2.36",
-    "vue-loading-overlay": "^4.0.4",
+    "vue-loading-overlay": "^5.0.3",
     "vue-router": "4",
     "vuex": "^4.0.2"
   },
