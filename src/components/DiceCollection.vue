@@ -10,8 +10,12 @@
           <input type="checkbox" v-model="profile.isCollectionPublic" @change="saveTheProfile"/>
         </div>
         <div class="element">
-          <label for="privacy">Show Only Wanted</label>
-          <input type="checkbox" v-model="showOnlyWanted" @change="changeWantedDisplay"/>
+          <label for="displayOptions">Dice Displayed</label>
+          <select id="displayOptions" v-model="displayOptions" @change="setDisplayOption">
+              <option value="0">All Dice</option>
+              <option value="1">Needed Only</option>
+              <option value="2">Min Required Only</option>
+          </select>
         </div>
         <button id="locate" @click="browseDice">Add Dice</button>
         <span id="filters">
@@ -62,14 +66,18 @@
                 <div @click="() => expand(die.name)" class="add-button"><span id="action-button" class="material-icons material-icons-outlined">expand_more</span></div>
                 <div id="expansion">
                   <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition">
-                    <div class="add-die">
+                    <div class="add-die" v-if="displayOptions == 0">
                       <span>{{ (grDie.edition === '-') ? 'Standard' : grDie.edition}}</span>
                       <span @click="() => decr(grDie)" class="material-icons material-icons-outlined">remove</span>
                       <div class="amount"><input type="number" v-model="grDie.amount" @keyup="() => changeAmount(grDie)" @change="() => changeAmount(grDie)"></div>
                       <span @click="() => incr(grDie)" class="material-icons material-icons-outlined">add</span>
                     </div>
-                    <div class="wanted-die">
-                      <div class="wanted"><span class="material-icons material-icons-outlined">chevron_right</span><span>Wanted</span></div>
+                    <div class="needed-die" v-if="displayOptions == 0 || displayOptions == 1">
+                      <div class="wanted"><span class="material-icons material-icons-outlined">chevron_right</span><span>Needed</span></div>
+                      <div class="amount">{{grDie.needed}}</div>
+                    </div>
+                    <div class="wanted-die" v-if="displayOptions == 0 || displayOptions == 2">
+                      <div class="wanted"><span class="material-icons material-icons-outlined">chevron_right</span><span>Min Required</span></div>
                       <span @click="() => decrWanted(grDie)" class="material-icons material-icons-outlined">remove</span>
                       <div class="amount"><input type="number" v-model="grDie.wanted" @keyup="() => changeWantedAmount(grDie)" @change="() => changeWantedAmount(grDie)"></div>
                       <span @click="() => incrWanted(grDie)" class="material-icons material-icons-outlined">add</span>
@@ -108,7 +116,7 @@ export default {
             sortColumn: 0,
             sortDirection: 1,
             profile: {},
-            showOnlyWanted: false,
+            displayOptions: 0,
             tourCallbacks: {
               onSkip: this.noMoreTours,
               onFinish: this.noMoreTours,
@@ -206,7 +214,7 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-        changeWantedDisplay() {
+        setDisplayOption() {
           this.isLoading = true;
           this.applyFiltersAndSort();
           this.recalcTotals();
@@ -322,7 +330,14 @@ export default {
                               && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
           );
 
-          if (this.showOnlyWanted) {
+          if (this.displayOptions == 0 || this.displayOptions == 1) {
+            dice = dice.map(die => {
+              let newDie = { ...die };
+              newDie.needed = die.amount - (die.wanted ? die.wanted : 0);
+              return newDie;
+            }).filter(die => die.needed && die.needed > 0);
+            console.log(dice);
+          } else if (this.displayOptions == 2) {
             dice = dice.filter(die => die.wanted && die.wanted > 0);
           }
 
@@ -577,6 +592,20 @@ export default {
     padding-left: 1.0em;
     background-color: #CCC;
     color: #AA4A44;
+  }
+
+  .needed-die {
+    grid-auto-flow: column;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    justify-content: center;
+    align-content: center;
+    justify-items: start;
+    align-items: center;
+    gap: .5em;
+    padding-left: 1.0em;
+    background-color: #CCC;
+    color: green;
   }
 
 #expansion {
