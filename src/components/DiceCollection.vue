@@ -336,7 +336,6 @@ export default {
               newDie.needed = die.amount - (die.wanted ? die.wanted : 0);
               return newDie;
             }).filter(die => die.needed && die.needed > 0);
-            console.log(dice);
           } else if (this.displayOptions == 2) {
             dice = dice.filter(die => die.wanted && die.wanted > 0);
           }
