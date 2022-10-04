@@ -4,8 +4,12 @@
       <div class="header">
         <span id="filters">
           <div class="element">
-            <label for="privacy">Show Only Wanted</label>
-            <input type="checkbox" v-model="showOnlyWanted" @change="changeWantedDisplay"/>
+            <label for="displayOptions">Dice Displayed</label>
+            <select id="displayOptions" v-model="displayOptions" @change="setDisplayOption">
+                <option value="0">All Dice</option>
+                <option value="1">Needed Only</option>
+                <option value="2">Min Required Only</option>
+            </select>
           </div>
           <div class="element">
               <label for="speciesFilter">Species/Set</label>
@@ -55,8 +59,9 @@
                 <div id="expansion">
                   <div v-for="grDie in diceGroupedByEdition[die.name]" :key="die.name + '/' + grDie.edition" class="add-die">
                     <span>{{ grDie.edition }}</span>
-                    <div class="amount">Have: {{grDie.amount}}</div>
-                    <div class="wanted" :style="{visibility: (grDie.wanted > 0) ? 'visible' : 'hidden'}">Want: {{grDie.wanted}}</div>
+                    <div v-if="displayOptions == 0" class="amount">Have: {{grDie.amount}}</div>
+                    <div v-if="displayOptions == 0 || displayOptions == 1" class="needed">Needed: {{grDie.needed}}</div>
+                    <div v-if="displayOptions == 0 || displayOptions == 2" class="wanted" :style="{visibility: (grDie.wanted > 0) ? 'visible' : 'hidden'}">Min Required: {{grDie.wanted}}</div>
                   </div>
                 </div>
           </div>
@@ -84,10 +89,10 @@ export default {
     },
     data() {
       return {
-            showOnlyWanted: false,
             totalDice: 0,
             sortColumn: 0,
             sortDirection: 1,
+            displayOptions: 0,
             dice: [],
             diceGroupedByEdition: {},
             filteredDice: [],
@@ -137,9 +142,9 @@ export default {
     },
     methods: {
         ...mapActions(['setCollectionDie', 'setFilters']),
-        changeWantedDisplay() {
+        setDisplayOption() {
           this.isLoading = true;
-          this.filteredDice = this.applyFiltersAndSort();
+          this.applyFiltersAndSort();
           this.recalcTotals();
           this.isLoading = false;
         },
@@ -223,7 +228,14 @@ export default {
                               && (that.sizeFilter === '' || die.rarity === that.sizeFilter)
                             );
 
-          if (this.showOnlyWanted) {
+          if (this.displayOptions == 0 || this.displayOptions == 1) {
+            dice = dice.map(die => {
+              let newDie = { ...die };
+              newDie.needed = die.amount - (die.wanted ? die.wanted : 0);
+              return newDie;
+            }).filter(die => die.needed && die.needed > 0);
+            console.log(dice);
+          } else if (this.displayOptions == 2) {
             dice = dice.filter(die => die.wanted && die.wanted > 0);
           }
 
@@ -409,6 +421,21 @@ export default {
 
   .wanted {
     color: #AA4A44;
+  }
+
+
+  .needed {
+    grid-auto-flow: column;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    justify-content: center;
+    align-content: center;
+    justify-items: start;
+    align-items: center;
+    gap: .5em;
+    padding-left: 1.0em;
+    background-color: #CCC;
+    color: green;
   }
 
   .add-die {
