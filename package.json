@@ -13,6 +13,8 @@
     "deploy": "yarn build && firebase deploy"
   },
   "dependencies": {
+    "@sentry/tracing": "^7.16.0",
+    "@sentry/vue": "^7.16.0",
     "core-js": "^3.6.5",
     "es6-promise": "^4.2.8",
     "firebase": "^9.6.5",

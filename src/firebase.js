@@ -47,96 +47,67 @@ const setStore = ($store) => {
 
 // generic collection actions
 const saveCollectionByField = async (collectionName, fieldName, data) => {
-    try {
-        auth = getAuth();
-        const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
-        return await set(collectionNameUserRef, data);
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+    auth = getAuth();
+    const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
+    return await set(collectionNameUserRef, data);
 };
 
 const saveCollection = async (collectionName, data) => {
-    try {
-        auth = getAuth();
-        const user = getCurrentUser();
-        const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
-        await set(collectionNameUserRef, data);
-        return true;
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+    auth = getAuth();
+    const user = getCurrentUser();
+    const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
+    await set(collectionNameUserRef, data);
+    return true;
 };
 
 const getCollection = async (collectionName) => {
-    try {
-        auth = getAuth();
-        const user = getCurrentUser();
-        if (user != null) {
-            const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
-            const snapshot = await get(collectionNameUserRef)
+    auth = getAuth();
+    const user = getCurrentUser();
+    if (user != null) {
+        const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
+        const snapshot = await get(collectionNameUserRef)
 
-            if (snapshot.exists()) {
-                return snapshot.val();
-            } else {
-                console.error('snapshot does not exist');
-                return null;
-            }
+        if (snapshot.exists()) {
+            return snapshot.val();
         } else {
-            console.error('user is ', user);
+            throw new Error('snapshot does not exist');
             return null;
         }
-    } catch (e) {
-        console.error(e);
+    } else {
+        throw new Error('user is null')
         return null;
     }
 }
 
 const getCollectionOn = (collectionName, callback) => {
-    try {
-        auth = getAuth();
-        const user = getCurrentUser();
-        if (user != null) {
-            const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
-            onValue(collectionNameUserRef, (snapshot) => {
-                callback(snapshot.val());
-            });
-        }
-    } catch (e) {
-        console.error(e);
+    auth = getAuth();
+    const user = getCurrentUser();
+    if (user != null) {
+        const collectionNameUserRef = ref(db, collectionName + '/' + user.uid);
+        onValue(collectionNameUserRef, (snapshot) => {
+            callback(snapshot.val());
+        });
     }
 }
 
 const getCollectionByField = async (collectionName, fieldName) => {
-    try {
-        const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
-        const snapshot = await get(collectionNameUserRef)
+    const collectionNameUserRef = ref(db, collectionName + '/' + fieldName);
+    const snapshot = await get(collectionNameUserRef)
 
-        if (snapshot.exists()) {
-            return snapshot.val();
-        } else {
-            return null;
-        }
-    } catch (e) {
-        console.error(e);
+    if (snapshot.exists()) {
+        return snapshot.val();
+    } else {
         return null;
     }
 }
 
 const getEntireCollection = async (collectionName) => {
-    try {
-        const collectionNameUserRef = ref(db, collectionName);
-        const snapshot = await get(collectionNameUserRef)
+    const collectionNameUserRef = ref(db, collectionName);
+    const snapshot = await get(collectionNameUserRef)
 
-        if (snapshot.exists()) {
-            return snapshot.val();
-        } else {
-            return null;
-        }
-    } catch (e) {
-        console.error(e);
+    if (snapshot.exists()) {
+        return snapshot.val();
+    } else {
         return null;
     }
 }
@@ -164,13 +135,8 @@ const createUserInGoogle = async (email, password) => {
 };
 
 const confirmPassword = async (authCode, password) => {
-    try {
-        let auth = getAuth();
-        return await confirmPasswordReset(auth, authCode, password).then(() => { return new Promise(resolve => resolve(true)) } );
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+    let auth = getAuth();
+    return await confirmPasswordReset(auth, authCode, password).then(() => { return new Promise(resolve => resolve(true)) } );
 };
 
 const signIntoGoogle = async (email, password) => {
@@ -231,23 +197,13 @@ const resendEmailWithLink = async (email) => {
 }
 
 const signOutOfGoogle = async () => {
-    try {
-        await signOut(auth);
-        return true;
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+    await signOut(auth);
+    return true;
 };
 
 const resetPasswordInGoogle = async (email) => {
-    try {
-        await sendPasswordResetEmail(auth, email);
-        return true;
-    } catch (e) {
-        console.error(e);
-        return false;
-    }
+    await sendPasswordResetEmail(auth, email);
+    return true;
 };
 
 const getCurrentUser = () => {
