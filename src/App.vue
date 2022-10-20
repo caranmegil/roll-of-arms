@@ -69,7 +69,7 @@ import {
   signOutOfGoogle,
   getCollectionByField,
   saveCollectionByField,
-} from '@/firebase';
+} from '@/firebase.js';
 
 export default {
   name: 'App',
