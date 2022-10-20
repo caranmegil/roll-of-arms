@@ -14,6 +14,9 @@ import {
     signIntoGoogle,
 } from '@/firebase';
 
+import * as Sentry from '@sentry/vue';
+import { BrowserTracing } from '@sentry/tracing';
+
 import App from './App.vue'
 
 import Main from './components/Main.vue';
@@ -210,8 +213,26 @@ const store = createStore({
 
 setStore(store);
 
-createApp(App)
+const app = createApp(App)
     .use(store)
     .use(router)
-    .use(VueTour)
-    .mount('#app');
+    .use(VueTour);
+
+
+Sentry.init({
+  app,
+  dsn: "https://e6299723557446cd9ea522f667db2cc7@o4504013669007360.ingest.sentry.io/4504013681852416",
+  integrations: [
+    new BrowserTracing({
+      routingInstrumentation: Sentry.vueRouterInstrumentation(router),
+      tracingOrigins: ["localhost", "roll-of-arms.app"],
+    }),
+  ],
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
+
+
+app.mount('#app');
