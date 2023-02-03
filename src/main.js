@@ -98,13 +98,13 @@ router.beforeEach( async (to, from, next) => {
 const store = createStore({
     state() {
         return {
-            user: JSON.parse(localStorage.getItem('user') || null),
-            credentials: JSON.parse(localStorage.getItem('credentials') || '{}'),
+            user: JSON.parse(localStorage.getItem('user') ?? 'null'),
+            credentials: JSON.parse(localStorage.getItem('credentials') ?? 'null'),
             bufferDie: null,
             forceName: null,
             forceSlot: 'Home',
             filters: {species: '', edition: '', size: '', type: '',},
-            dice: JSON.parse(localStorage.getItem('dice') || 'null'),
+            dice: JSON.parse(localStorage.getItem('dice') ?? 'null'),
             myForces: null,
             featureFlags: {},
         };
