@@ -216,6 +216,13 @@ body {
     height: 24px;
   }
 
+  .modal {
+    padding: 0;
+    top: 0em !important;
+    left: 0em !important;
+    right: 0em !important;
+    bottom: 0em;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -413,7 +420,6 @@ a:hover {
     justify-items: center;
     align-items: center;
     align-content: center;
-    z-index: 2;
     position: fixed;
     background-color: ivory;
     margin: auto;

@@ -3,7 +3,7 @@
     <div class="dice-browser">
       <Loading v-model:active="isLoading"/>
       <div id="dice">
-          <div v-if="hasDiceBeenAdded" class="alert-box saved">Added {{addedDiceMessage}} <button @click="dismissDiceBeenAdded">Dismiss</button></div>
+          <div v-if="hasDiceBeenAdded" class="modal alert-box saved">Added {{addedDiceMessage}} <button @click="dismissDiceBeenAdded">Dismiss</button></div>
           <div class="header">
               <div @click="rerunTour" class="rerun-tour material-icons material-icons-outlined">help</div>
               <h1>Dice Browser - {{this.$store.state.forceSlot}}</h1>
