@@ -36,6 +36,7 @@
               <input id="nameFilter" type="text" v-model="nameFilter" @keyup="setNameFilter"/>
           </div>
           <div class="element"><label for="totalDice">Total Dice</label><div id="totalDice">{{totalDice}}</div></div>
+          <button style="width: 100%" @click="downloadEntireCollection" id="downloadCollection">Download Collection</button>
         </span>
 
         <div class="separator"></div>
@@ -193,6 +194,34 @@ export default {
         },
         incr(die) {
           die.amount++;
+        },
+        downloadEntireCollection() {
+          const items = this.filteredDice;
+          const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+          const header = Object.keys(items[0]);
+          const csv = [
+            header.join(','), // header row first
+            ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+          ].join('\r\n');
+
+         var exportedFilenmae ='DiceCollection.csv';
+
+          var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, exportedFilenmae);
+          } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) { // feature detection
+              // Browsers that support HTML5 download attribute
+              var url = URL.createObjectURL(blob);
+              link.setAttribute("href", url);
+              link.setAttribute("download", exportedFilenmae);
+              link.style.visibility = 'hidden';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }
+          }
         },
         expand(id) {
           let row = document.getElementById(id);

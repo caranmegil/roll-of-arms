@@ -1,4 +1,9 @@
 # Roll Of Arms Release Notes
+## Release "Deluger"
+### Release Date: 2023-09-09
+Welcome to the third release of Roll of Arms! In the full release, we have the following features available for your enjoyment:
+* The ability to download your entire collection as CSV!
+
 ## Release "Bog Runner"
 ### Release Date: 2022-04-11
 Welcome to the second release of Roll of Arms! In the full release, we have the following features available for your enjoyment:
