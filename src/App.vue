@@ -34,7 +34,7 @@
 
     <div id="footer">
       <footer>
-        <a href="https://www.sfr-inc.com/dragondice.php" target="_blank"><img src="./assets/dr-logo-large.webp"/></a>
+        <a href="https://www.sfr-inc.com/dragondice.php" target="_blank"><img src="./assets/dr-logo-large.webp"/></a> <a href="https://github.com/caranmegil/roll-of-arms/"><img src="./assets/git.webp" style="width: 16px; height: 16px;"></a>
       </footer>
     </div>
   </div>
